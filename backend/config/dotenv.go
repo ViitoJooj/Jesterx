@@ -46,6 +46,25 @@ func Load() {
 
 	PostgresUri = fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s", postgres_user, postgres_password, postgres_host, postgres_port, postgres_db, postgres_ssl)
 
+	mongo_user := os.Getenv("MONGO_USER")
+	if mongo_user == "" {
+		log.Fatal("Error on get MONGO_USER")
+	}
+	mongo_password := os.Getenv("MONGO_PASSWORD")
+	if mongo_password == "" {
+		log.Fatal("Error on get MONGO_PASSWORD")
+	}
+	mongo_port := os.Getenv("MONGO_PORT")
+	if mongo_port == "" {
+		log.Fatal("Error on get MONGO_PORT")
+	}
+	mongo_host := os.Getenv("MONGO_HOST")
+	if mongo_host == "" {
+		log.Fatal("Error on get MONGO_HOST")
+	}
+
+	MongoUri = fmt.Sprintf("mongodb://%s:%s@%s:%s", mongo_user, mongo_password, mongo_host, mongo_port)
+
 	JwtSecret = os.Getenv("JWT_SECRET")
 	if JwtSecret == "" {
 		log.Fatal("Error on get JWT_SECRET")

@@ -11,7 +11,7 @@ type UserDataMe struct {
 }
 
 type MeResponse struct {
-	Sucess  bool       `json:"sucess"`
+	Success bool       `json:"success"`
 	Message string     `json:"message"`
 	Data    UserDataMe `json:"data"`
 }

@@ -11,7 +11,7 @@ type UserDataRegister struct {
 }
 
 type UserRegisterResponse struct {
-	Sucess  bool             `json:"sucess"`
+	Success bool             `json:"success"`
 	Message string           `json:"message"`
 	Data    UserDataRegister `json:"data"`
 }

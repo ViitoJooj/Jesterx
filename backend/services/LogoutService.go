@@ -8,13 +8,10 @@ import (
 )
 
 func LogoutService(c *gin.Context) {
-	tenantID := c.MustGet("tenantID").(string)
-	_ = tenantID
-
 	helpers.SetAuthCookie(c, "", 0)
 
 	c.JSON(200, responses.LogoutResponse{
-		Sucess:  true,
+		Success: true,
 		Message: "The user successfully exited the session.",
 	})
 }

@@ -11,7 +11,7 @@ func MeService(c *gin.Context) {
 	user := c.MustGet("user").(helpers.UserData)
 
 	c.JSON(200, responses.MeResponse{
-		Sucess:  true,
+		Success: true,
 		Message: "User info",
 		Data: responses.UserDataMe{
 			Id:         user.Id,

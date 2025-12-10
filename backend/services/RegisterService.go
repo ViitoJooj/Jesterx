@@ -6,97 +6,109 @@ import (
 	"gen-you-ecommerce/helpers"
 	"gen-you-ecommerce/models"
 	"gen-you-ecommerce/responses"
-	"log"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 func RegisterService(c *gin.Context) {
-	tenantID := c.MustGet("tenantID").(string)
+
+	tenantValue, hasTenant := c.Get("tenantID")
+	var tenantID string
+	if hasTenant {
+		tenantID = tenantValue.(string)
+	}
 
 	var body models.RegisterModel
 	if err := c.Bind(&body); err != nil {
-		c.JSON(400, responses.UserRegisterResponse{
-			Sucess:  true,
-			Message: "Invalid request body"})
+		c.JSON(http.StatusBadRequest, responses.ErrorResponse{Success: false, Message: "Invalid request body"})
 		return
 	}
 
 	if err := helpers.ValidateEmail(body.Email); err != nil {
-		c.JSON(400, responses.UserRegisterResponse{
-			Sucess:  true,
-			Message: err.Error()})
+		c.JSON(http.StatusBadRequest, responses.ErrorResponse{Success: false, Message: err.Error()})
 		return
 	}
 
 	if err := helpers.ValidatePassword(body.Password); err != nil {
-		c.JSON(400, responses.UserRegisterResponse{
-			Sucess:  true,
-			Message: err.Error()})
+		c.JSON(http.StatusBadRequest, responses.ErrorResponse{Success: false, Message: err.Error()})
 		return
 	}
 
 	exists, err := helpers.EmailExists(c.Request.Context(), config.DB, body.Email)
 	if err != nil {
-		c.JSON(500, responses.UserRegisterResponse{
-			Sucess:  true,
-			Message: "Database error"})
+		c.JSON(http.StatusInternalServerError, responses.ErrorResponse{Success: false, Message: "Database error"})
 		return
 	}
 	if exists {
-		c.JSON(400, responses.UserRegisterResponse{
-			Sucess:  true,
-			Message: "Email already registered"})
+		c.JSON(http.StatusBadRequest, responses.ErrorResponse{Success: false, Message: "Email already registered"})
 		return
 	}
 
 	hashedPassword, err := helpers.HashPassword(body.Password)
 	if err != nil {
-		c.JSON(500, responses.UserRegisterResponse{
-			Sucess:  true,
-			Message: "Internal error"})
+		c.JSON(http.StatusInternalServerError, responses.ErrorResponse{Success: false, Message: "Internal error"})
 		return
 	}
 
 	tx, err := config.DB.BeginTx(c.Request.Context(), &sql.TxOptions{})
 	if err != nil {
-		c.JSON(500, responses.UserRegisterResponse{
-			Sucess:  true,
-			Message: "Database error"})
+		c.JSON(http.StatusInternalServerError, responses.ErrorResponse{Success: false, Message: "Database error"})
 		return
 	}
 	defer tx.Rollback()
 
 	var userID, userPlan string
-	err = tx.QueryRow(`INSERT INTO users (email, password) VALUES ($1, $2) RETURNING id, plan`, body.Email, hashedPassword).Scan(&userID, &userPlan)
+	err = tx.QueryRow(`
+        INSERT INTO users (email, password)
+        VALUES ($1, $2)
+        RETURNING id, plan
+    `, body.Email, hashedPassword).Scan(&userID, &userPlan)
+
 	if err != nil {
-		c.JSON(500, responses.UserRegisterResponse{
-			Sucess:  true,
-			Message: "Database error"})
+		c.JSON(http.StatusInternalServerError, responses.ErrorResponse{
+			Success: false,
+			Message: "Database error",
+		})
 		return
 	}
 
-	_, err = tx.Exec(`INSERT INTO user_profiles (user_id, first_name, last_name) VALUES ($1, $2, $3)`, userID, body.First_name, body.Last_name)
+	_, err = tx.Exec(`
+        INSERT INTO user_profiles (user_id, first_name, last_name)
+        VALUES ($1, $2, $3)
+    `, userID, body.First_name, body.Last_name)
+
 	if err != nil {
-		c.JSON(500, responses.UserRegisterResponse{
-			Sucess:  true,
-			Message: "Database error"})
+		c.JSON(http.StatusInternalServerError, responses.ErrorResponse{
+			Success: false,
+			Message: "Database error",
+		})
 		return
 	}
 
-	_, err = tx.Exec(`INSERT INTO tenant_users (tenant_id, user_id, role) VALUES ($1, $2, $3)`, tenantID, userID, "user")
+	role := "platform_user"
+	if hasTenant && tenantID != "" {
+		_, err = tx.Exec(`
+            INSERT INTO tenant_users (tenant_id, user_id, role)
+            VALUES ($1, $2, 'customer')
+        `, tenantID, userID)
 
-	if err != nil {
-		c.JSON(500, responses.UserRegisterResponse{
-			Sucess:  true,
-			Message: "Database error"})
-		return
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, responses.ErrorResponse{
+				Success: false,
+				Message: "Database error",
+			})
+			return
+		}
+
+		role = "customer"
 	}
 
 	if err := tx.Commit(); err != nil {
-		c.JSON(500, responses.UserRegisterResponse{
-			Sucess:  true,
-			Message: "Database error"})
+		c.JSON(http.StatusInternalServerError, responses.ErrorResponse{
+			Success: false,
+			Message: "Database error",
+		})
 		return
 	}
 
@@ -106,29 +118,27 @@ func RegisterService(c *gin.Context) {
 		Profile_img: "",
 		First_name:  body.First_name,
 		Last_name:   body.Last_name,
-		Role:        "user",
+		Role:        role,
+		Plan:        userPlan,
 	}
 
 	token, err := helpers.GenerateToken(user)
 	if err != nil {
-		log.Println("Error generating token.:", err)
-		c.JSON(500, responses.UserRegisterResponse{
-			Sucess:  true,
-			Message: "Internal error"})
+		c.JSON(http.StatusInternalServerError, responses.ErrorResponse{Success: false, Message: "Internal error"})
 		return
 	}
 
-	var logged_timer int
+	var loggedTimer int
 	if !body.Keep_me_logged_in {
-		logged_timer = 24
+		loggedTimer = 24
 	} else {
-		logged_timer = 744
+		loggedTimer = 744
 	}
 
-	helpers.SetAuthCookie(c, token, logged_timer)
+	helpers.SetAuthCookie(c, token, loggedTimer)
 
-	c.JSON(200, responses.UserRegisterResponse{
-		Sucess:  true,
+	c.JSON(http.StatusOK, responses.UserRegisterResponse{
+		Success: true,
 		Message: "Registration successful.",
 		Data: responses.UserDataRegister{
 			Id:         user.Id,
@@ -140,5 +150,4 @@ func RegisterService(c *gin.Context) {
 			Plan:       user.Plan,
 		},
 	})
-
 }

@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"gen-you-ecommerce/helpers"
+	"gen-you-ecommerce/responses"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -11,18 +12,18 @@ func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenStr, err := c.Cookie("auth_token")
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"success": false,
-				"error":   "Missing auth token",
+			c.AbortWithStatusJSON(http.StatusUnauthorized, responses.ErrorResponse{
+				Success: false,
+				Message: "Missing auth token",
 			})
 			return
 		}
 
 		claims, err := helpers.ValidateToken(tokenStr)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"success": false,
-				"error":   "Invalid or expired auth token",
+			c.AbortWithStatusJSON(http.StatusUnauthorized, responses.ErrorResponse{
+				Success: false,
+				Message: "Invalid or expired auth token",
 			})
 			return
 		}
