@@ -1,17 +1,10 @@
 package services
 
 import (
-	"gen-you-ecommerce/helpers"
-	"gen-you-ecommerce/responses"
-
 	"github.com/gin-gonic/gin"
 )
 
 func LogoutService(c *gin.Context) {
-	helpers.SetAuthCookie(c, "", 0)
-
-	c.JSON(200, responses.LogoutResponse{
-		Success: true,
-		Message: "The user successfully exited the session.",
-	})
+	c.SetCookie("auth", "", 0, "/", "", false, true)
+	c.JSON(200, gin.H{"success": true, "message": "The user successfully exited the session."})
 }

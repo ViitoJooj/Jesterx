@@ -4,3 +4,5 @@ tmp
 */tmp
 dev_spec.txt
 */dev_spec.txt
+node_modules
+*/node_modules

@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"gen-you-ecommerce/config"
 	"gen-you-ecommerce/helpers"
-	"net/http"
+	"gen-you-ecommerce/responses"
 	"strings"
 	"time"
 
@@ -24,27 +24,27 @@ func UpdatePageService(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body."})
+		c.JSON(400, responses.ErrorResponse{Success: false, Message: "Invalid request body."})
 		return
 	}
 
 	if body.Name == nil && body.PageID == nil && body.Svelte == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Nothing to update."})
+		c.JSON(400, responses.ErrorResponse{Success: false, Message: "Nothing to update."})
 		return
 	}
 
 	if body.Svelte != nil && len(*body.Svelte) > 200_000 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Svelte content is too large."})
+		c.JSON(400, responses.ErrorResponse{Success: false, Message: "Svelte content is too large."})
 		return
 	}
 
 	hasAccess, role, err := userHasTenantAccess(user.Id, tenantID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to check permissions."})
+		c.JSON(400, responses.ErrorResponse{Success: false, Message: "Failed to check permissions."})
 		return
 	}
 	if !hasAccess || (role != "owner" && role != "admin" && role != "editor") {
-		c.JSON(http.StatusForbidden, gin.H{"error": "You do not have permission to edit pages."})
+		c.JSON(403, responses.ErrorResponse{Success: false, Message: "You do not have permission to edit pages."})
 		return
 	}
 
@@ -54,18 +54,14 @@ func UpdatePageService(c *gin.Context) {
 	var name string
 	var slug string
 
-	err = db.QueryRow(`
-        SELECT id, name, page_id
-        FROM pages
-        WHERE tenant_id = $1 AND page_id = $2
-    `, tenantID, currentSlug).Scan(&pageID, &name, &slug)
+	err = db.QueryRow(`SELECT id, name, page_id FROM pages WHERE tenant_id = $1 AND page_id = $2`, tenantID, currentSlug).Scan(&pageID, &name, &slug)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Page not found."})
+			c.JSON(404, responses.ErrorResponse{Success: false, Message: "Page not found."})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load page."})
+		c.JSON(500, responses.ErrorResponse{Success: false, Message: "Failed to load page."})
 		return
 	}
 
@@ -76,49 +72,34 @@ func UpdatePageService(c *gin.Context) {
 		slug = *body.PageID
 	}
 
-	_, err = db.Exec(`
-        UPDATE pages
-        SET name = $1,
-            page_id = $2,
-            updated_at = NOW()
-        WHERE id = $3 AND tenant_id = $4
-    `, name, slug, pageID, tenantID)
+	_, err = db.Exec(`UPDATE pages SET name = $1, page_id = $2, updated_at = NOW() WHERE id = $3 AND tenant_id = $4`, name, slug, pageID, tenantID)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "pages_unique_tenant_page") {
-			c.JSON(http.StatusConflict, gin.H{"error": "A page with this slug already exists in this site."})
+			c.JSON(409, responses.ErrorResponse{Success: false, Message: "A page with this slug already exists in this site."})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update page in Postgres."})
+		c.JSON(500, responses.ErrorResponse{Success: false, Message: "Failed to update page in Postgres."})
 		return
 	}
 
-	updateDoc := bson.M{
-		"page_id":    slug,
-		"updated_at": time.Now().UTC(),
-	}
+	updateDoc := bson.M{"page_id": slug, "updated_at": time.Now().UTC()}
+
 	if body.Svelte != nil {
 		updateDoc["svelte"] = *body.Svelte
 	}
 
-	_, err = config.MongoClient.
-		Database("genyou").
-		Collection("page_sveltes").
-		UpdateOne(
-			c.Request.Context(),
-			bson.M{"_id": pageID},
-			bson.M{"$set": updateDoc},
-		)
+	_, err = config.MongoClient.Database("genyou").Collection("page_sveltes").UpdateOne(c.Request.Context(), bson.M{"_id": pageID}, bson.M{"$set": updateDoc})
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update page content in MongoDB."})
+		c.JSON(500, responses.ErrorResponse{Success: false, Message: "Failed to update page content in MongoDB."})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"id":       pageID,
-		"page_id":  slug,
-		"name":     name,
-		"tenantId": tenantID,
+	c.JSON(200, responses.UpdatePageDTO{
+		Id:        pageID,
+		Page_id:   slug,
+		Name:      name,
+		Tenant_id: tenantID,
 	})
 }

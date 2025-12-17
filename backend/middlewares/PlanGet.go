@@ -9,54 +9,72 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func PlanLimitMiddleware() gin.HandlerFunc {
+var planLimits = map[string]int{
+	"free":       0,
+	"business":   1,
+	"pro":        10,
+	"enterprise": 50,
+}
+
+func PlanMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		user := c.MustGet("user").(helpers.UserData)
-		tenantID := c.MustGet("tenantID").(string)
-
-		maxPages := maxPagesForPlan(user.Plan)
-		if maxPages == 0 {
-			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
-				"error": "Your current plan does not allow creating pages.",
+		userAny, exists := c.Get("user")
+		if !exists {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"success": false,
+				"error":   "User not in context",
 			})
 			return
 		}
 
-		var count int
-		err := config.DB.QueryRow(
-			`SELECT COUNT(*) FROM pages WHERE tenant_id = $1`,
-			tenantID,
-		).Scan(&count)
+		user := userAny.(helpers.UserData)
 
-		if err != nil && err != sql.ErrNoRows {
+		// Sempre pega o plano do banco pra garantir que está atualizado
+		var plan string
+		err := config.DB.QueryRow(`SELECT plan FROM users WHERE id = $1`, user.Id).Scan(&plan)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+					"success": false,
+					"error":   "User not found",
+				})
+				return
+			}
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-				"error": "Failed to check page limit.",
+				"success": false,
+				"error":   "Database error while reading user plan",
 			})
 			return
 		}
 
-		if count >= maxPages {
+		maxSites, ok := planLimits[plan]
+		if !ok {
+			maxSites = 0
+		}
+
+		var currentSites int
+		err = config.DB.QueryRow(`
+			SELECT COUNT(*) 
+			FROM tenant_users 
+			WHERE user_id = $1 AND role = 'owner'
+		`, user.Id).Scan(&currentSites)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"error":   "Database error while counting user sites",
+			})
+			return
+		}
+
+		if currentSites >= maxSites {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
-				"error": "Page limit reached for your current subscription plan.",
+				"success": false,
+				"error":   "Plan limit reached for creating new sites",
+				"plan":    plan,
 			})
 			return
 		}
 
 		c.Next()
-	}
-}
-
-func maxPagesForPlan(plan string) int {
-	switch plan {
-	case "free":
-		return 0
-	case "business":
-		return 1
-	case "pro":
-		return 10
-	case "enterprise":
-		return 50
-	default:
-		return 0
 	}
 }

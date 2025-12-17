@@ -45,6 +45,19 @@ CREATE TABLE IF NOT EXISTS pages (
     CONSTRAINT pages_unique_tenant_page UNIQUE (tenant_id, page_id)
 );
 
+CREATE TABLE payments (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id),
+    plan VARCHAR(50) NOT NULL,
+    provider VARCHAR(50) NOT NULL,
+    provider_payment_id VARCHAR(255) NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    amount_cents INT NOT NULL,
+    currency VARCHAR(10) NOT NULL DEFAULT 'BRL',
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
 CREATE INDEX IF NOT EXISTS idx_user_profiles_user_id ON user_profiles(user_id);
 CREATE INDEX IF NOT EXISTS idx_pages_tenant_id ON pages(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_tenant_users_user_id ON tenant_users(user_id);
