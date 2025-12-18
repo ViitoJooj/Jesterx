@@ -128,19 +128,13 @@ func RegisterService(c *gin.Context) {
 		return
 	}
 
-	var loggedTimer int
-	if !body.Keep_me_logged_in {
-		loggedTimer = 24
-	} else {
-		loggedTimer = 744
-	}
-
+	loggedTimer := helpers.GetLoginDuration(body.Keep_me_logged_in)
 	helpers.SetAuthCookie(c, token, loggedTimer)
 
 	c.JSON(http.StatusOK, responses.UserRegisterResponse{
 		Success: true,
 		Message: "Registration successful.",
-		Data: responses.UserDataRegister{
+		Data: responses.UserData{
 			Id:         user.Id,
 			ProfileImg: user.Profile_img,
 			FirstName:  user.First_name,

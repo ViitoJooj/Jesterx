@@ -13,7 +13,7 @@ func MeService(c *gin.Context) {
 	c.JSON(200, responses.MeResponse{
 		Success: true,
 		Message: "User info",
-		Data: responses.UserDataMe{
+		Data: responses.UserData{
 			Id:         user.Id,
 			ProfileImg: user.Profile_img,
 			FirstName:  user.First_name,

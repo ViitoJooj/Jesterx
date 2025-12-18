@@ -38,7 +38,7 @@ func UpdatePageService(c *gin.Context) {
 		return
 	}
 
-	hasAccess, role, err := userHasTenantAccess(user.Id, tenantID)
+	hasAccess, role, err := helpers.UserHasTenantAccess(user.Id, tenantID)
 	if err != nil {
 		c.JSON(400, responses.ErrorResponse{Success: false, Message: "Failed to check permissions."})
 		return

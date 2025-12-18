@@ -101,19 +101,13 @@ func loginPlatform(c *gin.Context, body models.LoginModel) {
 		return
 	}
 
-	var loggedTimer int
-	if !body.Keep_me_logged_in {
-		loggedTimer = 24
-	} else {
-		loggedTimer = 744
-	}
-
+	loggedTimer := helpers.GetLoginDuration(body.Keep_me_logged_in)
 	helpers.SetAuthCookie(c, token, loggedTimer)
 
 	c.JSON(http.StatusOK, responses.UserLoginResponse{
 		Success: true,
 		Message: "Login successful.",
-		Data: responses.UserDataLogin{
+		Data: responses.UserData{
 			Id:         user.Id,
 			ProfileImg: user.Profile_img,
 			FirstName:  user.First_name,
@@ -190,19 +184,13 @@ func loginTenant(c *gin.Context, body models.LoginModel, tenantID string) {
 		return
 	}
 
-	var loggedTimer int
-	if !body.Keep_me_logged_in {
-		loggedTimer = 24
-	} else {
-		loggedTimer = 744
-	}
-
+	loggedTimer := helpers.GetLoginDuration(body.Keep_me_logged_in)
 	helpers.SetAuthCookie(c, token, loggedTimer)
 
 	c.JSON(http.StatusOK, responses.UserLoginResponse{
 		Success: true,
 		Message: "Login successful.",
-		Data: responses.UserDataLogin{
+		Data: responses.UserData{
 			Id:         user.Id,
 			ProfileImg: user.Profile_img,
 			FirstName:  user.First_name,

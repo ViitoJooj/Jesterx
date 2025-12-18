@@ -14,7 +14,7 @@ import (
 
 func main() {
 	config.Load()
-	if config.Gin_mode == "release" || config.Gin_mode == "prod" {
+	if config.GinMode == "release" || config.GinMode == "prod" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 

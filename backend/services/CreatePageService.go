@@ -1,7 +1,6 @@
 package services
 
 import (
-	"database/sql"
 	"gen-you-ecommerce/config"
 	"gen-you-ecommerce/helpers"
 	"gen-you-ecommerce/models"
@@ -28,7 +27,7 @@ func CreatePageService(c *gin.Context) {
 		return
 	}
 
-	hasAccess, _, err := userHasTenantAccess(user.Id, tenantID)
+	hasAccess, _, err := helpers.UserHasTenantAccess(user.Id, tenantID)
 	if err != nil {
 		c.JSON(500, responses.ErrorResponse{Success: false, Message: "Failed to check permissions."})
 		return
@@ -76,20 +75,4 @@ func CreatePageService(c *gin.Context) {
 		Name:      body.Name,
 		Tenant_id: tenantID,
 	})
-}
-
-func userHasTenantAccess(userID, tenantID string) (bool, string, error) {
-	db := config.DB
-	var role string
-
-	err := db.QueryRow(`SELECT role FROM tenant_users WHERE user_id = $1 AND tenant_id = $2`, userID, tenantID).Scan(&role)
-
-	if err == sql.ErrNoRows {
-		return false, "", nil
-	}
-	if err != nil {
-		return false, "", err
-	}
-
-	return true, role, nil
 }

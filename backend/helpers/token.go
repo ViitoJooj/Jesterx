@@ -68,3 +68,10 @@ func SetAuthCookie(c *gin.Context, token string, time int) {
 		true,
 	)
 }
+
+func GetLoginDuration(keepMeLoggedIn bool) int {
+	if !keepMeLoggedIn {
+		return 24
+	}
+	return 744
+}
