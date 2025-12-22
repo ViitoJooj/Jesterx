@@ -10,7 +10,7 @@ import { Footer } from "./components/Footer";
 import { NotFound } from "./pages/Not-found";
 import { HomePage } from "./pages/HomePage";
 import { SpeedInsights } from "@vercel/speed-insights/react";
-import { Store } from "./pages/Store";
+import { Pages } from "./pages/Pages";
 import { Products } from "./pages/Products";
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
@@ -25,7 +25,7 @@ root.render(
         <Route path="*" element={<NotFound />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/store" element={<Store />} />
+        <Route path="/store" element={<Pages />} />
         <Route path="/products" element={<Products />} />
       </Routes>
       <Footer />

@@ -45,9 +45,7 @@ export function CreatePageForm({ onClose, onSelectType }: CreatePageFormProps) {
       <div className={styles.shadow} onClick={onClose} />
 
       <div className={styles.main} role="dialog" aria-modal="true">
-        <button type="button" onClick={onClose} className={styles.closeButton} aria-label="Fechar modal">
-          ×
-        </button>
+        <button type="button" onClick={onClose} className={styles.closeButton} aria-label="Fechar modal"></button>
 
         <h1 className={styles.title}>Qual o tipo de página?</h1>
 
@@ -59,6 +57,10 @@ export function CreatePageForm({ onClose, onSelectType }: CreatePageFormProps) {
             </button>
           ))}
         </div>
+
+        <p className={styles.RecommendTypePage}>
+          Não encontrou seu tipo ? <a href="suporte">Nos recomende a sua!</a>
+        </p>
       </div>
     </>
   );
