@@ -1,0 +1,307 @@
+@use '../variables' as *;
+
+.main {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    min-height: calc(100vh - 200px);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+
+    h1 {
+        font-size: 2rem;
+        color: $font-color-primary;
+        margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+        color: $font-color-secondary;
+        font-size: 1rem;
+
+        strong {
+            color: $color-primary;
+            text-transform: capitalize;
+        }
+    }
+}
+
+.loading {
+    text-align: center;
+    padding: 4rem;
+    color: $font-color-secondary;
+}
+
+.projectsContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.createNewStore {
+    background: $background-color-primary;
+    border: 2px dashed $border-color;
+    border-radius: $border-radius-lg;
+    padding: 3rem 2rem;
+    cursor: pointer;
+    transition: $transition-base;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+        border-color: $color-primary;
+        transform: translateY(-4px);
+        box-shadow: $shadow-md;
+    }
+
+    .plus {
+        font-size: 3rem;
+        color: $color-primary;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: $font-color-primary;
+        margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+        font-size: 0.9375rem;
+        color: $font-color-secondary;
+    }
+}
+
+.pageCard {
+    background: $background-color-primary;
+    border: 2px solid $border-color;
+    border-radius: $border-radius-lg;
+    padding: 1.5rem;
+    transition: $transition-base;
+    display: flex;
+    flex-direction: column;
+
+    &:hover {
+        border-color: $color-primary;
+        transform: translateY(-4px);
+        box-shadow: $shadow-md;
+    }
+}
+
+.pageHeader {
+    margin-bottom: 1rem;
+
+    h3 {
+        font-size: 1.25rem;
+        color: $font-color-primary;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .pageType {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        background: rgba($color-primary, 0.1);
+        color: $color-primary;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+}
+
+.pageInfo {
+    flex: 1;
+    margin-bottom: 1rem;
+
+    p {
+        color: $font-color-secondary;
+        font-size: 0.9375rem;
+        margin-bottom: 0.5rem;
+
+        strong {
+            color: $font-color-primary;
+        }
+    }
+
+    .pageDate {
+        font-size: 0.875rem;
+        color: $font-color-muted;
+    }
+}
+
+.pageActions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.viewButton,
+.editButton {
+    flex: 1;
+    padding: 0.75rem;
+    border: none;
+    border-radius: $border-radius-md;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: $transition-base;
+}
+
+.viewButton {
+    background: transparent;
+    border: 2px solid $color-primary;
+    color: $color-primary;
+
+    &:hover {
+        background: $color-primary;
+        color: white;
+    }
+}
+
+.editButton {
+    background: $color-primary;
+    color: white;
+
+    &:hover {
+        background: $color-primary-dark;
+    }
+}
+
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+}
+
+.modalContent {
+    background: $background-color-primary;
+    border-radius: $border-radius-lg;
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: $shadow-lg;
+}
+
+.modalHeader {
+    padding: 2rem;
+    border-bottom: 1px solid $border-color;
+
+    h2 {
+        font-size: 1.5rem;
+        color: $font-color-primary;
+        margin-bottom: 0.5rem;
+    }
+
+    p {
+        color: $font-color-secondary;
+        font-size: 0.9375rem;
+    }
+}
+
+.siteForm {
+    padding: 2rem;
+
+    label {
+        display: block;
+        margin-bottom: 1.5rem;
+        font-weight: 500;
+        color: $font-color-primary;
+
+        input {
+            display: block;
+            width: 100%;
+            margin-top: 0.5rem;
+            padding: 0.75rem;
+            border: 1px solid $border-color;
+            border-radius: $border-radius-md;
+            font-size: 1rem;
+
+            &:focus {
+                outline: none;
+                border-color: $color-primary;
+            }
+
+            &:disabled {
+                background: $background-color-secondary;
+                cursor: not-allowed;
+            }
+        }
+
+        small {
+            display: block;
+            margin-top: 0.5rem;
+            color: $font-color-secondary;
+            font-size: 0.875rem;
+        }
+    }
+}
+
+.errorBox {
+    background: rgba($error-color, 0.1);
+    color: $error-color;
+    padding: 0.75rem;
+    border-radius: $border-radius-sm;
+    margin-bottom: 1rem;
+    font-size: 0.9375rem;
+}
+
+.modalActions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.primaryBtn {
+    flex: 1;
+    padding: 0.875rem;
+    background: $color-primary;
+    color: white;
+    border: none;
+    border-radius: $border-radius-md;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: $transition-base;
+
+    &:hover:not(:disabled) {
+        background: $color-primary-dark;
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+}
+
+@media (max-width: 768px) {
+    .main {
+        padding: 1rem;
+    }
+
+    .projectsContainer {
+        grid-template-columns: 1fr;
+    }
+
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+}

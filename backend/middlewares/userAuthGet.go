@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"gen-you-ecommerce/config"
 	"gen-you-ecommerce/helpers"
 	"gen-you-ecommerce/responses"
 	"net/http"
@@ -28,14 +29,22 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		userID := claims["sub"].(string)
+
+		var currentPlan string
+		err = config.DB.QueryRow(`SELECT COALESCE(plan, 'free') FROM users WHERE id = $1`, userID).Scan(&currentPlan)
+		if err != nil {
+			currentPlan = "free"
+		}
+
 		user := helpers.UserData{
-			Id:          claims["sub"].(string),
+			Id:          userID,
 			Profile_img: claims["profile_img"].(string),
 			First_name:  claims["first_name"].(string),
 			Last_name:   claims["last_name"].(string),
 			Email:       claims["email"].(string),
 			Role:        claims["role"].(string),
-			Plan:        claims["plan"].(string),
+			Plan:        currentPlan,
 		}
 
 		c.Set("user", user)

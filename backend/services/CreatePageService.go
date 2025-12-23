@@ -5,6 +5,7 @@ import (
 	"gen-you-ecommerce/helpers"
 	"gen-you-ecommerce/models"
 	"gen-you-ecommerce/responses"
+	"gen-you-ecommerce/templates"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -22,9 +23,15 @@ func CreatePageService(c *gin.Context) {
 		return
 	}
 
-	if len(body.Svelte) > 500_000 {
-		c.JSON(400, responses.ErrorResponse{Success: false, Message: "Svelte content is too large."})
+	validTypes := map[string]bool{"landing": true, "ecommerce": true, "software": true, "video": true}
+	if !validTypes[body.PageType] {
+		c.JSON(400, responses.ErrorResponse{Success: false, Message: "Invalid page type."})
 		return
+	}
+
+	svelteContent := templates.GetTemplateByType(body.PageType)
+	if body.Template != "" {
+		svelteContent = body.Template
 	}
 
 	hasAccess, _, err := helpers.UserHasTenantAccess(user.Id, tenantID)
@@ -56,7 +63,7 @@ func CreatePageService(c *gin.Context) {
 		ID:        pageUUID,
 		TenantID:  tenantID,
 		PageID:    slug,
-		Svelte:    body.Svelte,
+		Svelte:    svelteContent,
 		CreatedAt: now,
 		UpdatedAt: now,
 	}

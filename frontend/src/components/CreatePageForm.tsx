@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "../styles/components/CreatePageForm.module.scss";
+import { post, getCurrentTenant } from "../utils/api";
 
 import laddingPage from "../imgs/lading-Page.png";
 import ecommerceImg from "../imgs/ecommerce.png";
@@ -25,8 +27,15 @@ type CreatePageFormProps = {
 };
 
 export function CreatePageForm({ onClose, onSelectType }: CreatePageFormProps) {
+  const navigate = useNavigate();
   const [storeType, setStoreType] = useState<string>("");
   const [step, setStep] = useState<"choose" | "details">("choose");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>("");
+
+  const [pageName, setPageName] = useState("");
+  const [domain, setDomain] = useState("");
+  const [goal, setGoal] = useState("");
 
   const selected = useMemo(() => pageTypes.find((p) => p.id === storeType), [storeType]);
 
@@ -38,10 +47,37 @@ export function CreatePageForm({ onClose, onSelectType }: CreatePageFormProps) {
 
   function handleBack() {
     setStep("choose");
+    setError("");
   }
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+
+    setError("");
+    setLoading(true);
+
+    try {
+      const payload: any = {
+        name: pageName,
+        page_type: storeType,
+      };
+
+      if (domain) payload.domain = domain;
+      if (goal) payload.goal = goal;
+
+      const response = await post("/v1/pages", payload);
+
+      if (response) {
+        alert(`Página "${pageName}" criada com sucesso!`);
+        onClose();
+        window.location.reload();
+      }
+    } catch (err: any) {
+      console.error("Erro ao criar página:", err);
+      setError(err?.message || "Erro ao criar página");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -80,28 +116,28 @@ export function CreatePageForm({ onClose, onSelectType }: CreatePageFormProps) {
             </div>
 
             <p className={styles.RecommendTypePage}>
-              Não encontrou seu tipo? <a href="/suporte">Nos recomende a sua!</a>
+              Não encontrou seu tipo? <a href="/suporte">Nos recomende a sua! </a>
             </p>
           </div>
 
           <div className={`${styles.step} ${step === "details" ? styles.stepActive : styles.stepHidden}`}>
             <form className={styles.detailsForm} onSubmit={handleSubmit}>
+              {error && <div style={{ color: "#e74c3c", marginBottom: "1rem", padding: "0.5rem", background: "#fee", borderRadius: "4px" }}>{error}</div>}
+
               <label className={styles.field}>
                 Nome do projeto
-                <input type="text" placeholder="Ex: Minha Landing" />
+                <input type="text" placeholder="Ex:  Minha Landing" value={pageName} onChange={(e) => setPageName(e.target.value)} required disabled={loading} />
               </label>
 
               <label className={styles.field}>
                 Domínio (opcional)
-                <input type="text" placeholder="ex: meusite.com.br" />
+                <input type="text" placeholder="ex: meusite.com. br" value={domain} onChange={(e) => setDomain(e.target.value)} disabled={loading} />
               </label>
 
               <label className={styles.field}>
                 Objetivo
-                <select defaultValue="">
-                  <option value="" disabled>
-                    Selecione…
-                  </option>
+                <select value={goal} onChange={(e) => setGoal(e.target.value)} disabled={loading}>
+                  <option value="">Selecione…</option>
                   <option value="leads">Capturar leads</option>
                   <option value="sales">Vender</option>
                   <option value="brand">Apresentar marca</option>
@@ -109,11 +145,11 @@ export function CreatePageForm({ onClose, onSelectType }: CreatePageFormProps) {
               </label>
 
               <div className={styles.actions}>
-                <button type="button" className={styles.secondary} onClick={handleBack}>
+                <button type="button" className={styles.secondary} onClick={handleBack} disabled={loading}>
                   Alterar tipo
                 </button>
-                <button type="submit" className={styles.primary}>
-                  Criar página
+                <button type="submit" className={styles.primary} disabled={loading}>
+                  {loading ? "Criando..." : "Criar página"}
                 </button>
               </div>
             </form>

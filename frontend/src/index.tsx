@@ -12,6 +12,9 @@ import { HomePage } from "./pages/HomePage";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { Pages } from "./pages/Pages";
 import { Products } from "./pages/Products";
+import { Pricing } from "./pages/Pricing";
+import { PaymentSuccess } from "./pages/PaymentSuccess";
+import { PaymentCancel } from "./pages/PaymentCancel";
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 
@@ -25,8 +28,11 @@ root.render(
         <Route path="*" element={<NotFound />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/store" element={<Pages />} />
+        <Route path="/pages" element={<Pages />} />
         <Route path="/products" element={<Products />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/payment-success" element={<PaymentSuccess />} />
+        <Route path="/payment-cancel" element={<PaymentCancel />} />
       </Routes>
       <Footer />
     </UserProvider>

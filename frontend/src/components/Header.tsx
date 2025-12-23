@@ -121,7 +121,7 @@ export function Header() {
                 <NavLink to="/" end onClick={() => setOpen(false)}>
                   Home
                 </NavLink>
-                <NavLink to="/store" onClick={() => setOpen(false)}>
+                <NavLink to="/pages" onClick={() => setOpen(false)}>
                   My Store
                 </NavLink>
                 <NavLink to="/products" onClick={() => setOpen(false)}>
@@ -163,7 +163,7 @@ export function Header() {
             <NavLink to="/" end className={({ isActive }) => (isActive ? "active" : undefined)}>
               Home
             </NavLink>
-            <NavLink to="/store" className={({ isActive }) => (isActive ? "active" : undefined)}>
+            <NavLink to="/pages" className={({ isActive }) => (isActive ? "active" : undefined)}>
               My Store
             </NavLink>
             <NavLink to="/products" className={({ isActive }) => (isActive ? "active" : undefined)}>
