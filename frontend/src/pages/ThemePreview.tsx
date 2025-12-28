@@ -124,7 +124,7 @@ export function ThemePreviewPage() {
           </div>
         </div>
         <div className={styles.previewFrame}>
-          <iframe title={currentTheme.name} sandbox="allow-same-origin allow-scripts allow-forms" srcDoc={currentTheme.previewHtml} />
+          <iframe title={currentTheme.name} sandbox="allow-same-origin allow-scripts allow-forms allow-popups" srcDoc={currentTheme.previewHtml} />
         </div>
       </div>
     </main>

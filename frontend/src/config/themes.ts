@@ -13,9 +13,22 @@ export type CommunityTheme = {
 function buildTemplate(accent: string, title: string, subtitle: string, cta: string, extra?: string) {
   return `
   <style>
-    :root { --accent: ${accent}; --bg: #0f172a; --muted: #e2e8f0; }
+    :root {
+      --accent: ${accent};
+      --bg: #0f172a;
+      --muted: #e2e8f0;
+    }
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; background: linear-gradient(120deg, rgba(15,23,42,0.95), rgba(15,23,42,0.7)), radial-gradient(circle at 20% 20%, rgba(255,255,255,0.06), transparent 35%), radial-gradient(circle at 80% 0%, rgba(255,255,255,0.04), transparent 25%), #0b1220; color: #f8fafc; }
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background:
+        linear-gradient(120deg, rgba(15,23,42,0.95), rgba(15,23,42,0.7)),
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.06), transparent 35%),
+        radial-gradient(circle at 80% 0%, rgba(255,255,255,0.04), transparent 25%),
+        #0b1220;
+      color: #f8fafc;
+    }
     .page { min-height: 100vh; padding: 64px 24px; max-width: 1024px; margin: 0 auto; }
     .badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 999px; background: rgba(255,255,255,0.08); color: #cbd5e1; font-weight: 600; letter-spacing: 0.02em; }
     .badge svg { width: 18px; height: 18px; }
