@@ -121,6 +121,9 @@ export function Header() {
                 <NavLink to="/" end onClick={() => setOpen(false)}>
                   Home
                 </NavLink>
+                <NavLink to="/themes" onClick={() => setOpen(false)}>
+                  Loja de temas
+                </NavLink>
                 <NavLink to="/pages" onClick={() => setOpen(false)}>
                   My Store
                 </NavLink>
@@ -162,6 +165,9 @@ export function Header() {
           <nav className={styles.nav} aria-label="Primary">
             <NavLink to="/" end className={({ isActive }) => (isActive ? "active" : undefined)}>
               Home
+            </NavLink>
+            <NavLink to="/themes" className={({ isActive }) => (isActive ? "active" : undefined)}>
+              Loja de temas
             </NavLink>
             <NavLink to="/pages" className={({ isActive }) => (isActive ? "active" : undefined)}>
               My Store

@@ -1,6 +1,7 @@
 import { useMemo, useState, type DragEvent } from "react";
 import styles from "../styles/components/ThemeInstallerModal.module.scss";
 import { getCurrentTenant, post } from "../utils/api";
+import { communityThemes } from "../config/themes";
 
 type Theme = {
   id: string;
@@ -20,13 +21,13 @@ export function ThemeInstallerModal({ open, onClose, onApplied, onSkip }: Props)
   const tenant = getCurrentTenant();
 
   const themes = useMemo<Theme[]>(
-    () => [
-      { id: "minimal", name: "Minimal", description: "Clean, rápido e direto.", accent: "#111827" },
-      { id: "elegant", name: "Elegant", description: "Tipografia + espaçamento premium.", accent: "#7C3AED" },
-      { id: "bold", name: "Bold", description: "Cores fortes e CTAs grandes.", accent: "#F97316" },
-      { id: "studio", name: "Studio", description: "Showcase de produtos e portfólio.", accent: "#06B6D4" },
-      { id: "neo", name: "Neo", description: "Vibe moderna com cards.", accent: "#22C55E" },
-    ],
+    () =>
+      communityThemes.map((theme) => ({
+        id: theme.id,
+        name: theme.name,
+        description: theme.description,
+        accent: theme.accent,
+      })),
     []
   );
 
