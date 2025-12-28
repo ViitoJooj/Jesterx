@@ -4,6 +4,7 @@ import styles from "../styles/pages/ThemeStore.module.scss";
 import buttonStyles from "../styles/components/Button.module.scss";
 import { communityThemes, type CommunityTheme } from "../config/themes";
 import { getCurrentTenant, post } from "../utils/api";
+import { makeSlug } from "../utils/slug";
 
 export function ThemeStore() {
   const navigate = useNavigate();
@@ -13,10 +14,6 @@ export function ThemeStore() {
   const [error, setError] = useState("");
 
   const tenant = getCurrentTenant();
-
-  function makeSlug(prefix: string) {
-    return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
-  }
 
   async function handleInstall(themeId: string) {
     if (!tenant) {
@@ -105,7 +102,7 @@ export function ThemeStore() {
         {communityThemes.map((theme) => (
           <article key={theme.id} className={styles.card} style={{ borderColor: theme.accent }}>
             <div className={styles.preview}>
-              <iframe title={theme.name} sandbox="allow-same-origin allow-scripts allow-forms allow-popups" srcDoc={theme.previewHtml} />
+              <iframe title={theme.name} sandbox="allow-same-origin allow-scripts allow-forms" srcDoc={theme.previewHtml} />
               <span className={styles.tag}>{theme.author}</span>
             </div>
 

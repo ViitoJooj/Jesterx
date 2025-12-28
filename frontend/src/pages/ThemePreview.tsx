@@ -4,6 +4,7 @@ import styles from "../styles/pages/ThemeStore.module.scss";
 import buttonStyles from "../styles/components/Button.module.scss";
 import { getThemeById } from "../config/themes";
 import { getCurrentTenant, post } from "../utils/api";
+import { makeSlug } from "../utils/slug";
 
 export function ThemePreviewPage() {
   const { themeId } = useParams<{ themeId: string }>();
@@ -49,10 +50,6 @@ export function ThemePreviewPage() {
     } finally {
       setLoadingAction(false);
     }
-  }
-
-  function makeSlug(prefix: string) {
-    return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
   }
 
   async function clonePage() {
@@ -126,7 +123,7 @@ export function ThemePreviewPage() {
           </div>
         </div>
         <div className={styles.previewFrame}>
-          <iframe title={theme.name} sandbox="allow-same-origin allow-scripts allow-forms allow-popups" srcDoc={theme.previewHtml} />
+          <iframe title={theme.name} sandbox="allow-same-origin allow-scripts allow-forms" srcDoc={theme.previewHtml} />
         </div>
       </div>
     </main>
