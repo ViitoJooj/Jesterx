@@ -11,10 +11,11 @@ export type CommunityTheme = {
 };
 
 function buildTemplate(accent: string, title: string, subtitle: string, cta: string, extra?: string) {
+  const safeAccent = /^#[0-9A-Fa-f]{3,8}$/.test(accent) ? accent : "#ff3e00";
   return `
   <style>
     :root {
-      --accent: ${accent};
+      --accent: ${safeAccent};
       --bg: #0f172a;
       --muted: #e2e8f0;
     }

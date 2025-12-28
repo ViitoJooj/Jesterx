@@ -32,8 +32,6 @@ export function ThemePreviewPage() {
     );
   }
 
-  const currentTheme = theme;
-
   async function install() {
     if (!tenant) {
       setError("Crie um site antes de instalar um tema. Vá em 'Minhas Páginas'.");
@@ -44,13 +42,17 @@ export function ThemePreviewPage() {
     setError("");
     setLoadingAction(true);
     try {
-      await post("/v1/themes/apply", { theme_id: currentTheme.id });
+      await post("/v1/themes/apply", { theme_id: theme.id });
       setMessage("Tema instalado no site atual.");
     } catch (err: any) {
       setError(err?.message || "Não foi possível instalar o tema.");
     } finally {
       setLoadingAction(false);
     }
+  }
+
+  function makeSlug(prefix: string) {
+    return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
   }
 
   async function clonePage() {
@@ -62,12 +64,12 @@ export function ThemePreviewPage() {
     setMessage("");
     setError("");
     setLoadingAction(true);
-    const slug = `${currentTheme.id}-${Date.now().toString().slice(-5)}`;
+    const slug = makeSlug(theme.id);
     try {
       await post("/v1/pages", {
-        name: `Página ${currentTheme.name}`,
-        page_type: currentTheme.pageType,
-        template: currentTheme.template,
+        name: `Página ${theme.name}`,
+        page_type: theme.pageType,
+        template: theme.template,
         page_id: slug,
       });
       setMessage("Página criada com o tema selecionado.");
@@ -84,10 +86,10 @@ export function ThemePreviewPage() {
       <div className={styles.header}>
         <div>
           <p className={styles.eyebrow}>Loja de temas</p>
-          <h1>{currentTheme.name}</h1>
-          <p className={styles.subtitle}>{currentTheme.description}</p>
+          <h1>{theme.name}</h1>
+          <p className={styles.subtitle}>{theme.description}</p>
           <div className={styles.tags}>
-            {currentTheme.tags.map((tag) => (
+            {theme.tags.map((tag) => (
               <span key={tag}>{tag}</span>
             ))}
           </div>
@@ -115,16 +117,16 @@ export function ThemePreviewPage() {
             <p className={styles.subtitle}>Compartilhe este endereço com sua equipe para validar o tema.</p>
           </div>
           <div className={styles.previewActions}>
-            <button type="button" onClick={clonePage} disabled={loadingAction} className={styles.primaryButton} style={{ background: currentTheme.accent }}>
+            <button type="button" onClick={clonePage} disabled={loadingAction} className={styles.primaryButton} style={{ background: theme.accent }}>
               {loadingAction ? "Clonando..." : "Criar página com tema"}
             </button>
-            <a href={`/themes/${currentTheme.id}`} className={styles.linkButton}>
-              {typeof window !== "undefined" && window.location?.origin ? `${window.location.origin}/themes/${currentTheme.id}` : `/themes/${currentTheme.id}`}
+            <a href={`/themes/${theme.id}`} className={styles.linkButton}>
+              {`/themes/${theme.id}`}
             </a>
           </div>
         </div>
         <div className={styles.previewFrame}>
-          <iframe title={currentTheme.name} sandbox="allow-same-origin allow-scripts allow-forms allow-popups" srcDoc={currentTheme.previewHtml} />
+          <iframe title={theme.name} sandbox="allow-same-origin allow-scripts allow-forms allow-popups" srcDoc={theme.previewHtml} />
         </div>
       </div>
     </main>

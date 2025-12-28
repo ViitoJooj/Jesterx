@@ -14,6 +14,10 @@ export function ThemeStore() {
 
   const tenant = getCurrentTenant();
 
+  function makeSlug(prefix: string) {
+    return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+  }
+
   async function handleInstall(themeId: string) {
     if (!tenant) {
       setError("Crie um site antes de instalar um tema. Vá em 'Minhas Páginas'.");
@@ -44,7 +48,7 @@ export function ThemeStore() {
     setMessage("");
     setError("");
     setCreating(theme.id);
-    const slug = `${theme.id}-${Date.now().toString().slice(-5)}`;
+    const slug = makeSlug(theme.id);
 
     try {
       await post("/v1/pages", {
