@@ -137,19 +137,14 @@ cd frontend
 
 ## Contribuição
 
-#### Sinta-se à vontade para contribuir:
-
-1. Faça um fork
-2. Crie uma branch (feature/minha-feature)
-3. Commit suas alterações
-4. Abra um Pull Request
-
-Na duvida olhe o <a href="./CONTRIBUTING.md">CONTRIBUTING.md</a>
+#### Quer contribuir?
+É só:
+1. Fazer um fork
+2. Criar uma branch (autor/sua-feature)
+3. Commitar suas mudanças
+4. Abrir um Pull Request
+Qualquer dúvida, confere o <a href="./CONTRIBUTING.md">CONTRIBUTING.md</a>
 
 ## Licença
 
 Este projeto está licenciado conforme o arquivo <a href="LICENSE.md">LICENSE.md</a>
-
-## Autor
-
-Desenvolvido por ViitoJooj (819SauCe)
