@@ -143,7 +143,8 @@ cd frontend
 2. Criar uma branch (autor/sua-feature)
 3. Commitar suas mudanças
 4. Abrir um Pull Request
-Qualquer dúvida, confere o <a href="./CONTRIBUTING.md">CONTRIBUTING.md</a>
+
+- Qualquer dúvida, confere o <a href="./CONTRIBUTING.md">CONTRIBUTING.md</a>
 
 ## Licença
 
