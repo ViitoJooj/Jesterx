@@ -1,155 +1,198 @@
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import styles from "../styles/components/CreatePageForm.module.scss";
-import { post, getCurrentTenant } from "../utils/api";
+import { CustomSelect } from "./Select";
 
 import laddingPage from "../imgs/lading-Page.png";
 import ecommerceImg from "../imgs/ecommerce.png";
-import softwareSellImg from "../imgs/ecommerce.png";
+import softwareSellImg from "../imgs/softwareSell.png";
 import videoPage from "../imgs/videos.png";
 
-type PageType = {
+type PageType = "landing" | "ecommerce" | "software" | "video";
+
+type PageOption = {
   id: string;
   title: string;
-  image: string;
 };
 
-const pageTypes: PageType[] = [
-  { id: "landing", title: "Landing Page", image: laddingPage },
-  { id: "ecommerce", title: "E-commerce", image: ecommerceImg },
-  { id: "software", title: "Software Sell", image: softwareSellImg },
-  { id: "video", title: "Video page", image: videoPage },
+type PageTypeMeta = {
+  id: PageType;
+  title: string;
+  image: string;
+  defaultPages: PageOption[];
+};
+
+const pageTypes: PageTypeMeta[] = [
+  {
+    id: "landing",
+    title: "Landing Page",
+    image: laddingPage,
+    defaultPages: [
+      { id: "main", title: "Página única" },
+      { id: "contact", title: "Seção de contato" },
+      { id: "cta", title: "Call to action" },
+      { id: "faq", title: "FAQ" },
+    ],
+  },
+  {
+    id: "ecommerce",
+    title: "E-commerce",
+    image: ecommerceImg,
+    defaultPages: [
+      { id: "home", title: "Home" },
+      { id: "products", title: "Produtos" },
+      { id: "product", title: "Produto" },
+      { id: "cart", title: "Carrinho" },
+      { id: "checkout", title: "Checkout" },
+      { id: "about", title: "Sobre" },
+      { id: "search", title: "Busca" },
+      { id: "blog", title: "Blog" },
+    ],
+  },
+  {
+    id: "software",
+    title: "Software",
+    image: softwareSellImg,
+    defaultPages: [
+      { id: "main", title: "Página principal" },
+      { id: "download", title: "Download" },
+      { id: "pricing", title: "Preços" },
+      { id: "about", title: "Sobre" },
+      { id: "docs", title: "Documentação" },
+    ],
+  },
+  {
+    id: "video",
+    title: "Vídeo Page",
+    image: videoPage,
+    defaultPages: [
+      { id: "gallery", title: "Galeria" },
+      { id: "player", title: "Player" },
+      { id: "about", title: "Sobre" },
+    ],
+  },
 ];
 
 type CreatePageFormProps = {
   onClose: () => void;
-  onSuccess?: () => void;
+  onSuccess?: (data: any) => void;
 };
 
 export function CreatePageForm({ onClose, onSuccess }: CreatePageFormProps) {
-  const navigate = useNavigate();
-  const [storeType, setStoreType] = useState<string>("");
   const [step, setStep] = useState<"choose" | "details">("choose");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string>("");
-
-  const [pageName, setPageName] = useState("");
+  const [selectedType, setSelectedType] = useState<PageType | "">("");
+  const [name, setName] = useState("");
   const [domain, setDomain] = useState("");
+  const [description, setDescription] = useState("");
   const [goal, setGoal] = useState("");
+  const [logoUrl, setLogoUrl] = useState("");
+  const [pages, setPages] = useState<string[]>([]);
 
-  const selected = useMemo(() => pageTypes.find((p) => p.id === storeType), [storeType]);
+  const selected = useMemo(() => pageTypes.find((p) => p.id === selectedType), [selectedType]);
 
-  function handleSelectType(type: string) {
-    setStoreType(type);
+  function handleTypeSelect(type: PageType) {
+    setSelectedType(type);
+    setPages(pageTypes.find((p) => p.id === type)?.defaultPages.map((p) => p.id) || []);
     setStep("details");
   }
 
-  function handleBack() {
-    setStep("choose");
-    setError("");
+  function handleTogglePage(id: string) {
+    setPages((prev) =>
+      prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
+    );
   }
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    setError("");
-    setLoading(true);
+    const payload = {
+      name,
+      domain,
+      description,
+      goal,
+      logoUrl,
+      page_type: selectedType,
+      pages,
+    };
 
-    try {
-      const payload: any = {
-        name: pageName,
-        page_type: storeType,
-      };
-
-      if (domain) payload.domain = domain;
-      if (goal) payload.goal = goal;
-
-      const response = await post("/v1/pages", payload);
-
-      if (response) {
-        onSuccess?.();
-      }
-    } catch (err: any) {
-      setError(err?.message || "Erro ao criar página");
-    } finally {
-      setLoading(false);
-    }
+    console.log("Payload para envio:", payload);
+    onSuccess?.(payload);
   }
 
   return (
     <>
       <div className={styles.shadow} onClick={onClose} />
 
-      <div className={`${styles.main} ${step === "details" ? styles.aside : styles.center}`} role="dialog" aria-modal="true">
+      <div className={`${styles.main} ${step === "details" ? styles.aside : styles.center}`}>
         <div className={styles.headerBar}>
           {step === "details" ? (
-            <button type="button" onClick={handleBack} className={styles.iconButton} aria-label="Voltar">
-              {"<"}
-            </button>
+            <button onClick={() => setStep("choose")} className={styles.iconButton}>{"<"}</button>
           ) : (
             <span className={styles.iconPlaceholder} />
           )}
-
-          <div className={styles.headerTitleWrap}>
-            <h1 className={styles.headerTitle}>{step === "details" ? "Detalhes da página" : "Qual o tipo de página?"}</h1>
-            {step === "details" && selected?.title ? <p className={styles.headerSubtitle}>{selected.title}</p> : null}
-          </div>
-
-          <button type="button" onClick={onClose} className={styles.iconButtonClose} aria-label="Fechar modal">
-            X
-          </button>
+          <h1>{step === "choose" ? "Escolha o tipo de site" : "Detalhes do site"}</h1>
+          <button onClick={onClose} className={styles.iconButtonClose}>X</button>
         </div>
 
         <div className={styles.body}>
-          <div className={`${styles.step} ${step === "choose" ? styles.stepActive : styles.stepHidden}`}>
+          {step === "choose" && (
             <div className={styles.typeSiteContainer}>
               {pageTypes.map((page) => (
-                <button key={page.id} type="button" className={`${styles.pageTypeCard} ${storeType === page.id ? styles.active : ""}`} onClick={() => handleSelectType(page.id)}>
-                  <img src={page.image} alt={`${page.title} icon`} />
+                <button key={page.id} onClick={() => handleTypeSelect(page.id)} className={styles.pageTypeCard}>
+                  <img src={page.image} alt={page.title} />
                   <h2>{page.title}</h2>
                 </button>
               ))}
             </div>
+          )}
 
-            <p className={styles.RecommendTypePage}>
-              Não encontrou seu tipo? <a href="/suporte">Nos recomende a sua! </a>
-            </p>
-          </div>
-
-          <div className={`${styles.step} ${step === "details" ? styles.stepActive : styles.stepHidden}`}>
+          {step === "details" && (
             <form className={styles.detailsForm} onSubmit={handleSubmit}>
-              {error && <div style={{ color: "#e74c3c", marginBottom: "1rem", padding: "0.5rem", background: "#fee", borderRadius: "4px" }}>{error}</div>}
-
               <label className={styles.field}>
-                Nome do projeto
-                <input type="text" placeholder="Ex:  Minha Landing" value={pageName} onChange={(e) => setPageName(e.target.value)} required disabled={loading} />
+                Nome do site
+                <input value={name} onChange={(e) => setName(e.target.value)} required />
               </label>
 
               <label className={styles.field}>
-                Domínio (opcional)
-                <input type="text" placeholder="ex: meusite.com.br" value={domain} onChange={(e) => setDomain(e.target.value)} disabled={loading} />
+                Domínio
+                <input value={domain} onChange={(e) => setDomain(e.target.value)} />
               </label>
 
               <label className={styles.field}>
-                Objetivo
-                <select value={goal} onChange={(e) => setGoal(e.target.value)} disabled={loading}>
-                  <option value="">Selecione…</option>
-                  <option value="leads">Capturar leads</option>
-                  <option value="sales">Vender</option>
-                  <option value="brand">Apresentar marca</option>
-                </select>
+                Descrição
+                <input value={description} onChange={(e) => setDescription(e.target.value)} required />
               </label>
+
+              <label className={styles.field}>
+                URL do Logo
+                <input value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} />
+              </label>
+
+              <CustomSelect
+                value={goal}
+                onChange={setGoal}
+                placeholder="Selecione o objetivo"
+                options={[
+                  { value: "leads", label: "Capturar leads" },
+                  { value: "sales", label: "Vender" },
+                  { value: "brand", label: "Apresentar marca" },
+                ]}
+              />
+
+              <fieldset className={styles.pageCheckboxes}>
+                <legend>Páginas do site</legend>
+                {selected?.defaultPages.map((p) => (
+                  <label key={p.id}>
+                    <input type="checkbox" checked={pages.includes(p.id)} onChange={() => handleTogglePage(p.id)} />
+                    {p.title}
+                  </label>
+                ))}
+              </fieldset>
 
               <div className={styles.actions}>
-                <button type="button" className={styles.secondary} onClick={handleBack} disabled={loading}>
-                  Alterar tipo
-                </button>
-                <button type="submit" className={styles.primary} disabled={loading}>
-                  {loading ? "Criando..." : "Criar página"}
-                </button>
+                <button type="submit" className={styles.primary}>Criar site</button>
               </div>
             </form>
-          </div>
+          )}
         </div>
       </div>
     </>

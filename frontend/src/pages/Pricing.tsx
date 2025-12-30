@@ -54,7 +54,6 @@ export function Pricing() {
       });
 
       if (response.success && response.data?.checkout_url) {
-        // Redirecionar para o Stripe Checkout
         window.location.href = response.data.checkout_url;
       } else {
         alert("Erro ao criar sessão de checkout");
@@ -107,10 +106,7 @@ export function Pricing() {
         </div>
 
         <div className={styles.footer}>
-          <p>Todos os planos incluem 14 dias de teste grátis. Sem cartão de crédito necessário.</p>
-          <p>
-            <a href="/contact">Precisa de um plano customizado?</a>
-          </p>
+          <p>Precisa de um plano customizado? <a href="/contact">Entre em contato conosco</a></p>
         </div>
       </div>
     </main>

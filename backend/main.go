@@ -46,20 +46,6 @@ func main() {
 	router.GET("/v1/auth/logout", middlewares.OptionalTenantMiddleware(), middlewares.AuthMiddleware(), services.LogoutService)
 	router.GET("/v1/auth/refresh", middlewares.OptionalTenantMiddleware(), middlewares.AuthMiddleware(), services.RefreshUserService)
 
-	// V1/SITES
-	router.POST("/v1/sites", middlewares.AuthMiddleware(), middlewares.PlanMiddleware(), services.CreateSiteService)
-
-	// V1/PAGES
-	router.PUT("/v1/pages/:page_id", middlewares.TenantMiddleware(), middlewares.AuthMiddleware(), services.UpdatePageService)
-	router.GET("/v1/pages", middlewares.TenantMiddleware(), middlewares.AuthMiddleware(), services.ListPagesService)
-	router.POST("/v1/pages", middlewares.TenantMiddleware(), middlewares.AuthMiddleware(), services.CreatePageService)
-	router.GET("/v1/pages/:page_id", middlewares.TenantMiddleware(), middlewares.AuthMiddleware(), services.GetPageService)
-	router.GET("/v1/pages/:page_id/raw", middlewares.TenantMiddleware(), middlewares.AuthMiddleware(), services.GetRawSveltePageService)
-	router.DELETE("/v1/pages/:page_id", middlewares.TenantMiddleware(), middlewares.AuthMiddleware(), services.DeletePageService)
-
-	// V1/THEMES
-	router.POST("/v1/themes/apply", middlewares.TenantMiddleware(), middlewares.AuthMiddleware(), services.ApplyThemeService)
-
 	// V1/BILLING
 	router.POST("/v1/billing/checkout", middlewares.AuthMiddleware(), services.CreateCheckoutService)
 	router.POST("/v1/billing/webhook", services.PaymentWebhookService)

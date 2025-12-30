@@ -2,7 +2,6 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "../styles/pages/Pages.module.scss";
 import { CreatePageForm } from "../components/CreatePageForm";
-import { ThemeInstallerModal } from "../components/ThemeInstallerModal";
 import { DeletePageModal } from "../components/DeletePageModal";
 import { post, get, getCurrentTenant, setCurrentTenant } from "../utils/api";
 
@@ -148,7 +147,7 @@ export function Pages() {
     const tenant = getCurrentTenant();
     if (tenant && !localStorage.getItem(themeKey(tenant))) {
       sessionStorage.setItem(pendingThemeKey(tenant), "1");
-      setShowThemeModal(true);
+      await checkUserAndSite(); // << TROCA PRINCIPAL
       return;
     }
 
@@ -298,23 +297,6 @@ export function Pages() {
         />
       )}
 
-      <ThemeInstallerModal
-        open={showThemeModal}
-        onClose={async () => {
-          setShowThemeModal(false);
-          await loadPages();
-        }}
-        onApplied={async () => {
-          const tenant = getCurrentTenant();
-          if (tenant) sessionStorage.removeItem(pendingThemeKey(tenant));
-          await loadPages();
-        }}
-        onSkip={async () => {
-          const tenant = getCurrentTenant();
-          if (tenant) sessionStorage.removeItem(pendingThemeKey(tenant));
-          await loadPages();
-        }}
-      />
     </main>
   );
 }

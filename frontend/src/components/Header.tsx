@@ -35,7 +35,7 @@ export function Header() {
         credentials: "include",
         headers: csrf ? { "X-CSRF-Token": csrf } : undefined,
       });
-    } catch {}
+    } catch { }
 
     localStorage.removeItem("userId");
     localStorage.removeItem("userProfileImg");
@@ -84,60 +84,57 @@ export function Header() {
   const drawerPortal =
     typeof document !== "undefined"
       ? createPortal(
-          <>
-            <div className={`${styles.drawer_backdrop} ${open ? styles.open : ""}`} onClick={() => setOpen(false)} aria-hidden />
-            <aside id="drawer" className={`${styles.drawer} ${open ? styles.open : ""}`} aria-hidden={!open} role="dialog" aria-modal="true">
-              <div className={styles.drawer_header}>
-                <span>Menu</span>
-                <button className={styles.drawer_close} onClick={() => setOpen(false)} aria-label="Fechar menu">
-                  ×
+        <>
+          <div className={`${styles.drawer_backdrop} ${open ? styles.open : ""}`} onClick={() => setOpen(false)} aria-hidden />
+          <aside id="drawer" className={`${styles.drawer} ${open ? styles.open : ""}`} aria-hidden={!open} role="dialog" aria-modal="true">
+            <div className={styles.drawer_header}>
+              <span>Menu</span>
+              <button className={styles.drawer_close} onClick={() => setOpen(false)} aria-label="Fechar menu">
+                ×
+              </button>
+            </div>
+
+            {user === null ? (
+              <div className={styles.drawer_ctas_top}>
+                <Link to="/login" onClick={() => setOpen(false)} className={`${buttonStyles.default_button} ${buttonStyles["default_button--secondary"]}`}>
+                  Login
+                </Link>
+                <Link to="/register" onClick={() => setOpen(false)} className={`${buttonStyles.default_button} ${buttonStyles["default_button--primary"]}`}>
+                  Register
+                </Link>
+              </div>
+            ) : (
+              <div className={styles.drawer_ctas_top}>
+                <button
+                  onClick={() => {
+                    setOpen(false);
+                    handleLogout();
+                  }}
+                  className={`${buttonStyles.default_button} ${buttonStyles["default_button--secondary"]}`}
+                >
+                  Logout
                 </button>
               </div>
+            )}
 
-              {user === null ? (
-                <div className={styles.drawer_ctas_top}>
-                  <Link to="/login" onClick={() => setOpen(false)} className={`${buttonStyles.default_button} ${buttonStyles["default_button--secondary"]}`}>
-                    Login
-                  </Link>
-                  <Link to="/register" onClick={() => setOpen(false)} className={`${buttonStyles.default_button} ${buttonStyles["default_button--primary"]}`}>
-                    Register
-                  </Link>
-                </div>
-              ) : (
-                <div className={styles.drawer_ctas_top}>
-                  <button
-                    onClick={() => {
-                      setOpen(false);
-                      handleLogout();
-                    }}
-                    className={`${buttonStyles.default_button} ${buttonStyles["default_button--secondary"]}`}
-                  >
-                    Logout
-                  </button>
-                </div>
-              )}
-
-              <nav className={styles.drawer_nav} aria-label="Drawer navigation">
-                <NavLink to="/" end onClick={() => setOpen(false)}>
-                  Home
-                </NavLink>
-                <NavLink to="/themes" onClick={() => setOpen(false)}>
-                  Loja de temas
-                </NavLink>
-                <NavLink to="/pages" onClick={() => setOpen(false)}>
-                  My Store
-                </NavLink>
-                <NavLink to="/products" onClick={() => setOpen(false)}>
-                  My Products
-                </NavLink>
-                <NavLink to="/api" onClick={() => setOpen(false)}>
-                  API
-                </NavLink>
-              </nav>
-            </aside>
-          </>,
-          document.body
-        )
+            <nav className={styles.drawer_nav} aria-label="Drawer navigation">
+              <NavLink to="/pages" onClick={() => setOpen(false)}>
+                Minha loja
+              </NavLink>
+              <NavLink to="/products" onClick={() => setOpen(false)}>
+                Meus produtos
+              </NavLink>
+              <NavLink to="/themes" onClick={() => setOpen(false)}>
+                Loja de temas
+              </NavLink>
+              <NavLink to="/api" onClick={() => setOpen(false)}>
+                Documentação
+              </NavLink>
+            </nav>
+          </aside>
+        </>,
+        document.body
+      )
       : null;
 
   if (user === undefined) {
@@ -163,20 +160,17 @@ export function Header() {
           </Link>
 
           <nav className={styles.nav} aria-label="Primary">
-            <NavLink to="/" end className={({ isActive }) => (isActive ? "active" : undefined)}>
-              Home
+            <NavLink to="/pages" className={({ isActive }) => (isActive ? "active" : undefined)}>
+              Minha loja
+            </NavLink>
+            <NavLink to="/products" className={({ isActive }) => (isActive ? "active" : undefined)}>
+              Meus produtos
             </NavLink>
             <NavLink to="/themes" className={({ isActive }) => (isActive ? "active" : undefined)}>
               Loja de temas
             </NavLink>
-            <NavLink to="/pages" className={({ isActive }) => (isActive ? "active" : undefined)}>
-              My Store
-            </NavLink>
-            <NavLink to="/products" className={({ isActive }) => (isActive ? "active" : undefined)}>
-              My Products
-            </NavLink>
             <NavLink to="/api" className={({ isActive }) => (isActive ? "active" : undefined)}>
-              API
+              Documentação
             </NavLink>
           </nav>
 

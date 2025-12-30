@@ -1,5 +1,3 @@
-import { useUser } from "./UserContext";
-
 export function refreshToken() {
   return fetch("http://localhost:8080/token", {
     method: "POST",

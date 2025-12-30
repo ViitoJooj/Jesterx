@@ -111,7 +111,11 @@ if (typeof globalThis.fetch === "function") {
   };
 }
 
-export function UserProvider({ children }: { children: React.ReactNode }) {
+type UserProviderProps = {
+  children: React.ReactNode;
+};
+
+export function UserProvider({ children }: UserProviderProps) {
   const [user, setUser] = useState<User | undefined>(undefined);
   const ran = useRef(false);
 
@@ -164,7 +168,11 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     })();
   }, []);
 
-  return <UserContext.Provider value={{ user, setUser }}>{children}</UserContext.Provider>;
+  return React.createElement(
+    UserContext.Provider,
+    { value: { user, setUser } },
+    children
+  );
 }
 
 export function useUser() {

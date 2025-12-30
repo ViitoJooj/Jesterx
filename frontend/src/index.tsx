@@ -15,10 +15,6 @@ import { Products } from "./pages/Products";
 import { Pricing } from "./pages/Pricing";
 import { PaymentSuccess } from "./pages/PaymentSuccess";
 import { PaymentCancel } from "./pages/PaymentCancel";
-import { PagePreview } from "./pages/PagePreview";
-import { PageEdit } from "./pages/PageEdit";
-import { ThemeStore } from "./pages/ThemeStore";
-import { ThemePreviewPage } from "./pages/ThemePreview";
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 
@@ -35,12 +31,8 @@ root.render(
         <Route path="/pages" element={<ProtectedRoute> <Pages /> </ProtectedRoute>} />
         <Route path="/products" element={<ProtectedRoute> <Products /> </ProtectedRoute>} />
         <Route path="/pricing" element={<Pricing />} />
-        <Route path="/themes" element={<ThemeStore />} />
-        <Route path="/themes/:themeId" element={<ThemePreviewPage />} />
         <Route path="/payment-success" element={<ProtectedRoute> <PaymentSuccess /> </ProtectedRoute>} />
         <Route path="/payment-cancel" element={<ProtectedRoute> <PaymentCancel /> </ProtectedRoute>} />
-        <Route path="/pages/:pageId" element={<ProtectedRoute> <PagePreview /> </ProtectedRoute>} />
-        <Route path="/pages/:pageId/edit" element={<ProtectedRoute> <PageEdit /> </ProtectedRoute>} />
       </Routes>
       <Footer />
       <SpeedInsights />
