@@ -48,7 +48,8 @@ func GoogleLoginService(c *gin.Context) {
 	}
 
 	state := uuid.New().String()
-	c.SetCookie("oauth_state", state, 600, "/", "", false, true)
+	secure := config.GinMode == "release" || config.GinMode == "prod"
+	c.SetCookie("oauth_state", state, 600, "/", "", secure, true)
 
 	url := config.GoogleOAuthConfig.AuthCodeURL(state, oauth2.AccessTypeOffline)
 	c.Redirect(http.StatusTemporaryRedirect, url)
@@ -137,7 +138,8 @@ func GithubLoginService(c *gin.Context) {
 	}
 
 	state := uuid.New().String()
-	c.SetCookie("oauth_state", state, 600, "/", "", false, true)
+	secure := config.GinMode == "release" || config.GinMode == "prod"
+	c.SetCookie("oauth_state", state, 600, "/", "", secure, true)
 
 	url := config.GithubOAuthConfig.AuthCodeURL(state)
 	c.Redirect(http.StatusTemporaryRedirect, url)
@@ -279,8 +281,7 @@ func findOrCreateOAuthUser(ctx context.Context, email, firstName, lastName, prof
 	}
 
 	userID := uuid.New().String()
-	randomPassword := uuid.New().String()
-	hashedPassword, err := helpers.HashPassword(randomPassword)
+	hashedPassword, err := helpers.HashPassword("oauth-user-no-password")
 	if err != nil {
 		return helpers.UserData{}, err
 	}
