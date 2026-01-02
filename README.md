@@ -42,7 +42,16 @@ O projeto segue uma arquitetura **modular**, dividida em três partes principais
 
 ```
 jesterx/
-       ├─ backend/ # API e lógica do servidor
+       ├─ backend/                  # API e lógica do servidor
+           ├─ config/               # Configuração dos projetos
+           ├─ helpsers/             # Funções auxiliares
+           ├─ middlewares/          # middlewares
+           ├─ models/               # Padronização de modelos esperados nas apis
+           ├─ responses/            # Padronização de respostas das apis
+           ├─ services/             # serviços das apis
+           ├─ go.mod                # lib
+           ├─ go.sum                # lib
+           ﹂ main.go               # Aplicativo principal da api
        ├─ frontend/ # Interface do usuário
        ├─ sql/ # Scripts do banco de dados
        ├─ .env.example # Exemplo de variáveis de ambiente
