@@ -1,0 +1,16 @@
+{
+  "files": {
+    "main.css": "/static/css/main.b193260f.css",
+    "main.js": "/static/js/main.7a70a75e.js",
+    "static/media/totvs_icon.png": "/static/media/totvs_icon.fd908fd493870ac6d719.png",
+    "static/media/tiny_icon.avif": "/static/media/tiny_icon.71a024a9676667651670.avif",
+    "static/media/bling_icon.webp": "/static/media/bling_icon.3790b11c33860347b73b.webp",
+    "index.html": "/index.html",
+    "main.b193260f.css.map": "/static/css/main.b193260f.css.map",
+    "main.7a70a75e.js.map": "/static/js/main.7a70a75e.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.b193260f.css",
+    "static/js/main.7a70a75e.js"
+  ]
+}

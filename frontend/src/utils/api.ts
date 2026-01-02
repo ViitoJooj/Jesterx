@@ -57,10 +57,9 @@ export async function apiRequest<T = any>(endpoint: string, options: RequestInit
     }
 
     if (!response.ok) {
-      throw {
-        message: data.message || data.error || "Request failed",
-        status: response.status,
-      } as ApiError;
+      const error = new Error(data.message || data.error || "Request failed") as ApiError;
+      error.status = response.status;
+      throw error;
     }
 
     if (!text) {
@@ -75,9 +74,8 @@ export async function apiRequest<T = any>(endpoint: string, options: RequestInit
     if ((error as ApiError).message) {
       throw error;
     }
-    throw {
-      message: "Network error. Please try again later.",
-    } as ApiError;
+    const networkError = new Error("Network error. Please try again later.") as ApiError;
+    throw networkError;
   }
 }
 

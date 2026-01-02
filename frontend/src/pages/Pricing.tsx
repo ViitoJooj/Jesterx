@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import styles from "../styles/pages/Pricing.module.scss";
 import { get, post } from "../utils/api";
 
@@ -37,7 +36,6 @@ const fallbackPlans: Plan[] = [
 ];
 
 export function Pricing() {
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<PlanType | null>(null);
   const [plans, setPlans] = useState<Plan[]>(fallbackPlans);
