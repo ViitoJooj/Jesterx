@@ -42,7 +42,7 @@ O projeto segue uma arquitetura **modular**, dividida em três partes principais
 
 ```
 jesterx/
-       ├─ backend/                  # API e lógica do servidor
+    ㄴ backend/                     # API e lógica do servidor
            ├─ config/               # Configuração dos projetos
            ├─ helpsers/             # Funções auxiliares
            ├─ middlewares/          # middlewares
