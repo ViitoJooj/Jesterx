@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import styles from "../styles/components/CreatePageForm.module.scss";
-import { post, getCurrentTenant } from "../utils/api";
+import { post } from "../utils/api";
 
 import laddingPage from "../imgs/lading-Page.png";
 import ecommerceImg from "../imgs/ecommerce.png";
@@ -27,7 +26,6 @@ type CreatePageFormProps = {
 };
 
 export function CreatePageForm({ onClose, onSuccess }: CreatePageFormProps) {
-  const navigate = useNavigate();
   const [storeType, setStoreType] = useState<string>("");
   const [step, setStep] = useState<"choose" | "details">("choose");
   const [loading, setLoading] = useState(false);

@@ -42,7 +42,7 @@ export function Footer() {
             <Link to="/privacy">Privacidade</Link>
             <Link to="/terms">Termos</Link>
             <a href="mailto:hello@example.com">Contato</a>
-            <a href="#" target="_blank" rel="noreferrer">
+            <a href="https://github.com/ViitoJooj" target="_blank" rel="noreferrer">
               Por @viitoJooj
             </a>
           </div>

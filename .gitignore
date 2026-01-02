@@ -6,3 +6,7 @@ dev_spec.txt
 */dev_spec.txt
 node_modules
 */node_modules
+build
+*/build
+dist
+*/dist

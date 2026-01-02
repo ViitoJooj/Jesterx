@@ -29,6 +29,7 @@ func main() {
 	config.ConnectPostgres()
 	config.ConnectMongo()
 	config.InitStripe()
+	config.InitOAuth()
 	if err := services.SetupPlatformData(context.Background()); err != nil {
 		panic(err)
 	}
@@ -49,6 +50,12 @@ func main() {
 	router.GET("/v1/auth/me", middlewares.OptionalTenantMiddleware(), middlewares.AuthMiddleware(), services.MeService)
 	router.GET("/v1/auth/logout", middlewares.OptionalTenantMiddleware(), middlewares.AuthMiddleware(), services.LogoutService)
 	router.GET("/v1/auth/refresh", middlewares.OptionalTenantMiddleware(), middlewares.AuthMiddleware(), services.RefreshUserService)
+
+	// V1/AUTH/OAUTH2
+	router.GET("/v1/auth/google", services.GoogleLoginService)
+	router.GET("/v1/auth/google/callback", services.GoogleCallbackService)
+	router.GET("/v1/auth/github", services.GithubLoginService)
+	router.GET("/v1/auth/github/callback", services.GithubCallbackService)
 
 	// V1/SITES
 	router.POST("/v1/sites", middlewares.AuthMiddleware(), middlewares.PlanMiddleware(), services.CreateSiteService)
