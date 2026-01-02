@@ -6,7 +6,7 @@
 
 ## English
 
-Thanks for considering contributing to Jesterx! 
+Thanks for considering contributing to Jesterx!
 
 ### Project Setup
 
@@ -22,10 +22,15 @@ Thanks for considering contributing to Jesterx!
 ```bash
 # Clone the project
 git clone https://github.com/ViitoJooj/Jesterx.git
+```
 
+```
 # Install frontend dependencies
+cd frontend
 npm install
+```
 
+```
 # Install backend dependencies
 cd backend
 go mod download
@@ -34,10 +39,12 @@ go mod download
 Set up your `.env` based on `.env.example` and run the project:
 
 ```bash
-# Frontend
-npm run dev
+# frontend
+npm start
+```
 
-# Backend (in another terminal)
+```bash
+# backend
 cd backend
 go run main.go
 ```
@@ -60,27 +67,31 @@ go run main.go
 ### Code Standards
 
 **TypeScript:**
+
 - Use TypeScript, it helps a lot
 - Prettier is configured, just run it
 - Variable names need to make sense
 
 **Go:**
+
 - `gofmt` before committing
 - Comment exported functions
 - No hacky code
 
 **SCSS:**
+
 - BEM for classes
 - Use existing variables
 - Mobile first always
 
 **SQL:**
+
 - snake_case for tables and columns
 - Comment complex queries
 
 ### Commits
 
-Try to keep commits organized: 
+Try to keep commits organized:
 
 - `feat:` for new features
 - `fix:` for bugs
@@ -93,6 +104,7 @@ Example: `feat: add stripe checkout`
 ### Reporting Bugs
 
 Open an issue with:
+
 - What happened
 - What should happen
 - How to reproduce
@@ -101,6 +113,7 @@ Open an issue with:
 ### Suggesting Features
 
 Open an issue explaining:
+
 - What you want
 - Why it would be useful
 - How you imagine it working
@@ -171,21 +184,25 @@ go run main.go
 ### Padrões de Código
 
 **TypeScript:**
+
 - Usa TypeScript mesmo, ajuda muito
 - Prettier tá configurado, só rodar
 - Nome de variável tem que fazer sentido
 
 **Go:**
+
 - `gofmt` antes de commitar
 - Comenta as funções exportadas
 - Nada de gambiarra
 
 **SCSS:**
+
 - BEM pras classes
 - Usa as variáveis que já existem
 - Mobile first sempre
 
 **SQL:**
+
 - snake_case pras tabelas e colunas
 - Comenta as queries complexas
 
@@ -203,7 +220,8 @@ Exemplo: `feat: adiciona checkout com stripe`
 
 ### Reportar Bugs
 
-Abra uma issue com: 
+Abra uma issue com:
+
 - O que aconteceu
 - O que deveria acontecer
 - Como reproduzir
@@ -212,6 +230,7 @@ Abra uma issue com:
 ### Sugerir Features
 
 Abre uma issue explicando:
+
 - O que você quer
 - Por que seria útil
 - Como você imagina funcionando
