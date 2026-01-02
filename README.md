@@ -114,25 +114,36 @@ Isso irá subir o backend, frontend, redis, rabbitMQ e banco de dados.
 ## Funcionalidades
 
 - Cadastro e autenticação de usuários
+- (post/get) Comunicação rest nos serviços de softwares
 - CRUD de produtos
 - Carrinho de compras
 - Sistema de pedidos
 - Checkout
 - Painel administrativo
-- Integrações com meios de pagamento (futuro)
+- Integrações com meios de pagamento
 
 ## Desenvolvimento local
 
 Para desenvolvimento local:
 
-```
-# Backend
-cd backend
-# instalar dependências e rodar o servidor
+vá para o backend na pasta raiz.
 
-# Frontend
+```
+cd backend
+```
+instale as dependencias
+```
+go mod download
+```
+
+e depois
+
+```
 cd frontend
-# instalar dependências e rodar o app
+```
+e
+```
+npm install
 ```
 
 ## Contribuição
