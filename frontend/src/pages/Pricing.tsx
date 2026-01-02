@@ -1,40 +1,37 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "../styles/pages/Pricing.module.scss";
-import { post } from "../utils/api";
+import { get, post } from "../utils/api";
 
-type PlanType = "business" | "pro" | "enterprise";
+type PlanType = string;
 
 interface Plan {
   id: PlanType;
   name: string;
-  price: string;
-  priceValue: number;
+  price_cents: number;
   features: string[];
   popular?: boolean;
+  description?: string;
 }
 
-const plans: Plan[] = [
+const fallbackPlans: Plan[] = [
   {
     id: "business",
     name: "Business",
-    price: "R$ 49,00",
-    priceValue: 4900,
+    price_cents: 4900,
     features: ["1 site", "Páginas ilimitadas", "Suporte por email", "Templates básicos", "SSL incluído"],
   },
   {
     id: "pro",
     name: "Pro",
-    price: "R$ 99,00",
-    priceValue: 9900,
+    price_cents: 9900,
     popular: true,
     features: ["Até 10 sites", "Páginas ilimitadas", "Suporte prioritário", "Todos os templates", "SSL incluído", "Analytics avançado", "Integrações premium"],
   },
   {
     id: "enterprise",
     name: "Enterprise",
-    price: "R$ 199,00",
-    priceValue: 19900,
+    price_cents: 19900,
     features: ["Até 50 sites", "Páginas ilimitadas", "Suporte 24/7", "Templates customizados", "SSL incluído", "Analytics avançado", "Todas as integrações", "API dedicada", "Suporte a White Label"],
   },
 ];
@@ -43,6 +40,30 @@ export function Pricing() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<PlanType | null>(null);
+  const [plans, setPlans] = useState<Plan[]>(fallbackPlans);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const response = await get<Plan[]>("/v1/plans");
+        if (response.success && Array.isArray(response.data) && response.data.length > 0) {
+          const normalized = (response.data as Plan[]).map((plan) => ({
+            ...plan,
+            price_cents: Number(plan.price_cents) || 0,
+            features: Array.isArray(plan.features) ? plan.features : [],
+          }));
+          setPlans(normalized);
+        }
+      } catch {
+        setPlans(fallbackPlans);
+      }
+    })();
+  }, []);
+
+  function formatPrice(cents: number) {
+    if (!cents) return "R$ 0,00";
+    return (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  }
 
   async function handleSelectPlan(planId: PlanType) {
     setSelectedPlan(planId);
@@ -77,16 +98,17 @@ export function Pricing() {
         </div>
 
         <div className={styles.plansGrid}>
-          {plans.map((plan) => (
-            <div key={plan.id} className={`${styles.planCard} ${plan.popular ? styles.popular : ""}`}>
-              {plan.popular && <span className={styles.badge}>Mais Popular</span>}
+              {plans.map((plan) => (
+                <div key={plan.id} className={`${styles.planCard} ${plan.popular ? styles.popular : ""}`}>
+                  {plan.popular && <span className={styles.badge}>Mais Popular</span>}
 
-              <h2 className={styles.planName}>{plan.name}</h2>
+                  <h2 className={styles.planName}>{plan.name}</h2>
+                  {plan.description && <p className={styles.planDescription}>{plan.description}</p>}
 
-              <div className={styles.priceSection}>
-                <span className={styles.price}>{plan.price}</span>
-                <span className={styles.period}>/mês</span>
-              </div>
+                  <div className={styles.priceSection}>
+                    <span className={styles.price}>{formatPrice(plan.price_cents)}</span>
+                    <span className={styles.period}>/mês</span>
+                  </div>
 
               <ul className={styles.features}>
                 {plan.features.map((feature, index) => (

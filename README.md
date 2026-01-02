@@ -1,5 +1,5 @@
 <p align="center">
-  🇧🇷 Português | <a href="./README.en.md">🇺🇸 English</a>
+  🇧🇷 Português | <a href="./README.en.md">🇺🇸 English</a> | <a href="./README.es.md">🇪🇸 Español</a> | <a href="./README.fr.md">🇫🇷 Français</a>
 </p>
 
 # Jesterx
@@ -82,9 +82,29 @@ O frontend é responsável pela interface da loja, incluindo:
 - Carrinho de compras
 - Login e cadastro
 - Checkout
-- Área administrativa (em desenvolvimento)
+- Área administrativa (dashboard para admins)
 
 Ele consome diretamente a API do backend.
+
+---
+
+## Área Administrativa
+
+- Apenas usuários com e-mail listado em `ADMIN_EMAILS` recebem a role `platform_admin`.
+- Dashboard com métricas de usuários criados, ticket médio, receita e planos mais usados.
+- Gestão de usuários (visualizar, editar dados de perfil e plano sem expor senha, banir/desbanir, deletar).
+- Gestão de planos (alterar preços, descrições, limites e benefícios). O checkout usa sempre os valores atualizados.
+- Exportação de usuários em XLSX direto da interface e via API.
+
+### Principais rotas novas
+
+- `GET /v1/plans` – lista pública dos planos e limites.
+- `GET /v1/admin/plans` e `PUT /v1/admin/plans/:plan_id` – consulta e atualização de preços/descrições/limites.
+- `GET /v1/admin/users`, `PUT /v1/admin/users/:user_id`, `PUT /v1/admin/users/:user_id/ban`, `DELETE /v1/admin/users/:user_id` – gestão de usuários.
+- `GET /v1/admin/users/export` – exporta XLSX.
+- `GET /v1/admin/stats/overview` – dados para os dashboards.
+
+No frontend, a rota `/admin` é protegida por role e apresenta os dashboards, editor de planos e gestão de contas.
 
 ---
 
@@ -109,6 +129,7 @@ cp .env.example .env
 ```
 
 Depois ajuste as variáveis conforme seu ambiente, como banco de dados, portas e chaves de acesso.
+Inclua a lista de e-mails administrativos em `ADMIN_EMAILS` (separados por vírgula) para liberar o dashboard `/admin` e as rotas `/v1/admin`.
 
 ## Docker
 

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"jesterx-core/config"
 	"jesterx-core/helpers"
+	"jesterx-core/services"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -50,6 +51,9 @@ func PlanMiddleware() gin.HandlerFunc {
 		maxSites, ok := planLimits[plan]
 		if !ok {
 			maxSites = 0
+		}
+		if planConfig, err := services.GetPlanConfig(c.Request.Context(), plan); err == nil {
+			maxSites = planConfig.SiteLimit
 		}
 
 		var currentSites int

@@ -17,6 +17,8 @@ import { PaymentSuccess } from "./pages/PaymentSuccess";
 import { PaymentCancel } from "./pages/PaymentCancel";
 import { PagePreview } from "./pages/PagePreview";
 import { PageEdit } from "./pages/PageEdit";
+import { AdminRoute } from "./config/AdminRoute";
+import { AdminDashboard } from "./pages/AdminDashboard";
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 
@@ -37,6 +39,7 @@ root.render(
         <Route path="/payment-cancel" element={<ProtectedRoute> <PaymentCancel /> </ProtectedRoute>} />
         <Route path="/pages/:pageId" element={<ProtectedRoute> <PagePreview /> </ProtectedRoute>} />
         <Route path="/pages/:pageId/edit" element={<ProtectedRoute> <PageEdit /> </ProtectedRoute>} />
+        <Route path="/admin" element={<AdminRoute> <AdminDashboard /> </AdminRoute>} />
       </Routes>
       <Footer />
       <SpeedInsights />

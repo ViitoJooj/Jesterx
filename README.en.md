@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="./README.md">🇧🇷 Português</a> | 🇺🇸 English
+  <a href="./README.md">🇧🇷 Português</a> | 🇺🇸 English | <a href="./README.es.md">🇪🇸 Español</a> | <a href="./README.fr.md">🇫🇷 Français</a>
 </p>
 
 # Jesterx
@@ -71,9 +71,29 @@ The frontend is responsible for the store's interface, including:
 - Shopping cart
 - Login and registration
 - Checkout
-- Administrative area (under development)
+- Admin area (dashboard for platform admins)
 
 It directly consumes the backend API.
+
+---
+
+## Admin area
+
+- Only emails listed in `ADMIN_EMAILS` receive the `platform_admin` role.
+- Dashboard with user growth, average ticket, revenue, and plan usage metrics.
+- User management (view, edit profile data and plan without exposing passwords, ban/unban, delete).
+- Plan management (update prices, descriptions, limits, and benefits). Checkout always uses the latest values.
+- XLSX export of users directly from the interface or API.
+
+### Key new routes
+
+- `GET /v1/plans` – public list of plans and limits.
+- `GET /v1/admin/plans` and `PUT /v1/admin/plans/:plan_id` – query and update prices/descriptions/limits.
+- `GET /v1/admin/users`, `PUT /v1/admin/users/:user_id`, `PUT /v1/admin/users/:user_id/ban`, `DELETE /v1/admin/users/:user_id` – user management.
+- `GET /v1/admin/users/export` – XLSX export.
+- `GET /v1/admin/stats/overview` – data for admin dashboards.
+
+On the frontend, the `/admin` route is protected by role and shows dashboards, plan editor, and account management.
 
 ---
 
@@ -98,6 +118,7 @@ cp .env.example .env
 ```
 
 Then adjust the variables according to your environment, such as database, ports, and access keys.
+Add the list of admin emails in `ADMIN_EMAILS` (comma-separated) to unlock the `/admin` dashboard and `/v1/admin` routes.
 
 ## Docker
 
