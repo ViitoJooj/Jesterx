@@ -51,7 +51,7 @@ jesterx/
            ├─ services/             # serviços das apis
            ├─ go.mod                # lib
            ├─ go.sum                # lib
-           ﹂ main.go               # Aplicativo principal da api
+           ㄴ main.go               # Aplicativo principal da api
        ├─ frontend/ # Interface do usuário
        ├─ sql/ # Scripts do banco de dados
        ├─ .env.example # Exemplo de variáveis de ambiente
