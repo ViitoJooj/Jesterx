@@ -15,6 +15,7 @@ import { Products } from "./pages/Products";
 import { Pricing } from "./pages/Pricing";
 import { PaymentSuccess } from "./pages/PaymentSuccess";
 import { PaymentCancel } from "./pages/PaymentCancel";
+import { ThemeStore } from "./pages/ThemeStore";
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 
@@ -31,6 +32,7 @@ root.render(
         <Route path="/pages" element={<ProtectedRoute> <Pages /> </ProtectedRoute>} />
         <Route path="/products" element={<ProtectedRoute> <Products /> </ProtectedRoute>} />
         <Route path="/pricing" element={<Pricing />} />
+        <Route path="/themes" element={<ThemeStore />} />
         <Route path="/payment-success" element={<ProtectedRoute> <PaymentSuccess /> </ProtectedRoute>} />
         <Route path="/payment-cancel" element={<ProtectedRoute> <PaymentCancel /> </ProtectedRoute>} />
       </Routes>
