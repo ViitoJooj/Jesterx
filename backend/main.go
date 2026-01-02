@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"jesterx-core/config"
 	"jesterx-core/middlewares"
@@ -28,6 +29,9 @@ func main() {
 	config.ConnectPostgres()
 	config.ConnectMongo()
 	config.InitStripe()
+	if err := services.SetupPlatformData(context.Background()); err != nil {
+		panic(err)
+	}
 
 	router := gin.Default()
 	router.Use(cors.New(cors.Config{
@@ -57,6 +61,9 @@ func main() {
 	router.GET("/v1/pages/:page_id/raw", middlewares.TenantMiddleware(), middlewares.AuthMiddleware(), services.GetRawSveltePageService)
 	router.DELETE("/v1/pages/:page_id", middlewares.TenantMiddleware(), middlewares.AuthMiddleware(), services.DeletePageService)
 
+	// Public Plans
+	router.GET("/v1/plans", services.ListPlansService)
+
 	// V1/THEMES
 	router.POST("/v1/themes/apply", middlewares.TenantMiddleware(), middlewares.AuthMiddleware(), services.ApplyThemeService)
 
@@ -64,6 +71,19 @@ func main() {
 	router.POST("/v1/billing/checkout", middlewares.AuthMiddleware(), services.CreateCheckoutService)
 	router.POST("/v1/billing/webhook", services.PaymentWebhookService)
 	router.POST("/v1/billing/confirm", middlewares.AuthMiddleware(), services.ConfirmCheckoutService)
+
+	// V1/ADMIN
+	admin := router.Group("/v1/admin", middlewares.AuthMiddleware(), middlewares.AdminMiddleware())
+	{
+		admin.GET("/plans", services.AdminListPlansService)
+		admin.PUT("/plans/:plan_id", services.AdminUpdatePlanService)
+		admin.GET("/users", services.AdminListUsersService)
+		admin.PUT("/users/:user_id", services.AdminUpdateUserService)
+		admin.PUT("/users/:user_id/ban", services.AdminBanUserService)
+		admin.DELETE("/users/:user_id", services.AdminDeleteUserService)
+		admin.GET("/users/export", services.AdminExportUsersService)
+		admin.GET("/stats/overview", services.AdminOverviewService)
+	}
 
 	fmt.Print("\nYour api is running:\n\n")
 	fmt.Println("Bind address:", "0.0.0.0:"+config.ApplicationPort)

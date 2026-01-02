@@ -16,7 +16,7 @@ import (
 )
 
 type CheckoutRequest struct {
-	Plan string `json:"plan" binding:"required,oneof=business pro enterprise"`
+	Plan string `json:"plan" binding:"required"`
 }
 
 type apiResponse struct {
@@ -24,17 +24,6 @@ type apiResponse struct {
 	Message string      `json:"message,omitempty"`
 	Data    interface{} `json:"data,omitempty"`
 	Error   string      `json:"error,omitempty"`
-}
-
-type planInfo struct {
-	AmountCents int64
-	DisplayName string
-}
-
-var plans = map[string]planInfo{
-	"business":   {AmountCents: 4900, DisplayName: "Business"},
-	"pro":        {AmountCents: 9900, DisplayName: "Pro"},
-	"enterprise": {AmountCents: 19900, DisplayName: "Enterprise"},
 }
 
 func CreateCheckoutService(c *gin.Context) {
@@ -55,13 +44,17 @@ func CreateCheckoutService(c *gin.Context) {
 		return
 	}
 
-	p, ok := plans[req.Plan]
-	if !ok {
+	planConfig, err := GetPlanConfig(c.Request.Context(), req.Plan)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, apiResponse{Success: false, Error: "invalid plan"})
 		return
 	}
+	if planConfig.PriceCents <= 0 {
+		c.JSON(http.StatusBadRequest, apiResponse{Success: false, Error: "plan is not billable"})
+		return
+	}
 
-	title := cases.Title(language.Portuguese).String(req.Plan)
+	title := cases.Title(language.Portuguese).String(planConfig.Name)
 	productName := fmt.Sprintf("Plano %s", title)
 
 	params := &stripe.CheckoutSessionParams{
@@ -75,7 +68,7 @@ func CreateCheckoutService(c *gin.Context) {
 			{
 				PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
 					Currency:   stripe.String("brl"),
-					UnitAmount: stripe.Int64(p.AmountCents),
+					UnitAmount: stripe.Int64(planConfig.PriceCents),
 					ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
 						Name: stripe.String(productName),
 					},
@@ -97,7 +90,7 @@ func CreateCheckoutService(c *gin.Context) {
 	_, err = config.DB.Exec(`
 		INSERT INTO payments (user_id, plan, provider, provider_payment_id, status, amount_cents, currency)
 		VALUES ($1, $2, 'stripe', $3, 'pending', $4, 'BRL')
-	`, user.Id, req.Plan, sess.ID, p.AmountCents)
+	`, user.Id, req.Plan, sess.ID, planConfig.PriceCents)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			c.JSON(http.StatusInternalServerError, apiResponse{Success: false, Error: "payment persistence failed"})

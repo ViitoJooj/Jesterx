@@ -130,6 +130,11 @@ export function Header() {
                 <NavLink to="/api" onClick={() => setOpen(false)}>
                   API
                 </NavLink>
+                {user?.role === "platform_admin" && (
+                  <NavLink to="/admin" onClick={() => setOpen(false)}>
+                    Admin
+                  </NavLink>
+                )}
               </nav>
             </aside>
           </>,
@@ -166,13 +171,18 @@ export function Header() {
             <NavLink to="/pages" className={({ isActive }) => (isActive ? "active" : undefined)}>
               My Store
             </NavLink>
-            <NavLink to="/products" className={({ isActive }) => (isActive ? "active" : undefined)}>
-              My Products
-            </NavLink>
-            <NavLink to="/api" className={({ isActive }) => (isActive ? "active" : undefined)}>
-              API
-            </NavLink>
-          </nav>
+              <NavLink to="/products" className={({ isActive }) => (isActive ? "active" : undefined)}>
+                My Products
+              </NavLink>
+              <NavLink to="/api" className={({ isActive }) => (isActive ? "active" : undefined)}>
+                API
+              </NavLink>
+              {user?.role === "platform_admin" && (
+                <NavLink to="/admin" className={({ isActive }) => (isActive ? "active" : undefined)}>
+                  Admin
+                </NavLink>
+              )}
+            </nav>
 
           <div className={styles.user}>
             {user === null ? (

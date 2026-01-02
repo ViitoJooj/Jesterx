@@ -17,6 +17,7 @@ type UserData struct {
 	Email       string
 	Role        string
 	Plan        string
+	Banned      bool
 }
 
 func GenerateToken(user UserData) (string, error) {

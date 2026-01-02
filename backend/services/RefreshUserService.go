@@ -30,7 +30,9 @@ func RefreshUserService(c *gin.Context) {
 			COALESCE(u.plan, 'free'),
 			COALESCE(p.profile_img, ''),
 			COALESCE(p.first_name, ''),
-			COALESCE(p. last_name, '')
+			COALESCE(p.last_name, ''),
+			COALESCE(u.role, 'platform_user'),
+			COALESCE(u.banned, FALSE)
 		FROM users u
 		LEFT JOIN user_profiles p ON p.user_id = u.id
 		WHERE u.id = $1
@@ -41,6 +43,8 @@ func RefreshUserService(c *gin.Context) {
 		&updatedUser.Profile_img,
 		&updatedUser.First_name,
 		&updatedUser.Last_name,
+		&updatedUser.Role,
+		&updatedUser.Banned,
 	)
 
 	if err != nil {
@@ -52,7 +56,13 @@ func RefreshUserService(c *gin.Context) {
 		return
 	}
 
-	updatedUser.Role = user.Role
+	if updatedUser.Banned {
+		c.JSON(http.StatusForbidden, responses.ErrorResponse{Success: false, Message: "User is banned"})
+		return
+	}
+
+	updatedUser.Role = helpers.ResolvePlatformRole(updatedUser.Email, updatedUser.Role)
+	_, _ = config.DB.Exec(`UPDATE users SET role = $1 WHERE id = $2`, updatedUser.Role, updatedUser.Id)
 
 	token, err := helpers.GenerateToken(updatedUser)
 	if err != nil {

@@ -58,12 +58,14 @@ func RegisterService(c *gin.Context) {
 	}
 	defer tx.Rollback()
 
+	platformRole := helpers.ResolvePlatformRole(body.Email, "platform_user")
+
 	var userID, userPlan string
 	err = tx.QueryRow(`
-        INSERT INTO users (email, password)
-        VALUES ($1, $2)
+        INSERT INTO users (email, password, role)
+        VALUES ($1, $2, $3)
         RETURNING id, plan
-    `, body.Email, hashedPassword).Scan(&userID, &userPlan)
+    `, body.Email, hashedPassword, platformRole).Scan(&userID, &userPlan)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, responses.ErrorResponse{
@@ -86,7 +88,7 @@ func RegisterService(c *gin.Context) {
 		return
 	}
 
-	role := "platform_user"
+	role := platformRole
 	if hasTenant && tenantID != "" {
 		_, err = tx.Exec(`
             INSERT INTO tenant_users (tenant_id, user_id, role)
@@ -101,7 +103,9 @@ func RegisterService(c *gin.Context) {
 			return
 		}
 
-		role = "customer"
+		if !helpers.IsPlatformAdminEmail(body.Email) {
+			role = "customer"
+		}
 	}
 
 	if err := tx.Commit(); err != nil {

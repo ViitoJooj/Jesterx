@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/joho/godotenv"
 )
@@ -17,6 +18,7 @@ var (
 	StripeWebhookSecret string
 	HostProd            string
 	ApplicationPort     string
+	AdminEmails         []string
 )
 
 func Load() {
@@ -40,6 +42,16 @@ func Load() {
 		"postgres://%s:%s@%s:%s/%s?sslmode=%s",
 		postgresUser, postgresPassword, postgresHost, postgresPort, postgresDB, postgresSSL,
 	)
+
+	adminList := os.Getenv("ADMIN_EMAILS")
+	if adminList != "" {
+		for _, email := range strings.Split(adminList, ",") {
+			email = strings.TrimSpace(email)
+			if email != "" {
+				AdminEmails = append(AdminEmails, email)
+			}
+		}
+	}
 
 	//MongoDB
 	mongoUser := mustGetenv("MONGO_USER")

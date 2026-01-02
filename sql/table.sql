@@ -3,6 +3,8 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(200) UNIQUE NOT NULL,
     password VARCHAR(300) NOT NULL,
     plan VARCHAR(50) NOT NULL DEFAULT 'free',
+    role VARCHAR(50) NOT NULL DEFAULT 'platform_user',
+    banned BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -61,3 +63,14 @@ CREATE TABLE payments (
 CREATE INDEX IF NOT EXISTS idx_user_profiles_user_id ON user_profiles(user_id);
 CREATE INDEX IF NOT EXISTS idx_pages_tenant_id ON pages(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_tenant_users_user_id ON tenant_users(user_id);
+
+CREATE TABLE IF NOT EXISTS plan_configs (
+    id VARCHAR(50) PRIMARY KEY,
+    name VARCHAR(120) NOT NULL,
+    price_cents BIGINT NOT NULL DEFAULT 0,
+    description TEXT,
+    features TEXT[] NOT NULL DEFAULT '{}',
+    site_limit INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

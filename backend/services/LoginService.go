@@ -7,6 +7,7 @@ import (
 	"jesterx-core/models"
 	"jesterx-core/responses"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -65,7 +66,9 @@ func loginPlatform(c *gin.Context, body models.LoginModel) {
             COALESCE(u.plan, 'free'),
             COALESCE(p.profile_img, ''),
             COALESCE(p.first_name, ''),
-            COALESCE(p.last_name, '')
+            COALESCE(p.last_name, ''),
+            COALESCE(u.role, 'platform_user'),
+            COALESCE(u.banned, FALSE)
         FROM users u
         LEFT JOIN user_profiles p ON p.user_id = u.id
         WHERE u.email = $1
@@ -77,6 +80,8 @@ func loginPlatform(c *gin.Context, body models.LoginModel) {
 		&user.Profile_img,
 		&user.First_name,
 		&user.Last_name,
+		&user.Role,
+		&user.Banned,
 	)
 
 	if err != nil {
@@ -93,7 +98,15 @@ func loginPlatform(c *gin.Context, body models.LoginModel) {
 		return
 	}
 
-	user.Role = "platform_user"
+	if user.Banned {
+		c.JSON(http.StatusForbidden, responses.ErrorResponse{Success: false, Message: "User is banned"})
+		return
+	}
+
+	user.Role = helpers.ResolvePlatformRole(user.Email, user.Role)
+	if user.Role != "" {
+		_, _ = config.DB.Exec(`UPDATE users SET role = $1 WHERE id = $2`, user.Role, user.Id)
+	}
 
 	token, err := helpers.GenerateToken(user)
 	if err != nil {
@@ -122,6 +135,8 @@ func loginPlatform(c *gin.Context, body models.LoginModel) {
 func loginTenant(c *gin.Context, body models.LoginModel, tenantID string) {
 	var user helpers.UserData
 	var hashedPassword string
+	var tenantRole string
+	var platformRole string
 
 	err := config.DB.QueryRow(`
         SELECT 
@@ -132,7 +147,9 @@ func loginTenant(c *gin.Context, body models.LoginModel, tenantID string) {
             COALESCE(p.profile_img, ''),
             COALESCE(p.first_name, ''),
             COALESCE(p.last_name, ''),
-            COALESCE(tu.role, 'customer')
+            COALESCE(tu.role, 'customer'),
+            COALESCE(u.banned, FALSE),
+            COALESCE(u.role, 'platform_user')
         FROM users u
         LEFT JOIN user_profiles p ON p.user_id = u.id
         LEFT JOIN tenant_users tu ON tu.user_id = u.id AND tu.tenant_id = $2
@@ -145,7 +162,9 @@ func loginTenant(c *gin.Context, body models.LoginModel, tenantID string) {
 		&user.Profile_img,
 		&user.First_name,
 		&user.Last_name,
-		&user.Role,
+		&tenantRole,
+		&user.Banned,
+		&platformRole,
 	)
 
 	if err != nil {
@@ -156,6 +175,8 @@ func loginTenant(c *gin.Context, body models.LoginModel, tenantID string) {
 		c.JSON(http.StatusInternalServerError, responses.ErrorResponse{Success: false, Message: "Database error"})
 		return
 	}
+
+	user.Role = strings.TrimSpace(tenantRole)
 
 	var hasAccess bool
 	err = config.DB.QueryRow(
@@ -173,10 +194,23 @@ func loginTenant(c *gin.Context, body models.LoginModel, tenantID string) {
 		return
 	}
 
+	if user.Banned {
+		c.JSON(http.StatusForbidden, responses.ErrorResponse{Success: false, Message: "User is banned"})
+		return
+	}
+
 	if !helpers.CheckPasswordHash(body.Password, hashedPassword) {
 		c.JSON(http.StatusBadRequest, responses.ErrorResponse{Success: false, Message: "Verify email or password"})
 		return
 	}
+
+	roleToUse := user.Role
+	if strings.TrimSpace(roleToUse) == "" {
+		roleToUse = platformRole
+	}
+
+	user.Role = helpers.ResolvePlatformRole(user.Email, roleToUse)
+	_, _ = config.DB.Exec(`UPDATE users SET role = $1 WHERE id = $2`, helpers.ResolvePlatformRole(user.Email, platformRole), user.Id)
 
 	token, err := helpers.GenerateToken(user)
 	if err != nil {
