@@ -245,6 +245,103 @@ func GithubCallbackService(c *gin.Context) {
 	c.Redirect(http.StatusTemporaryRedirect, config.HostProd)
 }
 
+func TwitterLoginService(c *gin.Context) {
+	if config.TwitterOAuthConfig == nil {
+		c.JSON(http.StatusServiceUnavailable, responses.ErrorResponse{Success: false, Message: "Twitter OAuth not configured"})
+		return
+	}
+
+	state := uuid.New().String()
+	secure := config.GinMode == "release" || config.GinMode == "prod"
+	c.SetCookie("oauth_state", state, 600, "/", "", secure, true)
+
+	// Twitter OAuth 2.0 requires PKCE
+	url := config.TwitterOAuthConfig.AuthCodeURL(state, oauth2.SetAuthURLParam("code_challenge", "challenge"), oauth2.SetAuthURLParam("code_challenge_method", "plain"))
+	c.Redirect(http.StatusTemporaryRedirect, url)
+}
+
+func TwitterCallbackService(c *gin.Context) {
+	if config.TwitterOAuthConfig == nil {
+		c.JSON(http.StatusServiceUnavailable, responses.ErrorResponse{Success: false, Message: "Twitter OAuth not configured"})
+		return
+	}
+
+	state := c.Query("state")
+	stateCookie, err := c.Cookie("oauth_state")
+	if err != nil || state != stateCookie {
+		c.JSON(http.StatusBadRequest, responses.ErrorResponse{Success: false, Message: "Invalid state parameter"})
+		return
+	}
+
+	code := c.Query("code")
+	if code == "" {
+		c.JSON(http.StatusBadRequest, responses.ErrorResponse{Success: false, Message: "Code not found"})
+		return
+	}
+
+	token, err := config.TwitterOAuthConfig.Exchange(context.Background(), code, oauth2.SetAuthURLParam("code_verifier", "challenge"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, responses.ErrorResponse{Success: false, Message: "Failed to exchange token"})
+		return
+	}
+
+	client := config.TwitterOAuthConfig.Client(context.Background(), token)
+	resp, err := client.Get("https://api.twitter.com/2/users/me?user.fields=profile_image_url")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, responses.ErrorResponse{Success: false, Message: "Failed to get user info"})
+		return
+	}
+	defer resp.Body.Close()
+
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, responses.ErrorResponse{Success: false, Message: "Failed to read user info"})
+		return
+	}
+
+	var result struct {
+		Data struct {
+			ID              string `json:"id"`
+			Name            string `json:"name"`
+			Username        string `json:"username"`
+			ProfileImageURL string `json:"profile_image_url"`
+		} `json:"data"`
+	}
+	if err := json.Unmarshal(data, &result); err != nil {
+		c.JSON(http.StatusInternalServerError, responses.ErrorResponse{Success: false, Message: "Failed to parse user info"})
+		return
+	}
+
+	// Twitter API v2 doesn't return email by default, use username@twitter.placeholder
+	email := result.Data.Username + "@twitter.oauth"
+	firstName, lastName := splitName(result.Data.Name)
+	
+	user, err := findOrCreateOAuthUser(c.Request.Context(), email, firstName, lastName, result.Data.ProfileImageURL, "twitter")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, responses.ErrorResponse{Success: false, Message: "Database error"})
+		return
+	}
+
+	if user.Banned {
+		c.JSON(http.StatusForbidden, responses.ErrorResponse{Success: false, Message: "User is banned"})
+		return
+	}
+
+	user.Role = helpers.ResolvePlatformRole(user.Email, user.Role)
+	if user.Role != "" {
+		_, _ = config.DB.Exec(`UPDATE users SET role = $1 WHERE id = $2`, user.Role, user.Id)
+	}
+
+	jwtToken, err := helpers.GenerateToken(user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, responses.ErrorResponse{Success: false, Message: "Internal error"})
+		return
+	}
+
+	helpers.SetAuthCookie(c, jwtToken, 7*24*3600)
+	c.Redirect(http.StatusTemporaryRedirect, config.HostProd)
+}
+
 func findOrCreateOAuthUser(ctx context.Context, email, firstName, lastName, profileImg, provider string) (helpers.UserData, error) {
 	var user helpers.UserData
 

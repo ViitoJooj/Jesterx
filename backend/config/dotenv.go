@@ -25,6 +25,9 @@ var (
 	GithubClientID      string
 	GithubClientSecret  string
 	GithubRedirectURL   string
+	TwitterClientID     string
+	TwitterClientSecret string
+	TwitterRedirectURL  string
 )
 
 func Load() {
@@ -77,6 +80,9 @@ func Load() {
 	GithubClientID = os.Getenv("GITHUB_CLIENT_ID")
 	GithubClientSecret = os.Getenv("GITHUB_CLIENT_SECRET")
 	GithubRedirectURL = os.Getenv("GITHUB_REDIRECT_URL")
+	TwitterClientID = os.Getenv("TWITTER_CLIENT_ID")
+	TwitterClientSecret = os.Getenv("TWITTER_CLIENT_SECRET")
+	TwitterRedirectURL = os.Getenv("TWITTER_REDIRECT_URL")
 }
 
 func mustGetenv(key string) string {

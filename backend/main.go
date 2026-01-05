@@ -56,6 +56,8 @@ func main() {
 	router.GET("/v1/auth/google/callback", services.GoogleCallbackService)
 	router.GET("/v1/auth/github", services.GithubLoginService)
 	router.GET("/v1/auth/github/callback", services.GithubCallbackService)
+	router.GET("/v1/auth/twitter", services.TwitterLoginService)
+	router.GET("/v1/auth/twitter/callback", services.TwitterCallbackService)
 
 	// V1/SITES
 	router.POST("/v1/sites", middlewares.AuthMiddleware(), middlewares.PlanMiddleware(), services.CreateSiteService)

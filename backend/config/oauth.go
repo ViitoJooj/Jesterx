@@ -7,8 +7,9 @@ import (
 )
 
 var (
-	GoogleOAuthConfig *oauth2.Config
-	GithubOAuthConfig *oauth2.Config
+	GoogleOAuthConfig  *oauth2.Config
+	GithubOAuthConfig  *oauth2.Config
+	TwitterOAuthConfig *oauth2.Config
 )
 
 func InitOAuth() {
@@ -32,6 +33,19 @@ func InitOAuth() {
 			RedirectURL:  GithubRedirectURL,
 			Scopes:       []string{"user:email"},
 			Endpoint:     github.Endpoint,
+		}
+	}
+
+	if TwitterClientID != "" && TwitterClientSecret != "" {
+		TwitterOAuthConfig = &oauth2.Config{
+			ClientID:     TwitterClientID,
+			ClientSecret: TwitterClientSecret,
+			RedirectURL:  TwitterRedirectURL,
+			Scopes:       []string{"tweet.read", "users.read"},
+			Endpoint: oauth2.Endpoint{
+				AuthURL:  "https://twitter.com/i/oauth2/authorize",
+				TokenURL: "https://api.twitter.com/2/oauth2/token",
+			},
 		}
 	}
 }
