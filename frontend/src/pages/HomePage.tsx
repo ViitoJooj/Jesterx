@@ -9,22 +9,21 @@ export function HomePage() {
       <main className={styles.main}>
         <div className={styles.header}>
           <h1>
-            Build your project
+            Construa seu projeto
             <br />
-            <RotatingWord items={["Easier", "Clearer", "Faster", "Simpler"]} />
+            <RotatingWord items={["mais rápido", "com clareza", "sem código", "do seu jeito"]} />
           </h1>
 
           <h2>
-            Jester is the ultimate low-code platform for creating everything from full e-commerce stores to landing pages and digital experiences all in one place. Connect with ERPs, manage physical and digital products, and launch your online business without writing a single line of code. Empower
-            your team to build, grow, and scale effortlessly.
+            Jester é a plataforma low-code para criar desde e-commerces completos até landing pages e experiências digitais em um só lugar. Conecte ERPs, gerencie produtos físicos e digitais e lance sua operação sem escrever código. Dê autonomia para sua equipe crescer e escalar.
           </h2>
 
           <div className={styles.cta}>
             <Link to="/pricing" className={`${buttonStyles.default_button} ${buttonStyles["default_button--primary"]}`}>
-              Build now
+              Começar agora
             </Link>
             <Link to="/register" className={`${buttonStyles.default_button} ${buttonStyles["default_button--secondary"]}`}>
-              Watch demo
+              Ver demo
             </Link>
           </div>
         </div>

@@ -10,6 +10,7 @@ type Plan = {
   description: string;
   features: string[];
   site_limit: number;
+  route_limit: number;
 };
 
 type AdminUser = {
@@ -104,6 +105,7 @@ export function AdminDashboard() {
         description: plan.description,
         features: plan.features,
         site_limit: Number(plan.site_limit) || 0,
+        route_limit: Number(plan.route_limit) || 0,
       });
 
       const data = response.data as Plan[] | undefined;
@@ -272,6 +274,10 @@ export function AdminDashboard() {
               <label className={styles.field}>
                 <span>Limite de sites</span>
                 <input type="number" className={styles.input} value={plan.site_limit} onChange={(e) => updatePlanField(plan.id, "site_limit", Number(e.target.value))} />
+              </label>
+              <label className={styles.field}>
+                <span>Limite de rotas/páginas</span>
+                <input type="number" className={styles.input} value={plan.route_limit} onChange={(e) => updatePlanField(plan.id, "route_limit", Number(e.target.value))} />
               </label>
               <button className={styles.primary} onClick={() => savePlan(plan)} disabled={savingPlanId === plan.id}>
                 {savingPlanId === plan.id ? "Salvando..." : "Salvar plano"}

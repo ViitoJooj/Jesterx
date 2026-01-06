@@ -19,16 +19,17 @@ export function Footer() {
           <div className={styles.links}>
             <div className={styles.col}>
               <h4>Produto</h4>
-              <Link to="/">Home</Link>
-              <Link to="/store">My Store</Link>
-              <Link to="/products">My Products</Link>
+              <Link to="/">Início</Link>
+              <Link to="/pages">Minhas páginas</Link>
+              <Link to="/products">Meus produtos</Link>
+              <Link to="/temas">Loja de temas</Link>
               <Link to="/api">API</Link>
             </div>
             <div className={styles.col}>
               <h4>Empresa</h4>
               <Link to="/about">Sobre</Link>
               <Link to="/support">Suporte</Link>
-              <Link to="/docs">Docs</Link>
+              <Link to="/docs">Documentação</Link>
               <Link to="/status">Status</Link>
             </div>
           </div>

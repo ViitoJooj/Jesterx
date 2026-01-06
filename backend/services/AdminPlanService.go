@@ -15,6 +15,7 @@ type updatePlanBody struct {
 	Description string   `json:"description"`
 	Features    []string `json:"features"`
 	SiteLimit   int      `json:"site_limit"`
+	RouteLimit  int      `json:"route_limit"`
 }
 
 func AdminListPlansService(c *gin.Context) {
@@ -50,6 +51,7 @@ func AdminUpdatePlanService(c *gin.Context) {
 		Description: strings.TrimSpace(body.Description),
 		Features:    body.Features,
 		SiteLimit:   body.SiteLimit,
+		RouteLimit:  body.RouteLimit,
 	})
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": err.Error()})
@@ -85,6 +87,7 @@ func toPlanResponse(plans []PlanConfig) []responses.PlanConfigResponse {
 			Description: plan.Description,
 			Features:    plan.Features,
 			SiteLimit:   plan.SiteLimit,
+			RouteLimit:  plan.RouteLimit,
 		})
 	}
 	return resp

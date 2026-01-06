@@ -16,13 +16,13 @@ describe('Validation Utilities', () => {
     test('rejects empty email', () => {
       const result = validateEmail('');
       expect(result.isValid).toBe(false);
-      expect(result.error).toBe('Email is required');
+      expect(result.error).toBe("Email é obrigatório");
     });
 
     test('rejects invalid email format', () => {
       const result = validateEmail('invalid-email');
       expect(result.isValid).toBe(false);
-      expect(result.error).toBe('Invalid email format');
+      expect(result.error).toBe("Formato de email inválido");
     });
   });
 
@@ -36,37 +36,37 @@ describe('Validation Utilities', () => {
     test('rejects empty password', () => {
       const result = validatePassword('');
       expect(result.isValid).toBe(false);
-      expect(result.error).toBe('Password is required');
+      expect(result.error).toBe("Senha é obrigatória");
     });
 
     test('rejects password shorter than 8 characters', () => {
       const result = validatePassword('Pass1!');
       expect(result.isValid).toBe(false);
-      expect(result.error).toBe('Password must be at least 8 characters');
+      expect(result.error).toBe("Senha deve ter pelo menos 8 caracteres");
     });
 
     test('rejects password without uppercase', () => {
       const result = validatePassword('password123!');
       expect(result.isValid).toBe(false);
-      expect(result.error).toBe('Password must contain at least one uppercase letter');
+      expect(result.error).toBe("Senha deve conter pelo menos uma letra maiúscula");
     });
 
     test('rejects password without lowercase', () => {
       const result = validatePassword('PASSWORD123!');
       expect(result.isValid).toBe(false);
-      expect(result.error).toBe('Password must contain at least one lowercase letter');
+      expect(result.error).toBe("Senha deve conter pelo menos uma letra minúscula");
     });
 
     test('rejects password without number', () => {
       const result = validatePassword('Password!');
       expect(result.isValid).toBe(false);
-      expect(result.error).toBe('Password must contain at least one number');
+      expect(result.error).toBe("Senha deve conter pelo menos um número");
     });
 
     test('rejects password without special character', () => {
       const result = validatePassword('Password123');
       expect(result.isValid).toBe(false);
-      expect(result.error).toBe('Password must contain at least one special character');
+      expect(result.error).toBe("Senha deve conter pelo menos um caractere especial");
     });
   });
 
@@ -80,33 +80,33 @@ describe('Validation Utilities', () => {
     test('rejects empty confirmation', () => {
       const result = validatePasswordConfirmation('Password123!', '');
       expect(result.isValid).toBe(false);
-      expect(result.error).toBe('Please confirm your password');
+      expect(result.error).toBe("Confirme sua senha");
     });
 
     test('rejects mismatched passwords', () => {
       const result = validatePasswordConfirmation('Password123!', 'Different123!');
       expect(result.isValid).toBe(false);
-      expect(result.error).toBe('Passwords do not match');
+      expect(result.error).toBe("As senhas não conferem");
     });
   });
 
   describe('validateRequired', () => {
     test('accepts non-empty value', () => {
-      const result = validateRequired('John', 'First Name');
+      const result = validateRequired('João', 'Nome');
       expect(result.isValid).toBe(true);
       expect(result.error).toBeUndefined();
     });
 
     test('rejects empty value', () => {
-      const result = validateRequired('', 'First Name');
+      const result = validateRequired('', 'Nome');
       expect(result.isValid).toBe(false);
-      expect(result.error).toBe('First Name is required');
+      expect(result.error).toBe('Nome é obrigatório');
     });
 
     test('rejects whitespace-only value', () => {
-      const result = validateRequired('   ', 'Last Name');
+      const result = validateRequired('   ', 'Sobrenome');
       expect(result.isValid).toBe(false);
-      expect(result.error).toBe('Last Name is required');
+      expect(result.error).toBe('Sobrenome é obrigatório');
     });
   });
 });

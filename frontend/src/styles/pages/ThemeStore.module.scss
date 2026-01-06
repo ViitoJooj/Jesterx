@@ -1,0 +1,111 @@
+@use "../variables" as *;
+
+.main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.header {
+    h1 {
+        margin: 0.3rem 0 0;
+        font-size: 1.9rem;
+    }
+}
+
+.kicker {
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+    color: $font-color-secondary;
+    font-size: 0.9rem;
+}
+
+.lead {
+    margin: 0.35rem 0 0;
+    color: $font-color-secondary;
+}
+
+.error {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #fca5a5;
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+}
+
+.card {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1rem;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    align-items: flex-start;
+}
+
+.cardKicker {
+    margin: 0;
+    font-size: 0.85rem;
+    color: $font-color-secondary;
+}
+
+.domain {
+    display: inline-block;
+    margin-top: 0.25rem;
+    color: $font-color-secondary;
+}
+
+.badge {
+    padding: 0.35rem 0.65rem;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.8rem;
+}
+
+.badgeSale {
+    background: #ecfdf3;
+    color: #166534;
+}
+
+.badgeView {
+    background: #eef2ff;
+    color: #312e81;
+}
+
+.muted {
+    margin: 0;
+    color: $font-color-secondary;
+}
+
+.toggle {
+    margin-top: auto;
+    align-self: flex-start;
+    border: 1px solid #111827;
+    background: #111827;
+    color: #fff;
+    padding: 0.5rem 0.9rem;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.hint {
+    margin: 0.25rem 0 0;
+    color: $font-color-secondary;
+}

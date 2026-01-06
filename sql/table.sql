@@ -71,6 +71,7 @@ CREATE TABLE IF NOT EXISTS plan_configs (
     description TEXT,
     features TEXT[] NOT NULL DEFAULT '{}',
     site_limit INT NOT NULL DEFAULT 0,
+    route_limit INT NOT NULL DEFAULT 0,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

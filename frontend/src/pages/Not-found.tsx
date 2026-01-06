@@ -8,15 +8,15 @@ export function NotFound() {
       <section className={styles.card}>
         <div className={styles.code}>404</div>
         <h1 id="nf-title" className={styles.title}>
-          Page not found
+          Página não encontrada
         </h1>
-        <p className={styles.desc}>The page you’re looking for doesn’t exist or was moved.</p>
+        <p className={styles.desc}>A página que você procura não existe ou foi movida.</p>
         <div className={styles.actions}>
           <Link to="/" className={`${buttonStyles.default_button} ${buttonStyles["default_button--primary"]}`}>
-            Go to Home
+            Ir para início
           </Link>
-          <Link to="/store" className={`${buttonStyles.default_button} ${buttonStyles["default_button--secondary"]}`}>
-            My Store
+          <Link to="/pages" className={`${buttonStyles.default_button} ${buttonStyles["default_button--secondary"]}`}>
+            Minhas páginas
           </Link>
         </div>
       </section>

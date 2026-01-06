@@ -69,12 +69,17 @@ func main() {
 	router.GET("/v1/pages/:page_id", middlewares.TenantMiddleware(), middlewares.AuthMiddleware(), services.GetPageService)
 	router.GET("/v1/pages/:page_id/raw", middlewares.TenantMiddleware(), middlewares.AuthMiddleware(), services.GetRawSveltePageService)
 	router.DELETE("/v1/pages/:page_id", middlewares.TenantMiddleware(), middlewares.AuthMiddleware(), services.DeletePageService)
+	router.GET("/v1/pages/:page_id/products", middlewares.TenantMiddleware(), middlewares.AuthMiddleware(), services.ListProductsService)
+	router.POST("/v1/pages/:page_id/products", middlewares.TenantMiddleware(), middlewares.AuthMiddleware(), services.CreateProductService)
+	router.PUT("/v1/pages/:page_id/products/:product_id", middlewares.TenantMiddleware(), middlewares.AuthMiddleware(), services.UpdateProductService)
 
 	// Public Plans
 	router.GET("/v1/plans", services.ListPlansService)
 
 	// V1/THEMES
 	router.POST("/v1/themes/apply", middlewares.TenantMiddleware(), middlewares.AuthMiddleware(), services.ApplyThemeService)
+	router.GET("/v1/themes/store", middlewares.OptionalTenantMiddleware(), services.ListThemeStoreService)
+	router.PUT("/v1/themes/store/:page_id", middlewares.TenantMiddleware(), middlewares.AuthMiddleware(), services.UpdateThemeStoreEntryService)
 
 	// V1/BILLING
 	router.POST("/v1/billing/checkout", middlewares.AuthMiddleware(), services.CreateCheckoutService)
@@ -93,6 +98,10 @@ func main() {
 		admin.GET("/users/export", services.AdminExportUsersService)
 		admin.GET("/stats/overview", services.AdminOverviewService)
 	}
+
+	// Public access to page content and products
+	router.GET("/v1/public/pages/:page_id", middlewares.TenantMiddleware(), services.PublicPageService)
+	router.GET("/v1/public/pages/:page_id/products", middlewares.TenantMiddleware(), services.PublicListProductsService)
 
 	fmt.Print("\nYour api is running:\n\n")
 	fmt.Println("Bind address:", "0.0.0.0:"+config.ApplicationPort)
