@@ -25,11 +25,13 @@ func CreateProductService(c *gin.Context) {
 	}
 
 	var body struct {
-		Name        string   `json:"name" binding:"required"`
-		Description string   `json:"description"`
-		PriceCents  int64    `json:"price_cents"`
-		Images      []string `json:"images"`
-		Visible     *bool    `json:"visible"`
+		Name        string                  `json:"name" binding:"required"`
+		Description string                  `json:"description"`
+		Type        string                  `json:"type"`
+		PriceCents  int64                   `json:"price_cents"`
+		Images      []string                `json:"images"`
+		Visible     *bool                   `json:"visible"`
+		Variants    []models.ProductVariant `json:"variants"`
 	}
 
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -62,6 +64,17 @@ func CreateProductService(c *gin.Context) {
 		visible = *body.Visible
 	}
 
+	for _, v := range body.Variants {
+		if v.Quantity < 0 {
+			c.JSON(400, responses.ErrorResponse{Success: false, Message: "Quantidade do modelo não pode ser negativa."})
+			return
+		}
+		if v.PriceCents < 0 {
+			c.JSON(400, responses.ErrorResponse{Success: false, Message: "Preço do modelo inválido."})
+			return
+		}
+	}
+
 	now := time.Now().UTC()
 	product := models.Product{
 		ID:          uuid.NewString(),
@@ -69,9 +82,11 @@ func CreateProductService(c *gin.Context) {
 		PageID:      pageSlug,
 		Name:        strings.TrimSpace(body.Name),
 		Description: strings.TrimSpace(body.Description),
+		Type:        strings.TrimSpace(body.Type),
 		PriceCents:  body.PriceCents,
 		Images:      body.Images,
 		Visible:     visible,
+		Variants:    body.Variants,
 		CreatedAt:   now,
 		UpdatedAt:   now,
 	}
@@ -92,11 +107,13 @@ func UpdateProductService(c *gin.Context) {
 	productID := c.Param("product_id")
 
 	var body struct {
-		Name        *string  `json:"name"`
-		Description *string  `json:"description"`
-		PriceCents  *int64   `json:"price_cents"`
-		Images      []string `json:"images"`
-		Visible     *bool    `json:"visible"`
+		Name        *string                 `json:"name"`
+		Description *string                 `json:"description"`
+		Type        *string                 `json:"type"`
+		PriceCents  *int64                  `json:"price_cents"`
+		Images      []string                `json:"images"`
+		Visible     *bool                   `json:"visible"`
+		Variants    []models.ProductVariant `json:"variants"`
 	}
 
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -139,6 +156,22 @@ func UpdateProductService(c *gin.Context) {
 	}
 	if body.Visible != nil {
 		update["visible"] = *body.Visible
+	}
+	if body.Type != nil {
+		update["type"] = strings.TrimSpace(*body.Type)
+	}
+	if body.Variants != nil {
+		for _, v := range body.Variants {
+			if v.Quantity < 0 {
+				c.JSON(400, responses.ErrorResponse{Success: false, Message: "Quantidade do modelo não pode ser negativa."})
+				return
+			}
+			if v.PriceCents < 0 {
+				c.JSON(400, responses.ErrorResponse{Success: false, Message: "Preço do modelo inválido."})
+				return
+			}
+		}
+		update["variants"] = body.Variants
 	}
 
 	result, err := config.MongoClient.Database("genyou").Collection("products").UpdateOne(
