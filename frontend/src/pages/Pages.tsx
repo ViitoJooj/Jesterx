@@ -32,6 +32,7 @@ export function Pages() {
   const [isOpen, setIsOpen] = useState(false);
   const [showSiteModal, setShowSiteModal] = useState(false);
   const [showThemeModal, setShowThemeModal] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [pages, setPages] = useState<Page[]>([]);
   const [loadingPages, setLoadingPages] = useState(false);
@@ -72,6 +73,8 @@ export function Pages() {
         navigate("/login");
         return;
       }
+
+      setUser(response.data);
 
       if (!response.data.plan || response.data.plan === "free") {
         navigate("/pricing");
