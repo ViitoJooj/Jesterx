@@ -64,8 +64,8 @@ func main() {
 
 	// V1/PAGES
 	router.PUT("/v1/pages/:page_id", middlewares.TenantMiddleware(), middlewares.AuthMiddleware(), services.UpdatePageService)
-	router.GET("/v1/pages", middlewares.TenantMiddleware(), middlewares.AuthMiddleware(), services.ListPagesService)
-	router.POST("/v1/pages", middlewares.TenantMiddleware(), middlewares.AuthMiddleware(), services.CreatePageService)
+	router.GET("/v1/pages", middlewares.AuthMiddleware(), middlewares.OptionalTenantMiddleware(), services.ListPagesService)
+	router.POST("/v1/pages", middlewares.AuthMiddleware(), middlewares.OptionalTenantMiddleware(), services.CreatePageService)
 	router.GET("/v1/pages/:page_id", middlewares.TenantMiddleware(), middlewares.AuthMiddleware(), services.GetPageService)
 	router.GET("/v1/pages/:page_id/raw", middlewares.TenantMiddleware(), middlewares.AuthMiddleware(), services.GetRawSveltePageService)
 	router.DELETE("/v1/pages/:page_id", middlewares.TenantMiddleware(), middlewares.AuthMiddleware(), services.DeletePageService)

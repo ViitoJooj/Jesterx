@@ -20,15 +20,27 @@ type PageItem struct {
 
 func ListPagesService(c *gin.Context) {
 	user := c.MustGet("user").(helpers.UserData)
-	tenantID := c.MustGet("tenantID").(string)
+	tenantID := c.GetString("tenantID")
 
-	hasAccess, _, err := helpers.UserHasTenantAccess(user.Id, tenantID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, responses.ErrorResponse{Success: false, Message: "Failed to check permissions."})
-		return
+	if tenantID == "" {
+		if fallbackTenant, err := resolveUserTenant(user.Id); err == nil && fallbackTenant != "" {
+			tenantID = fallbackTenant
+		}
+	}
+
+	hasAccess := true
+	if tenantID == "" {
+		hasAccess = false
+	} else {
+		var err error
+		hasAccess, _, err = helpers.UserHasTenantAccess(user.Id, tenantID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, responses.ErrorResponse{Success: false, Message: "Failed to check permissions."})
+			return
+		}
 	}
 	if !hasAccess {
-		c.JSON(http.StatusForbidden, responses.ErrorResponse{Success: false, Message: "You do not belong to this site."})
+		c.JSON(http.StatusForbidden, responses.ErrorResponse{Success: false, Message: "Você precisa criar ou selecionar um site para listar páginas."})
 		return
 	}
 

@@ -15,7 +15,7 @@ import (
 
 func CreatePageService(c *gin.Context) {
 	user := c.MustGet("user").(helpers.UserData)
-	tenantID := c.MustGet("tenantID").(string)
+	tenantID := c.GetString("tenantID")
 
 	var body models.CreatePageModels
 
@@ -40,13 +40,26 @@ func CreatePageService(c *gin.Context) {
 		svelteContent = body.Template
 	}
 
-	hasAccess, _, err := helpers.UserHasTenantAccess(user.Id, tenantID)
-	if err != nil {
-		c.JSON(500, responses.ErrorResponse{Success: false, Message: "Failed to check permissions."})
-		return
+	if tenantID == "" {
+		if fallbackTenant, err := resolveUserTenant(user.Id); err == nil && fallbackTenant != "" {
+			tenantID = fallbackTenant
+		}
+	}
+
+	hasAccess := true
+	if tenantID == "" {
+		hasAccess = false
+	}
+	if tenantID != "" {
+		ok, _, err := helpers.UserHasTenantAccess(user.Id, tenantID)
+		if err != nil {
+			c.JSON(500, responses.ErrorResponse{Success: false, Message: "Failed to check permissions."})
+			return
+		}
+		hasAccess = ok
 	}
 	if !hasAccess {
-		c.JSON(403, responses.ErrorResponse{Success: false, Message: "You do not belong to this site (tenant)."})
+		c.JSON(403, responses.ErrorResponse{Success: false, Message: "Você precisa criar ou selecionar um site para adicionar páginas."})
 		return
 	}
 
