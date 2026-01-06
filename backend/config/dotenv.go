@@ -19,6 +19,15 @@ var (
 	HostProd            string
 	ApplicationPort     string
 	AdminEmails         []string
+	GoogleClientID      string
+	GoogleClientSecret  string
+	GoogleRedirectURL   string
+	GithubClientID      string
+	GithubClientSecret  string
+	GithubRedirectURL   string
+	TwitterClientID     string
+	TwitterClientSecret string
+	TwitterRedirectURL  string
 )
 
 func Load() {
@@ -63,6 +72,17 @@ func Load() {
 
 	StripeSecretKey = mustGetenv("STRIPE_API_SECRET")
 	StripeWebhookSecret = mustGetenv("STRIPE_WEBHOOK_SECRET")
+
+	// OAuth2 - Optional, load if available
+	GoogleClientID = os.Getenv("GOOGLE_CLIENT_ID")
+	GoogleClientSecret = os.Getenv("GOOGLE_CLIENT_SECRET")
+	GoogleRedirectURL = os.Getenv("GOOGLE_REDIRECT_URL")
+	GithubClientID = os.Getenv("GITHUB_CLIENT_ID")
+	GithubClientSecret = os.Getenv("GITHUB_CLIENT_SECRET")
+	GithubRedirectURL = os.Getenv("GITHUB_REDIRECT_URL")
+	TwitterClientID = os.Getenv("TWITTER_CLIENT_ID")
+	TwitterClientSecret = os.Getenv("TWITTER_CLIENT_SECRET")
+	TwitterRedirectURL = os.Getenv("TWITTER_REDIRECT_URL")
 }
 
 func mustGetenv(key string) string {
