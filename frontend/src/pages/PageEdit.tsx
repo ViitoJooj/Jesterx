@@ -127,6 +127,7 @@ export function PageEdit() {
     const [showHeader, setShowHeader] = useState(true);
     const [showFooter, setShowFooter] = useState(true);
     const [componentIds, setComponentIds] = useState<string[]>([]);
+    const [showPreview, setShowPreview] = useState(false);
 
     useEffect(() => {
         if (!pageId) {
@@ -357,6 +358,24 @@ export function PageEdit() {
                         rows={18}
                     />
                 </label>
+
+                <div className={styles.previewActions}>
+                    <label className={styles.checkboxLabel}>
+                        <input type="checkbox" checked={showPreview} onChange={(e) => setShowPreview(e.target.checked)} />
+                        <span>Visualizar página renderizada</span>
+                    </label>
+                </div>
+
+                {showPreview && (
+                    <div className={styles.previewBox}>
+                        <iframe
+                            title="Pré-visualização"
+                            className={styles.previewFrame}
+                            sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+                            srcDoc={`${showHeader ? headerContent : ""}\n${svelteCode}\n${showFooter ? footerContent : ""}`}
+                        />
+                    </div>
+                )}
 
                 <div className={styles.actions}>
                     <button

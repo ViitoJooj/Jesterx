@@ -60,6 +60,26 @@
     justify-content: flex-end;
 }
 
+.previewActions {
+    display: flex;
+    justify-content: flex-start;
+    margin: 0.25rem 0 0.75rem;
+}
+
+.previewBox {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.previewFrame {
+    width: 100%;
+    min-height: 520px;
+    border: none;
+    background: #fff;
+}
+
 .primaryButton,
 .secondaryButton {
     padding: 0.55rem 1.25rem;
