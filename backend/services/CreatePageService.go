@@ -6,6 +6,7 @@ import (
 	"jesterx-core/models"
 	"jesterx-core/responses"
 	"jesterx-core/templates"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -14,7 +15,7 @@ import (
 
 func CreatePageService(c *gin.Context) {
 	user := c.MustGet("user").(helpers.UserData)
-	tenantID := c.MustGet("tenantID").(string)
+	tenantID := c.GetString("tenantID")
 
 	var body models.CreatePageModels
 
@@ -29,18 +30,36 @@ func CreatePageService(c *gin.Context) {
 		return
 	}
 
+	if len(body.Components) > componentLimit {
+		c.JSON(400, responses.ErrorResponse{Success: false, Message: "Limite de componentes excedido."})
+		return
+	}
+
 	svelteContent := templates.GetTemplateByType(body.PageType)
 	if body.Template != "" {
 		svelteContent = body.Template
 	}
 
-	hasAccess, _, err := helpers.UserHasTenantAccess(user.Id, tenantID)
-	if err != nil {
-		c.JSON(500, responses.ErrorResponse{Success: false, Message: "Failed to check permissions."})
-		return
+	if tenantID == "" {
+		if fallbackTenant, err := resolveUserTenant(user.Id); err == nil && fallbackTenant != "" {
+			tenantID = fallbackTenant
+		}
+	}
+
+	hasAccess := true
+	if tenantID == "" {
+		hasAccess = false
+	}
+	if tenantID != "" {
+		ok, _, err := helpers.UserHasTenantAccess(user.Id, tenantID)
+		if err != nil {
+			c.JSON(500, responses.ErrorResponse{Success: false, Message: "Failed to check permissions."})
+			return
+		}
+		hasAccess = ok
 	}
 	if !hasAccess {
-		c.JSON(403, responses.ErrorResponse{Success: false, Message: "You do not belong to this site (tenant)."})
+		c.JSON(403, responses.ErrorResponse{Success: false, Message: "Você precisa criar ou selecionar um site para adicionar páginas."})
 		return
 	}
 
@@ -52,6 +71,21 @@ func CreatePageService(c *gin.Context) {
 		slug = pageUUID
 	}
 
+	plan, err := GetPlanConfig(c.Request.Context(), strings.TrimSpace(user.Plan))
+	if err != nil {
+		plan = PlanConfig{RouteLimit: 0}
+	}
+
+	if plan.RouteLimit > 0 {
+		var pageCount int
+		if err := db.QueryRow(`SELECT COUNT(*) FROM pages WHERE tenant_id = $1`, tenantID).Scan(&pageCount); err == nil {
+			if pageCount >= plan.RouteLimit {
+				c.JSON(403, responses.ErrorResponse{Success: false, Message: "Limite de rotas do seu plano atingido."})
+				return
+			}
+		}
+	}
+
 	_, err = db.Exec(`INSERT INTO pages (id, tenant_id, name, page_id) VALUES ($1, $2, $3, $4)`, pageUUID, tenantID, body.Name, slug)
 	if err != nil {
 		c.JSON(500, responses.ErrorResponse{Success: false, Message: "Failed to save page in Postgres."})
@@ -59,13 +93,27 @@ func CreatePageService(c *gin.Context) {
 	}
 
 	now := time.Now().UTC()
+	showHeader := true
+	if body.ShowHeader != nil {
+		showHeader = *body.ShowHeader
+	}
+	showFooter := true
+	if body.ShowFooter != nil {
+		showFooter = *body.ShowFooter
+	}
+
 	doc := models.PageSvelte{
-		ID:        pageUUID,
-		TenantID:  tenantID,
-		PageID:    slug,
-		Svelte:    svelteContent,
-		CreatedAt: now,
-		UpdatedAt: now,
+		ID:         pageUUID,
+		TenantID:   tenantID,
+		PageID:     slug,
+		Svelte:     svelteContent,
+		Header:     body.Header,
+		Footer:     body.Footer,
+		ShowHeader: showHeader,
+		ShowFooter: showFooter,
+		Components: body.Components,
+		CreatedAt:  now,
+		UpdatedAt:  now,
 	}
 
 	_, err = config.MongoClient.Database("genyou").Collection("page_sveltes").InsertOne(c.Request.Context(), doc)
@@ -75,6 +123,17 @@ func CreatePageService(c *gin.Context) {
 		c.JSON(500, responses.ErrorResponse{Success: false, Message: "Failed to save page content in MongoDB."})
 		return
 	}
+
+	_, _ = config.MongoClient.Database("genyou").Collection("theme_store_entries").InsertOne(c.Request.Context(), models.ThemeStoreEntry{
+		ID:        pageUUID,
+		TenantID:  tenantID,
+		PageID:    slug,
+		Name:      body.Name,
+		Domain:    body.Domain,
+		ForSale:   false,
+		CreatedAt: now,
+		UpdatedAt: now,
+	})
 
 	c.JSON(201, responses.CreatePageDTO{
 		Id:        pageUUID,

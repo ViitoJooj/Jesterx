@@ -60,6 +60,26 @@
     justify-content: flex-end;
 }
 
+.previewActions {
+    display: flex;
+    justify-content: flex-start;
+    margin: 0.25rem 0 0.75rem;
+}
+
+.previewBox {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.previewFrame {
+    width: 100%;
+    min-height: 520px;
+    border: none;
+    background: #fff;
+}
+
 .primaryButton,
 .secondaryButton {
     padding: 0.55rem 1.25rem;
@@ -105,4 +125,104 @@
     background: #e9f7ef;
     color: #1e8449;
     font-size: 0.9rem;
+}
+
+.inlineRow {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.checkboxLabel {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    color: #111;
+}
+
+.blocksSection {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 1rem;
+    background: #fafafa;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.blocksHeader {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.blocksTitle {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.blocksSubtitle {
+    margin: 0.25rem 0 0;
+    color: #555;
+    font-size: 0.95rem;
+}
+
+.pillList {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.pill {
+    background: #111827;
+    color: #fff;
+    padding: 0.3rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+}
+
+.blocksGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 0.75rem;
+}
+
+.blockCard {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 0.9rem;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
+.blockHeader {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.blockBadge {
+    background: #eef2ff;
+    color: #4338ca;
+    padding: 0.2rem 0.5rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+}
+
+.blockDescription {
+    margin: 0;
+    color: #4b5563;
+    font-size: 0.9rem;
+}
+
+.blockActions {
+    display: flex;
+    justify-content: flex-end;
 }

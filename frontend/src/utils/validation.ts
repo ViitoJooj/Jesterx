@@ -11,11 +11,11 @@ const SPECIAL_CHAR_REGEX = /[!@#$%^&*()_+\-=[\]{}:,.?]/;
 
 export function validateEmail(email: string): ValidationResult {
   if (!email) {
-    return { isValid: false, error: 'Email is required' };
+    return { isValid: false, error: "Email é obrigatório" };
   }
 
   if (!EMAIL_REGEX.test(email)) {
-    return { isValid: false, error: 'Invalid email format' };
+    return { isValid: false, error: "Formato de email inválido" };
   }
 
   return { isValid: true };
@@ -23,27 +23,27 @@ export function validateEmail(email: string): ValidationResult {
 
 export function validatePassword(password: string): ValidationResult {
   if (!password) {
-    return { isValid: false, error: 'Password is required' };
+    return { isValid: false, error: "Senha é obrigatória" };
   }
 
   if (password.length < 8) {
-    return { isValid: false, error: 'Password must be at least 8 characters' };
+    return { isValid: false, error: "Senha deve ter pelo menos 8 caracteres" };
   }
 
   if (!UPPERCASE_REGEX.test(password)) {
-    return { isValid: false, error: 'Password must contain at least one uppercase letter' };
+    return { isValid: false, error: "Senha deve conter pelo menos uma letra maiúscula" };
   }
 
   if (!LOWERCASE_REGEX.test(password)) {
-    return { isValid: false, error: 'Password must contain at least one lowercase letter' };
+    return { isValid: false, error: "Senha deve conter pelo menos uma letra minúscula" };
   }
 
   if (!DIGIT_REGEX.test(password)) {
-    return { isValid: false, error: 'Password must contain at least one number' };
+    return { isValid: false, error: "Senha deve conter pelo menos um número" };
   }
 
   if (!SPECIAL_CHAR_REGEX.test(password)) {
-    return { isValid: false, error: 'Password must contain at least one special character' };
+    return { isValid: false, error: "Senha deve conter pelo menos um caractere especial" };
   }
 
   return { isValid: true };
@@ -54,11 +54,11 @@ export function validatePasswordConfirmation(
   confirmPassword: string
 ): ValidationResult {
   if (!confirmPassword) {
-    return { isValid: false, error: 'Please confirm your password' };
+    return { isValid: false, error: "Confirme sua senha" };
   }
 
   if (password !== confirmPassword) {
-    return { isValid: false, error: 'Passwords do not match' };
+    return { isValid: false, error: "As senhas não conferem" };
   }
 
   return { isValid: true };
@@ -66,7 +66,7 @@ export function validatePasswordConfirmation(
 
 export function validateRequired(value: string, fieldName: string): ValidationResult {
   if (!value || value.trim() === '') {
-    return { isValid: false, error: `${fieldName} is required` };
+    return { isValid: false, error: `${fieldName} é obrigatório` };
   }
 
   return { isValid: true };

@@ -74,7 +74,7 @@ export async function apiRequest<T = any>(endpoint: string, options: RequestInit
     if ((error as ApiError).message) {
       throw error;
     }
-    const networkError = new Error("Network error. Please try again later.") as ApiError;
+    const networkError = new Error("Erro de rede. Tente novamente mais tarde.") as ApiError;
     throw networkError;
   }
 }

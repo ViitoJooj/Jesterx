@@ -112,12 +112,17 @@ func GetRawSveltePageService(c *gin.Context) {
 		"success": true,
 		"message": "",
 		"data": gin.H{
-			"id":         doc.ID,
-			"tenant_id":  doc.TenantID,
-			"page_id":    doc.PageID,
-			"svelte":     doc.Svelte,
-			"created_at": doc.CreatedAt,
-			"updated_at": doc.UpdatedAt,
+			"id":          doc.ID,
+			"tenant_id":   doc.TenantID,
+			"page_id":     doc.PageID,
+			"svelte":      doc.Svelte,
+			"header":      doc.Header,
+			"footer":      doc.Footer,
+			"show_header": doc.ShowHeader,
+			"show_footer": doc.ShowFooter,
+			"components":  doc.Components,
+			"created_at":  doc.CreatedAt,
+			"updated_at":  doc.UpdatedAt,
 		},
 	})
 }

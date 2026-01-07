@@ -32,6 +32,7 @@ export function Pages() {
   const [isOpen, setIsOpen] = useState(false);
   const [showSiteModal, setShowSiteModal] = useState(false);
   const [showThemeModal, setShowThemeModal] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [pages, setPages] = useState<Page[]>([]);
   const [loadingPages, setLoadingPages] = useState(false);
@@ -72,6 +73,8 @@ export function Pages() {
         navigate("/login");
         return;
       }
+
+      setUser(response.data);
 
       if (!response.data.plan || response.data.plan === "free") {
         navigate("/pricing");
@@ -186,6 +189,21 @@ export function Pages() {
       <div className={styles.header}>
         <div>
           <h1>Minhas Páginas 🎉</h1>
+          <p className={styles.subtitle}>Crie um site e depois adicione páginas e temas.</p>
+        </div>
+        <div className={styles.headerActions}>
+          <button className={styles.primaryBtn} onClick={() => setShowSiteModal(true)}>
+            Criar site
+          </button>
+          <button
+            className={styles.secondaryBtn}
+            onClick={() => {
+              if (!getCurrentTenant()) setShowSiteModal(true);
+              else setIsOpen(true);
+            }}
+          >
+            Criar página
+          </button>
         </div>
       </div>
 

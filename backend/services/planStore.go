@@ -17,6 +17,7 @@ type PlanConfig struct {
 	Description string   `json:"description"`
 	Features    []string `json:"features"`
 	SiteLimit   int      `json:"site_limit"`
+	RouteLimit  int      `json:"route_limit"`
 }
 
 var defaultPlanConfigs = []PlanConfig{
@@ -25,32 +26,36 @@ var defaultPlanConfigs = []PlanConfig{
 		Name:        "Free",
 		PriceCents:  0,
 		Description: "Plano gratuito para começar a testar páginas e lojas.",
-		Features:    []string{"1 site", "Editor básico", "Hospedagem incluída"},
+		Features:    []string{"1 site", "Editor básico", "Hospedagem incluída", "Rotas limitadas"},
 		SiteLimit:   0,
+		RouteLimit:  0,
 	},
 	{
 		ID:          "business",
 		Name:        "Business",
 		PriceCents:  4900,
 		Description: "Para quem precisa sair do zero com rapidez.",
-		Features:    []string{"1 site", "Páginas ilimitadas", "Templates básicos", "Suporte por email"},
+		Features:    []string{"1 site", "Páginas ilimitadas", "Templates básicos", "Suporte por email", "Rotas ilimitadas"},
 		SiteLimit:   1,
+		RouteLimit:  0,
 	},
 	{
 		ID:          "pro",
 		Name:        "Pro",
 		PriceCents:  9900,
 		Description: "Mais recursos e liberdade para escalar.",
-		Features:    []string{"Até 10 sites", "Páginas ilimitadas", "Todos os templates", "Suporte prioritário", "Analytics avançado"},
+		Features:    []string{"Até 10 sites", "Páginas ilimitadas", "Todos os templates", "Suporte prioritário", "Analytics avançado", "Rotas ilimitadas"},
 		SiteLimit:   10,
+		RouteLimit:  0,
 	},
 	{
 		ID:          "enterprise",
 		Name:        "Enterprise",
 		PriceCents:  19900,
 		Description: "Para equipes e operações que precisam de alta capacidade.",
-		Features:    []string{"Até 50 sites", "Páginas ilimitadas", "Templates customizados", "Integrações e API dedicadas", "Suporte 24/7"},
+		Features:    []string{"Até 50 sites", "Páginas ilimitadas", "Templates customizados", "Integrações e API dedicadas", "Suporte 24/7", "Rotas ilimitadas"},
 		SiteLimit:   50,
+		RouteLimit:  0,
 	},
 }
 
@@ -79,10 +84,16 @@ func createPlanTable(ctx context.Context) error {
 			description TEXT,
 			features TEXT[] NOT NULL DEFAULT '{}',
 			site_limit INT NOT NULL DEFAULT 0,
+			route_limit INT NOT NULL DEFAULT 0,
 			created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 			updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 		);
 	`)
+	if err != nil {
+		return err
+	}
+
+	_, err = config.DB.ExecContext(ctx, `ALTER TABLE plan_configs ADD COLUMN IF NOT EXISTS route_limit INT NOT NULL DEFAULT 0;`)
 	if err != nil {
 		return err
 	}
@@ -93,16 +104,17 @@ func createPlanTable(ctx context.Context) error {
 func seedDefaultPlans(ctx context.Context) error {
 	for _, plan := range defaultPlanConfigs {
 		_, err := config.DB.ExecContext(ctx, `
-			INSERT INTO plan_configs (id, name, price_cents, description, features, site_limit)
-			VALUES ($1, $2, $3, $4, $5, $6)
+			INSERT INTO plan_configs (id, name, price_cents, description, features, site_limit, route_limit)
+			VALUES ($1, $2, $3, $4, $5, $6, $7)
 			ON CONFLICT (id) DO UPDATE
 			SET name = EXCLUDED.name,
 				price_cents = EXCLUDED.price_cents,
 				description = EXCLUDED.description,
 				features = EXCLUDED.features,
 				site_limit = EXCLUDED.site_limit,
+				route_limit = EXCLUDED.route_limit,
 				updated_at = NOW()
-		`, plan.ID, plan.Name, plan.PriceCents, plan.Description, pq.Array(plan.Features), plan.SiteLimit)
+		`, plan.ID, plan.Name, plan.PriceCents, plan.Description, pq.Array(plan.Features), plan.SiteLimit, plan.RouteLimit)
 		if err != nil {
 			return err
 		}
@@ -116,7 +128,7 @@ func ListPlanConfigs(ctx context.Context) ([]PlanConfig, error) {
 	}
 
 	rows, err := config.DB.QueryContext(ctx, `
-		SELECT id, name, price_cents, COALESCE(description, ''), features, site_limit
+		SELECT id, name, price_cents, COALESCE(description, ''), features, site_limit, route_limit
 		FROM plan_configs
 		ORDER BY price_cents ASC, id ASC
 	`)
@@ -128,7 +140,7 @@ func ListPlanConfigs(ctx context.Context) ([]PlanConfig, error) {
 	var plans []PlanConfig
 	for rows.Next() {
 		var plan PlanConfig
-		if err := rows.Scan(&plan.ID, &plan.Name, &plan.PriceCents, &plan.Description, pq.Array(&plan.Features), &plan.SiteLimit); err != nil {
+		if err := rows.Scan(&plan.ID, &plan.Name, &plan.PriceCents, &plan.Description, pq.Array(&plan.Features), &plan.SiteLimit, &plan.RouteLimit); err != nil {
 			return nil, err
 		}
 		plans = append(plans, plan)
@@ -148,10 +160,10 @@ func GetPlanConfig(ctx context.Context, id string) (PlanConfig, error) {
 
 	var plan PlanConfig
 	err := config.DB.QueryRowContext(ctx, `
-		SELECT id, name, price_cents, COALESCE(description, ''), features, site_limit
+		SELECT id, name, price_cents, COALESCE(description, ''), features, site_limit, route_limit
 		FROM plan_configs
 		WHERE id = $1
-	`, id).Scan(&plan.ID, &plan.Name, &plan.PriceCents, &plan.Description, pq.Array(&plan.Features), &plan.SiteLimit)
+	`, id).Scan(&plan.ID, &plan.Name, &plan.PriceCents, &plan.Description, pq.Array(&plan.Features), &plan.SiteLimit, &plan.RouteLimit)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			if def, ok := defaultPlanByID(id); ok {
@@ -173,6 +185,10 @@ func UpdatePlanConfig(ctx context.Context, planID string, input PlanConfig) (Pla
 		return PlanConfig{}, errors.New("invalid plan values")
 	}
 
+	if input.RouteLimit < 0 {
+		return PlanConfig{}, errors.New("invalid route limit")
+	}
+
 	if strings.TrimSpace(input.Name) == "" {
 		return PlanConfig{}, errors.New("plan name is required")
 	}
@@ -182,16 +198,17 @@ func UpdatePlanConfig(ctx context.Context, planID string, input PlanConfig) (Pla
 	}
 
 	_, err := config.DB.ExecContext(ctx, `
-		INSERT INTO plan_configs (id, name, price_cents, description, features, site_limit)
-		VALUES ($1, $2, $3, $4, $5, $6)
+		INSERT INTO plan_configs (id, name, price_cents, description, features, site_limit, route_limit)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
 		ON CONFLICT (id) DO UPDATE
 		SET name = EXCLUDED.name,
 			price_cents = EXCLUDED.price_cents,
 			description = EXCLUDED.description,
 			features = EXCLUDED.features,
 			site_limit = EXCLUDED.site_limit,
+			route_limit = EXCLUDED.route_limit,
 			updated_at = NOW()
-	`, planID, input.Name, input.PriceCents, input.Description, pq.Array(input.Features), input.SiteLimit)
+	`, planID, input.Name, input.PriceCents, input.Description, pq.Array(input.Features), input.SiteLimit, input.RouteLimit)
 	if err != nil {
 		return PlanConfig{}, err
 	}

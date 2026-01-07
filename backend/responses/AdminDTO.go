@@ -9,6 +9,7 @@ type PlanConfigResponse struct {
 	Description string   `json:"description"`
 	Features    []string `json:"features"`
 	SiteLimit   int      `json:"site_limit"`
+	RouteLimit  int      `json:"route_limit"`
 }
 
 type AdminUserResponse struct {

@@ -97,10 +97,10 @@ export function Header() {
               {user === null ? (
                 <div className={styles.drawer_ctas_top}>
                   <Link to="/login" onClick={() => setOpen(false)} className={`${buttonStyles.default_button} ${buttonStyles["default_button--secondary"]}`}>
-                    Login
+                    Entrar
                   </Link>
                   <Link to="/register" onClick={() => setOpen(false)} className={`${buttonStyles.default_button} ${buttonStyles["default_button--primary"]}`}>
-                    Register
+                    Criar conta
                   </Link>
                 </div>
               ) : (
@@ -118,23 +118,26 @@ export function Header() {
               )}
 
               <nav className={styles.drawer_nav} aria-label="Drawer navigation">
-                <NavLink to="/" end onClick={() => setOpen(false)}>
-                  Home
-                </NavLink>
-                <NavLink to="/pages" onClick={() => setOpen(false)}>
-                  My Store
-                </NavLink>
-                <NavLink to="/products" onClick={() => setOpen(false)}>
-                  My Products
-                </NavLink>
-                <NavLink to="/api" onClick={() => setOpen(false)}>
-                  API
-                </NavLink>
-                {user?.role === "platform_admin" && (
-                  <NavLink to="/admin" onClick={() => setOpen(false)}>
-                    Admin
-                  </NavLink>
-                )}
+                 <NavLink to="/" end onClick={() => setOpen(false)}>
+                   Início
+                 </NavLink>
+                 <NavLink to="/pages" onClick={() => setOpen(false)}>
+                   Minhas páginas
+                 </NavLink>
+                 <NavLink to="/products" onClick={() => setOpen(false)}>
+                   Meus produtos
+                 </NavLink>
+                 <NavLink to="/temas" onClick={() => setOpen(false)}>
+                   Loja de temas
+                 </NavLink>
+                 <NavLink to="/api" onClick={() => setOpen(false)}>
+                   API
+                 </NavLink>
+                 {user?.role === "platform_admin" && (
+                   <NavLink to="/admin" onClick={() => setOpen(false)}>
+                     Admin
+                   </NavLink>
+                 )}
               </nav>
             </aside>
           </>,
@@ -159,20 +162,23 @@ export function Header() {
     <>
       <header className={styles.header}>
         <div className={styles.inner}>
-          <Link to="/" className={styles.brand} aria-label="Go to homepage">
+          <Link to="/" className={styles.brand} aria-label="Ir para a página inicial">
             <span className={styles.logo}>J</span>
             <span className={styles.name}>Jester</span>
           </Link>
 
           <nav className={styles.nav} aria-label="Primary">
             <NavLink to="/" end className={({ isActive }) => (isActive ? "active" : undefined)}>
-              Home
+              Início
             </NavLink>
             <NavLink to="/pages" className={({ isActive }) => (isActive ? "active" : undefined)}>
-              My Store
+              Minhas páginas
             </NavLink>
               <NavLink to="/products" className={({ isActive }) => (isActive ? "active" : undefined)}>
-                My Products
+                Meus produtos
+              </NavLink>
+              <NavLink to="/temas" className={({ isActive }) => (isActive ? "active" : undefined)}>
+                Loja de temas
               </NavLink>
               <NavLink to="/api" className={({ isActive }) => (isActive ? "active" : undefined)}>
                 API
@@ -188,10 +194,10 @@ export function Header() {
             {user === null ? (
               <>
                 <Link to="/login" className={`${buttonStyles.default_button} ${buttonStyles["default_button--secondary"]}`}>
-                  Login
+                  Entrar
                 </Link>
                 <Link to="/register" className={`${buttonStyles.default_button} ${buttonStyles["default_button--primary"]}`}>
-                  Register
+                  Criar conta
                 </Link>
               </>
             ) : (
@@ -226,11 +232,14 @@ export function Header() {
                   <Link to="/products" role="menuitem" className={styles.user_menu_item}>
                     Meus Produtos
                   </Link>
+                  <Link to="/temas" role="menuitem" className={styles.user_menu_item}>
+                    Loja de temas
+                  </Link>
 
                   <div className={styles.menu_divider} />
 
                   <button role="menuitem" onClick={handleLogout} className={`${styles.user_menu_item_btn} ${styles.danger}`}>
-                    Logout
+                    Sair
                   </button>
                 </div>
               </div>

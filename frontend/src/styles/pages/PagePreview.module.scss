@@ -32,3 +32,28 @@
     /* ajusta se seu header tiver outra altura */
     border: none;
 }
+
+.productStrip {
+    padding: 1.5rem;
+    background: #f9fafb;
+}
+
+.productGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.productCard {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 0.9rem;
+    background: #fff;
+}
+
+.price {
+    display: inline-block;
+    margin-top: 0.35rem;
+    font-weight: 700;
+}

@@ -14,10 +14,10 @@ type PageType = {
 };
 
 const pageTypes: PageType[] = [
-  { id: "landing", title: "Landing Page", image: laddingPage },
+  { id: "landing", title: "Página de captura", image: laddingPage },
   { id: "ecommerce", title: "E-commerce", image: ecommerceImg },
-  { id: "software", title: "Software Sell", image: softwareSellImg },
-  { id: "video", title: "Video page", image: videoPage },
+  { id: "software", title: "Software", image: softwareSellImg },
+  { id: "video", title: "Página de vídeo", image: videoPage },
 ];
 
 type CreatePageFormProps = {
@@ -33,6 +33,7 @@ export function CreatePageForm({ onClose, onSuccess }: CreatePageFormProps) {
 
   const [pageName, setPageName] = useState("");
   const [domain, setDomain] = useState("");
+  const [pageSlug, setPageSlug] = useState("");
   const [goal, setGoal] = useState("");
 
   const selected = useMemo(() => pageTypes.find((p) => p.id === storeType), [storeType]);
@@ -57,6 +58,7 @@ export function CreatePageForm({ onClose, onSuccess }: CreatePageFormProps) {
       const payload: any = {
         name: pageName,
         page_type: storeType,
+        page_id: pageSlug,
       };
 
       if (domain) payload.domain = domain;
@@ -89,9 +91,9 @@ export function CreatePageForm({ onClose, onSuccess }: CreatePageFormProps) {
           )}
 
           <div className={styles.headerTitleWrap}>
-            <h1 className={styles.headerTitle}>{step === "details" ? "Detalhes da página" : "Qual o tipo de página?"}</h1>
-            {step === "details" && selected?.title ? <p className={styles.headerSubtitle}>{selected.title}</p> : null}
-          </div>
+             <h1 className={styles.headerTitle}>{step === "details" ? "Detalhes da página" : "Qual o tipo de página?"}</h1>
+             {step === "details" && selected?.title ? <p className={styles.headerSubtitle}>{selected.title}</p> : null}
+           </div>
 
           <button type="button" onClick={onClose} className={styles.iconButtonClose} aria-label="Fechar modal">
             X
@@ -121,6 +123,18 @@ export function CreatePageForm({ onClose, onSuccess }: CreatePageFormProps) {
               <label className={styles.field}>
                 Nome do projeto
                 <input type="text" placeholder="Ex:  Minha Landing" value={pageName} onChange={(e) => setPageName(e.target.value)} required disabled={loading} />
+              </label>
+
+              <label className={styles.field}>
+                URL / rota da página
+                <input
+                  type="text"
+                  placeholder="ex: oferta-inicial"
+                  value={pageSlug}
+                  onChange={(e) => setPageSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
+                  disabled={loading}
+                />
+                <small>Use letras, números e hífens. Deixe em branco para gerar automaticamente.</small>
               </label>
 
               <label className={styles.field}>

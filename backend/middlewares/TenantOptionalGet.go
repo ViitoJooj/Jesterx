@@ -19,11 +19,12 @@ func OptionalTenantMiddleware() gin.HandlerFunc {
 		var tenantID string
 		err := config.DB.QueryRow(`SELECT id FROM tenants WHERE page_id = $1`, tenantPageID).Scan(&tenantID)
 		if err != nil {
-			if err == sql.ErrNoRows {
-				c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"success": false, "error": "Tenant not found"})
+			// Se o tenant não existir, apenas ignore o header para não quebrar rotas públicas/sem tenant
+			if err != sql.ErrNoRows {
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"success": false, "error": "Database error"})
 				return
 			}
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"success": false, "error": "Database error"})
+			c.Next()
 			return
 		}
 

@@ -30,6 +30,33 @@
     }
 }
 
+.headerActions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.primaryBtn,
+.secondaryBtn {
+    padding: 0.65rem 1.1rem;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.primaryBtn {
+    background: $color-primary;
+    color: white;
+    border-color: $color-primary;
+}
+
+.secondaryBtn {
+    background: transparent;
+    color: $font-color-primary;
+    border-color: $border-color;
+}
+
 .loading {
     text-align: center;
     padding: 4rem;

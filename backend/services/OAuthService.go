@@ -312,10 +312,10 @@ func TwitterCallbackService(c *gin.Context) {
 		return
 	}
 
-	// Twitter API v2 doesn't return email by default, use username@twitter.placeholder
-	email := result.Data.Username + "@twitter.oauth"
+	// Twitter API v2 doesn't return email by default, use username@placeholder
+	email := result.Data.Username + "@" + twitterPlaceholderDomain
 	firstName, lastName := splitName(result.Data.Name)
-	
+
 	user, err := findOrCreateOAuthUser(c.Request.Context(), email, firstName, lastName, result.Data.ProfileImageURL, "twitter")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, responses.ErrorResponse{Success: false, Message: "Database error"})
