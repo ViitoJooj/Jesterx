@@ -20,7 +20,17 @@ func ListThemeStoreService(c *gin.Context) {
 		currentTenant = tenantID.(string)
 	}
 
-	cursor, err := config.MongoClient.Database("genyou").Collection("theme_store_entries").Find(c.Request.Context(), bson.M{})
+	filter := bson.M{"for_sale": true}
+	if currentTenant != "" {
+		filter = bson.M{
+			"$or": []bson.M{
+				{"for_sale": true},
+				{"tenant_id": currentTenant},
+			},
+		}
+	}
+
+	cursor, err := config.MongoClient.Database("genyou").Collection("theme_store_entries").Find(c.Request.Context(), filter)
 	if err != nil {
 		c.JSON(500, responses.ErrorResponse{Success: false, Message: "Não foi possível carregar a loja de temas."})
 		return
