@@ -189,6 +189,21 @@ export function Pages() {
       <div className={styles.header}>
         <div>
           <h1>Minhas Páginas 🎉</h1>
+          <p className={styles.subtitle}>Crie um site e depois adicione páginas e temas.</p>
+        </div>
+        <div className={styles.headerActions}>
+          <button className={styles.primaryBtn} onClick={() => setShowSiteModal(true)}>
+            Criar site
+          </button>
+          <button
+            className={styles.secondaryBtn}
+            onClick={() => {
+              if (!getCurrentTenant()) setShowSiteModal(true);
+              else setIsOpen(true);
+            }}
+          >
+            Criar página
+          </button>
         </div>
       </div>
 
