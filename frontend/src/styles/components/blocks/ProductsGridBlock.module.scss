@@ -1,0 +1,79 @@
+.section {
+    padding: 3.5rem 3rem;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 20px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.title {
+    margin: 0;
+    font-size: 1.6rem;
+}
+
+.link {
+    color: #f97316;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.25rem;
+}
+
+.card {
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 0.9rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06);
+}
+
+.thumb {
+    height: 140px;
+    border-radius: 12px;
+    background: #f3f4f6;
+    display: grid;
+    place-items: center;
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+.name {
+    font-weight: 600;
+}
+
+.desc {
+    font-size: 0.9rem;
+    color: #6b7280;
+}
+
+.price {
+    font-weight: 700;
+}
+
+.button {
+    margin-top: 0.5rem;
+    padding: 0.55rem;
+    border-radius: 10px;
+    border: none;
+    background: #111827;
+    color: #fff;
+    font-weight: 500;
+    cursor: pointer;
+}

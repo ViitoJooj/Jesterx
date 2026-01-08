@@ -21,6 +21,7 @@ import { AdminRoute } from "./config/AdminRoute";
 import { AdminDashboard } from "./pages/AdminDashboard";
 import { ThemeStore } from "./pages/ThemeStore";
 import { PublicPage } from "./pages/PublicPage";
+import { ThemeProduct } from "./pages/ThemeProduct";
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 
@@ -44,6 +45,7 @@ root.render(
         <Route path="/pages/:pageId/edit" element={<ProtectedRoute> <PageEdit /> </ProtectedRoute>} />
         <Route path="/public/:tenant/:pageId" element={<PublicPage />} />
         <Route path="/admin" element={<AdminRoute> <AdminDashboard /> </AdminRoute>} />
+        <Route path="/themes/:slug" element={<ThemeProduct />} />
       </Routes>
       <Footer />
       <SpeedInsights />

@@ -1,0 +1,32 @@
+@use "../variables" as *;
+
+
+.inspector {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.section {
+    border-bottom: 1px solid $border-color;
+    padding-bottom: 0.75rem;
+}
+
+.section:last-child {
+    border-bottom: none;
+}
+
+.label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: $font-color-secondary;
+}
+
+.input {
+    margin-top: 0.25rem;
+    width: 100%;
+    padding: 0.5rem 0.65rem;
+    border-radius: $border-radius-sm;
+    border: 1px solid $border-color;
+    font-size: 0.9rem;
+}

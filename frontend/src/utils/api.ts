@@ -24,83 +24,69 @@ export function clearCurrentTenant() {
   localStorage.removeItem("current_tenant");
 }
 
-export async function apiRequest<T = any>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
-  const defaultHeaders: Record<string, string> = {
+export async function apiRequest<T = any>(endpoint: string, options: RequestInit = {}, useTenant: boolean = true): Promise<ApiResponse<T>> {
+  const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
 
-  const tenant = getCurrentTenant();
-  if (tenant) {
-    defaultHeaders["X-Tenant-Page-Id"] = tenant;
+  if (useTenant) {
+    const tenant = getCurrentTenant();
+    if (tenant) {
+      headers["X-Tenant-Page-Id"] = tenant;
+    }
   }
 
-  const config: RequestInit = {
+  const response = await fetch(`${url}${endpoint}`, {
     ...options,
     headers: {
-      ...defaultHeaders,
+      ...headers,
       ...options.headers,
     },
     credentials: "include",
-  };
+  });
 
-  try {
-    const response = await fetch(`${url}${endpoint}`, config);
-    const text = await response.text();
+  const text = await response.text();
+  let data: any = {};
 
-    let data: any = {};
-    if (text) {
-      try {
-        data = JSON.parse(text);
-      } catch {
-        data = {};
-      }
+  if (text) {
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = {};
     }
-
-    if (!response.ok) {
-      const error = new Error(data.message || data.error || "Request failed") as ApiError;
-      error.status = response.status;
-      throw error;
-    }
-
-    if (!text) {
-      return {
-        success: true,
-        message: "",
-      } as ApiResponse<T>;
-    }
-
-    return data as ApiResponse<T>;
-  } catch (error) {
-    if ((error as ApiError).message) {
-      throw error;
-    }
-    const networkError = new Error("Erro de rede. Tente novamente mais tarde.") as ApiError;
-    throw networkError;
   }
+
+  if (!response.ok) {
+    const error = new Error(data.message || data.error || "Request failed") as ApiError;
+    error.status = response.status;
+    throw error;
+  }
+
+  return text ? (data as ApiResponse<T>) : ({ success: true } as ApiResponse<T>);
 }
 
-export async function post<T = any>(endpoint: string, body: any): Promise<ApiResponse<T>> {
+export function get<T = any>(endpoint: string) {
+  return apiRequest<T>(endpoint, { method: "GET" }, true);
+}
+
+export function getPublic<T = any>(endpoint: string) {
+  return apiRequest<T>(endpoint, { method: "GET" }, false);
+}
+
+export function post<T = any>(endpoint: string, body: any) {
   return apiRequest<T>(endpoint, {
     method: "POST",
     body: JSON.stringify(body),
   });
 }
 
-export async function get<T = any>(endpoint: string): Promise<ApiResponse<T>> {
-  return apiRequest<T>(endpoint, {
-    method: "GET",
-  });
-}
-
-export async function put<T = any>(endpoint: string, body: any): Promise<ApiResponse<T>> {
+export function put<T = any>(endpoint: string, body: any) {
   return apiRequest<T>(endpoint, {
     method: "PUT",
     body: JSON.stringify(body),
   });
 }
 
-export async function del<T = any>(endpoint: string): Promise<ApiResponse<T>> {
-  return apiRequest<T>(endpoint, {
-    method: "DELETE",
-  });
+export function del<T = any>(endpoint: string) {
+  return apiRequest<T>(endpoint, { method: "DELETE" });
 }

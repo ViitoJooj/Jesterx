@@ -1,87 +1,71 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ThemeCard } from "../components/ThemeCard";
 import styles from "../styles/pages/ThemeStore.module.scss";
-import { get, put } from "../utils/api";
+import { getPublic } from "../utils/api";
 
 type ThemeEntry = {
   id: string;
-  page_id: string;
+  slug: string;
   name: string;
-  domain?: string;
-  for_sale: boolean;
-  owned?: boolean;
-  updated_at?: string;
+  description?: string;
+  thumbnail?: string;
+  rating?: number | null;
+  installs?: number | null;
 };
 
 export function ThemeStore() {
-  const [entries, setEntries] = useState<ThemeEntry[]>([]);
+  const [themes, setThemes] = useState<ThemeEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  async function load() {
-    setLoading(true);
-    setError("");
-    try {
-      const res = await get<ThemeEntry[]>("/v1/themes/store");
-      if (res.data) setEntries(res.data);
-    } catch (err: any) {
-      setError(err?.message || "Não foi possível carregar a loja de temas.");
-    } finally {
-      setLoading(false);
-    }
-  }
+  const [error, setError] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     load();
   }, []);
 
-  async function toggleSale(entry: ThemeEntry) {
+  async function load() {
+    setLoading(true);
+    setError(false);
+
     try {
-      await put(`/v1/themes/store/${entry.page_id}`, { for_sale: !entry.for_sale });
-      await load();
-    } catch (err: any) {
-      setError(err?.message || "Erro ao atualizar tema.");
+      const res = await getPublic<ThemeEntry[]>("/v1/themes/store");
+      setThemes(Array.isArray(res.data) ? res.data : []);
+    } catch {
+      setThemes([]);
+      setError(true);
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
     <main className={styles.main}>
       <header className={styles.header}>
-        <div>
-          <p className={styles.kicker}>Marketplace de temas</p>
-          <h1>Veja e publique lojas como temas</h1>
-          <p className={styles.lead}>Toda página criada entra aqui. Defina se quer vender ou apenas exibir seu tema.</p>
-        </div>
+        <h1>Loja de temas</h1>
+        <p>Templates modernos prontos para produção</p>
       </header>
 
-      {error && <div className={styles.error}>{error}</div>}
+      {loading && <p>Carregando...</p>}
 
-      {loading ? (
-        <p>Carregando temas...</p>
-      ) : (
-        <div className={styles.grid}>
-          {entries.map((entry) => (
-            <article key={entry.id} className={styles.card}>
-              <div className={styles.cardHeader}>
-                <div>
-                  <p className={styles.cardKicker}>{entry.page_id}</p>
-                  <h3>{entry.name}</h3>
-                  {entry.domain && <span className={styles.domain}>{entry.domain}</span>}
-                </div>
-                <span className={`${styles.badge} ${entry.for_sale ? styles.badgeSale : styles.badgeView}`}>
-                  {entry.for_sale ? "À venda" : "Somente vitrine"}
-                </span>
-              </div>
-              <p className={styles.muted}>Atualizado {entry.updated_at ? new Date(entry.updated_at).toLocaleString("pt-BR") : "recentemente"}</p>
-              {entry.owned ? (
-                <button className={styles.toggle} type="button" onClick={() => toggleSale(entry)}>
-                  {entry.for_sale ? "Marcar como vitrine" : "Colocar à venda"}
-                </button>
-              ) : (
-                <p className={styles.hint}>Entre com o tenant da loja para habilitar o controle de venda.</p>
-              )}
-            </article>
+      {!loading && error && (
+        <p className={styles.error}>Não foi possível carregar os temas</p>
+      )}
+
+      {!loading && !error && (
+        <section className={styles.grid}>
+          {themes.map((theme) => (
+            <ThemeCard
+              key={theme.id}
+              name={theme.name}
+              description={theme.description || "Tema moderno e otimizado"}
+              thumbnail={theme.thumbnail}
+              rating={theme.rating}
+              installs={theme.installs}
+              onClick={() => navigate(`/themes/${theme.slug}`)}
+            />
           ))}
-        </div>
+        </section>
       )}
     </main>
   );

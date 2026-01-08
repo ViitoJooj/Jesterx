@@ -1,0 +1,21 @@
+@use "../variables" as *;
+
+
+.canvas {
+    max-width: 960px;
+    margin: 0 auto;
+    background: $background-color-primary;
+    border-radius: $border-radius-lg;
+    box-shadow: $shadow-lg;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.empty {
+    text-align: center;
+    color: $font-color-muted;
+    font-size: 0.95rem;
+    padding: 3rem 1rem;
+}

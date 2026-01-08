@@ -73,7 +73,6 @@ export function Pricing() {
       });
 
       if (response.success && response.data?.checkout_url) {
-        // Redirecionar para o Stripe Checkout
         window.location.href = response.data.checkout_url;
       } else {
         alert("Erro ao criar sessão de checkout");
@@ -96,17 +95,17 @@ export function Pricing() {
         </div>
 
         <div className={styles.plansGrid}>
-              {plans.map((plan) => (
-                <div key={plan.id} className={`${styles.planCard} ${plan.popular ? styles.popular : ""}`}>
-                  {plan.popular && <span className={styles.badge}>Mais Popular</span>}
+          {plans.map((plan) => (
+            <div key={plan.id} className={`${styles.planCard} ${plan.popular ? styles.popular : ""}`}>
+              {plan.popular && <span className={styles.badge}>Mais Popular</span>}
 
-                  <h2 className={styles.planName}>{plan.name}</h2>
-                  {plan.description && <p className={styles.planDescription}>{plan.description}</p>}
+              <h2 className={styles.planName}>{plan.name}</h2>
+              {plan.description && <p className={styles.planDescription}>{plan.description}</p>}
 
-                  <div className={styles.priceSection}>
-                    <span className={styles.price}>{formatPrice(plan.price_cents)}</span>
-                    <span className={styles.period}>/mês</span>
-                  </div>
+              <div className={styles.priceSection}>
+                <span className={styles.price}>{formatPrice(plan.price_cents)}</span>
+                <span className={styles.period}>/mês</span>
+              </div>
 
               <ul className={styles.features}>
                 {plan.features.map((feature, index) => (
