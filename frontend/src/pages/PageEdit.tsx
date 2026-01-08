@@ -41,6 +41,13 @@ export function PageEdit() {
         setSaving(false);
     }
 
+    function deleteBlock(blockId: string) {
+        setBlocks((prev) => prev.filter((b) => b.id !== blockId));
+        if (selected === blockId) {
+            setSelected(null);
+        }
+    }
+
     if (loading) return <div className={styles.loading}>Carregando editor…</div>;
 
     return (
@@ -64,6 +71,7 @@ export function PageEdit() {
                 }
                 onSave={save}
                 saving={saving}
+                onDelete={deleteBlock}
             />
         </div>
     );

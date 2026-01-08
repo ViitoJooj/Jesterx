@@ -79,6 +79,7 @@ func main() {
 	// V1/THEMES
 	router.POST("/v1/themes/apply", middlewares.TenantMiddleware(), middlewares.AuthMiddleware(), services.ApplyThemeService)
 	router.GET("/v1/themes/store", middlewares.OptionalTenantMiddleware(), services.ListThemeStoreService)
+	router.GET("/v1/themes/store/:slug", services.GetThemeStoreBySlugService)
 	router.PUT("/v1/themes/store/:page_id", middlewares.TenantMiddleware(), middlewares.AuthMiddleware(), services.UpdateThemeStoreEntryService)
 
 	// V1/BILLING

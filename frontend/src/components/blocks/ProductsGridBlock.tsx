@@ -17,7 +17,7 @@ export function ProductsGridBlock() {
                 }}
             >
                 <h2 style={{ margin: 0, fontSize: 28 }}>Produtos em destaque</h2>
-                <a style={{ color: "#f97316", fontWeight: 600 }}>Ver todos</a>
+                <a href="#ver-todos" style={{ color: "#f97316", fontWeight: 600 }}>Ver todos</a>
             </div>
 
             <div

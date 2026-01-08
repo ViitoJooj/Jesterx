@@ -3,26 +3,68 @@
 .sidebar {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    background: $background-color-primary;
+    border-right: 1px solid $border-color;
+    padding: 1.5rem 1rem;
+    overflow-y: auto;
+    height: 100%;
+}
+
+.header {
+    margin-bottom: 1.5rem;
 }
 
 .title {
-    font-size: 0.85rem;
-    font-weight: 600;
+    font-size: 0.75rem;
+    font-weight: 700;
     text-transform: uppercase;
+    letter-spacing: 0.05em;
     color: $font-color-muted;
+    margin-bottom: 0.25rem;
 }
 
-.block {
-    padding: 0.6rem 0.75rem;
+.subtitle {
+    font-size: 0.85rem;
+    color: $font-color-secondary;
+    margin-top: 0.25rem;
+}
+
+.blockList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.blockItem {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
     border-radius: $border-radius-md;
-    background: $background-color-secondary;
+    background: $background-color;
     border: 1px solid $border-color;
     cursor: pointer;
     transition: $transition-base;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: $font-color-primary;
 }
 
-.block:hover {
+.blockItem:hover {
     background: $color-primary;
     color: $font-color-inverse;
+    border-color: $color-primary;
+    transform: translateY(-1px);
+    box-shadow: $shadow-md;
+}
+
+.blockIcon {
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+.divider {
+    height: 1px;
+    background: $border-color;
+    margin: 1.5rem 0;
 }

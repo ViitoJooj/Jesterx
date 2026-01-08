@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useEffect, useState, useCallback } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import styles from "../styles/pages/ThemeProduct.module.scss";
 import { get } from "../utils/api";
 
-type ThemeProduct = {
+type ThemeProductData = {
     id: string;
     name: string;
     description: string;
@@ -11,49 +11,138 @@ type ThemeProduct = {
     rating: number;
     installs: number;
     long_description: string;
+    page_id: string;
+    domain: string;
 };
 
 export function ThemeProduct() {
     const { slug } = useParams();
-    const [theme, setTheme] = useState<ThemeProduct | null>(null);
+    const navigate = useNavigate();
+    const [theme, setTheme] = useState<ThemeProductData | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+
+    const load = useCallback(async () => {
+        try {
+            setLoading(true);
+            setError("");
+            const res = await get<ThemeProductData>(`/v1/themes/store/${slug}`);
+            if (res.success && res.data) {
+                setTheme(res.data);
+            } else {
+                setError("Tema não encontrado");
+            }
+        } catch (err: any) {
+            setError(err?.message || "Erro ao carregar tema");
+        } finally {
+            setLoading(false);
+        }
+    }, [slug]);
 
     useEffect(() => {
         load();
-    }, [slug]);
+    }, [load]);
 
-    async function load() {
-        const res = await get<ThemeProduct>(`/v1/themes/store/${slug}`);
-        if (res.success && res.data) setTheme(res.data);
+    if (loading) {
+        return (
+            <div className={styles.loading}>
+                <p>Carregando tema...</p>
+            </div>
+        );
     }
 
-    if (!theme) return <p>Carregando tema...</p>;
+    if (error || !theme) {
+        return (
+            <div className={styles.error}>
+                <p className={styles.errorText}>{error || "Tema não encontrado"}</p>
+                <button className={styles.backButton} onClick={() => navigate("/temas")}>
+                    ← Voltar para loja de temas
+                </button>
+            </div>
+        );
+    }
 
     return (
         <main className={styles.main}>
-            <div className={styles.gallery}>
-                {theme.images.map((img) => (
-                    <img key={img} src={img} alt={theme.name} />
-                ))}
-            </div>
-
-            <section className={styles.info}>
-                <h1>{theme.name}</h1>
-
-                <div className={styles.meta}>
-                    <span>⭐ {theme.rating.toFixed(1)}</span>
-                    <span>👥 {theme.installs} lojas usando</span>
+            <div className={styles.content}>
+                <div className={styles.gallery}>
+                    {theme.images.map((img) => (
+                        <img 
+                            key={img} 
+                            src={img} 
+                            alt={`${theme.name} - Preview`}
+                            className={styles.galleryImage}
+                        />
+                    ))}
                 </div>
 
-                <p className={styles.description}>{theme.description}</p>
+                <div className={styles.info}>
+                    <h1 className={styles.title}>{theme.name}</h1>
+                    
+                    <p className={styles.description}>{theme.description}</p>
 
-                <button className={styles.primary}>
-                    Usar este tema
-                </button>
+                    <div className={styles.meta}>
+                        <div className={styles.metaItem}>
+                            <span className={styles.metaIcon}>⭐</span>
+                            <span>{theme.rating.toFixed(1)}</span>
+                        </div>
+                        <div className={styles.metaItem}>
+                            <span className={styles.metaIcon}>👥</span>
+                            <span>{theme.installs} instalações</span>
+                        </div>
+                    </div>
 
-                <article className={styles.details}>
-                    <h2>Sobre o tema</h2>
-                    <p>{theme.long_description}</p>
-                </article>
+                    <button className={styles.primaryButton}>
+                        🎨 Usar este tema
+                    </button>
+                </div>
+            </div>
+
+            <section className={styles.details}>
+                <h2 className={styles.detailsTitle}>Sobre o tema</h2>
+                <p className={styles.detailsText}>{theme.long_description}</p>
+
+                <div className={styles.features}>
+                    <h3 className={styles.detailsTitle}>Recursos inclusos</h3>
+                    <div className={styles.featuresGrid}>
+                        <div className={styles.featureItem}>
+                            <span className={styles.featureIcon}>📱</span>
+                            <div className={styles.featureContent}>
+                                <h4 className={styles.featureTitle}>Design Responsivo</h4>
+                                <p className={styles.featureDescription}>
+                                    Funciona perfeitamente em todos os dispositivos
+                                </p>
+                            </div>
+                        </div>
+                        <div className={styles.featureItem}>
+                            <span className={styles.featureIcon}>⚡</span>
+                            <div className={styles.featureContent}>
+                                <h4 className={styles.featureTitle}>Performance Otimizada</h4>
+                                <p className={styles.featureDescription}>
+                                    Carregamento rápido e otimizado para SEO
+                                </p>
+                            </div>
+                        </div>
+                        <div className={styles.featureItem}>
+                            <span className={styles.featureIcon}>🎨</span>
+                            <div className={styles.featureContent}>
+                                <h4 className={styles.featureTitle}>Personalizável</h4>
+                                <p className={styles.featureDescription}>
+                                    Fácil de customizar cores e conteúdo
+                                </p>
+                            </div>
+                        </div>
+                        <div className={styles.featureItem}>
+                            <span className={styles.featureIcon}>🔒</span>
+                            <div className={styles.featureContent}>
+                                <h4 className={styles.featureTitle}>Seguro</h4>
+                                <p className={styles.featureDescription}>
+                                    Código limpo e seguindo as melhores práticas
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </section>
         </main>
     );

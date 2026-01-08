@@ -1,32 +1,160 @@
 @use "../variables" as *;
 
-
 .inspector {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    background: $background-color-primary;
+    border-left: 1px solid $border-color;
+    padding: 1.5rem 1rem;
+    overflow-y: auto;
+    height: 100%;
+}
+
+.header {
+    margin-bottom: 1.5rem;
+}
+
+.title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: $font-color-muted;
+    margin-bottom: 0.25rem;
+}
+
+.blockType {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: $font-color-primary;
+    margin-top: 0.5rem;
+}
+
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 3rem 1rem;
+    color: $font-color-muted;
+}
+
+.emptyIcon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.emptyText {
+    font-size: 0.9rem;
 }
 
 .section {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
     border-bottom: 1px solid $border-color;
-    padding-bottom: 0.75rem;
 }
 
 .section:last-child {
     border-bottom: none;
+    margin-bottom: 0;
+}
+
+.sectionTitle {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: $font-color-secondary;
+    margin-bottom: 1rem;
+}
+
+.field {
+    margin-bottom: 1rem;
+}
+
+.field:last-child {
+    margin-bottom: 0;
 }
 
 .label {
+    display: block;
     font-size: 0.8rem;
     font-weight: 600;
     color: $font-color-secondary;
+    margin-bottom: 0.4rem;
 }
 
-.input {
-    margin-top: 0.25rem;
+.input,
+.textarea {
     width: 100%;
-    padding: 0.5rem 0.65rem;
+    padding: 0.6rem 0.75rem;
     border-radius: $border-radius-sm;
     border: 1px solid $border-color;
     font-size: 0.9rem;
+    color: $font-color-primary;
+    background: $background-color;
+    transition: $transition-fast;
+}
+
+.input:focus,
+.textarea:focus {
+    outline: none;
+    border-color: $color-primary;
+    box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
+}
+
+.textarea {
+    resize: vertical;
+    min-height: 80px;
+    font-family: inherit;
+}
+
+.actions {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid $border-color;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.saveButton {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: $border-radius-md;
+    border: none;
+    background: $color-primary;
+    color: $font-color-inverse;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: $transition-base;
+}
+
+.saveButton:hover:not(:disabled) {
+    background: $color-primary-dark;
+    transform: translateY(-1px);
+    box-shadow: $shadow-md;
+}
+
+.saveButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.deleteButton {
+    width: 100%;
+    padding: 0.65rem 1rem;
+    border-radius: $border-radius-md;
+    border: 1px solid $error-color;
+    background: transparent;
+    color: $error-color;
+    font-weight: 500;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: $transition-fast;
+}
+
+.deleteButton:hover {
+    background: $error-color;
+    color: $font-color-inverse;
 }

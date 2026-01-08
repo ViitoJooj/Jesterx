@@ -1,43 +1,211 @@
 @use "../variables" as *;
 
 .main {
-    max-width: 1100px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 2rem 1.25rem 3rem;
-    display: grid;
-    grid-template-columns: 1.2fr 1fr;
-    gap: 2rem;
+    padding: 2.5rem 1.5rem 4rem;
 }
 
-.gallery img {
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    font-size: 1.1rem;
+    color: $font-color-muted;
+}
+
+.error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    text-align: center;
+    padding: 2rem;
+}
+
+.errorText {
+    font-size: 1.2rem;
+    color: $error-color;
+    margin-bottom: 1.5rem;
+}
+
+.backButton {
+    padding: 0.75rem 1.5rem;
+    border-radius: $border-radius-md;
+    border: 1px solid $border-color;
+    background: $background-color-primary;
+    color: $font-color-primary;
+    font-weight: 500;
+    cursor: pointer;
+    transition: $transition-fast;
+}
+
+.backButton:hover {
+    background: $background-color;
+}
+
+.content {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 3rem;
+    margin-bottom: 3rem;
+}
+
+.gallery {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.galleryImage {
     width: 100%;
-    border-radius: 12px;
-    margin-bottom: 0.75rem;
+    border-radius: $border-radius-lg;
+    box-shadow: $shadow-lg;
+    transition: $transition-base;
+}
+
+.galleryImage:hover {
+    transform: scale(1.02);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
 }
 
 .info {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 1.5rem;
+    position: sticky;
+    top: 2rem;
+    align-self: start;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: $font-color-primary;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.description {
+    font-size: 1.05rem;
+    color: $font-color-secondary;
+    line-height: 1.6;
 }
 
 .meta {
     display: flex;
-    gap: 1rem;
-    color: #374151;
+    gap: 1.5rem;
+    align-items: center;
+    padding: 1rem 0;
+    border-top: 1px solid $border-color;
+    border-bottom: 1px solid $border-color;
 }
 
-.primary {
-    margin: 1rem 0;
-    background: #111827;
-    color: #fff;
+.metaItem {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    color: $font-color-secondary;
+}
+
+.metaIcon {
+    font-size: 1.2rem;
+}
+
+.primaryButton {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    border-radius: $border-radius-md;
     border: none;
-    border-radius: 10px;
-    padding: 0.7rem 1.2rem;
+    background: $color-primary;
+    color: $font-color-inverse;
+    font-weight: 700;
+    font-size: 1rem;
     cursor: pointer;
+    transition: $transition-base;
+    box-shadow: $shadow-md;
+}
+
+.primaryButton:hover {
+    background: $color-primary-dark;
+    transform: translateY(-2px);
+    box-shadow: $shadow-lg;
 }
 
 .details {
-    margin-top: 1.5rem;
-    color: #374151;
+    background: $background-color-primary;
+    border-radius: $border-radius-lg;
+    padding: 2rem;
+    box-shadow: $shadow-md;
+}
+
+.detailsTitle {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: $font-color-primary;
+    margin-bottom: 1rem;
+}
+
+.detailsText {
+    font-size: 1rem;
+    color: $font-color-secondary;
+    line-height: 1.7;
+}
+
+.features {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid $border-color;
+}
+
+.featuresGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.featureItem {
+    display: flex;
+    align-items: start;
+    gap: 1rem;
+}
+
+.featureIcon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.featureContent {
+    flex: 1;
+}
+
+.featureTitle {
+    font-size: 1rem;
+    font-weight: 600;
+    color: $font-color-primary;
+    margin-bottom: 0.25rem;
+}
+
+.featureDescription {
+    font-size: 0.9rem;
+    color: $font-color-secondary;
+}
+
+@media (max-width: 900px) {
+    .content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .info {
+        position: static;
+    }
+
+    .title {
+        font-size: 1.75rem;
+    }
 }
