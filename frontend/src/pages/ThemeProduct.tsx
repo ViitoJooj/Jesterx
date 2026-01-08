@@ -66,11 +66,11 @@ export function ThemeProduct() {
         <main className={styles.main}>
             <div className={styles.content}>
                 <div className={styles.gallery}>
-                    {theme.images.map((img, index) => (
+                    {theme.images.map((img) => (
                         <img 
-                            key={index} 
+                            key={img} 
                             src={img} 
-                            alt={`${theme.name} - Preview ${index + 1}`}
+                            alt={`${theme.name} - Preview`}
                             className={styles.galleryImage}
                         />
                     ))}

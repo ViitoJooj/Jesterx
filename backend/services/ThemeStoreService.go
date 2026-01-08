@@ -83,8 +83,13 @@ func GetThemeStoreBySlugService(c *gin.Context) {
 		Domain          string   `json:"domain"`
 	}
 
-	// For now, we'll return mock data for images, rating, and installs
-	// In a real scenario, this would come from the database
+	// TODO: Replace mock data with actual database fields
+	// The following fields should be added to ThemeStoreEntry model:
+	// - Description (short description)
+	// - Images (array of image URLs)
+	// - Rating (average rating from reviews)
+	// - Installs (number of installations)
+	// - LongDescription (detailed description)
 	resp := ThemeDetailResponse{
 		ID:              entry.ID,
 		Name:            entry.Name,

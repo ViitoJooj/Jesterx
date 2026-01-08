@@ -33,7 +33,7 @@ export function BuilderCanvas({ blocks, selected, onSelect }: any) {
                         onClick={() => setPreviewMode("tablet")}
                         title="Tablet"
                     >
-                        📱
+                        📟
                     </button>
                     <button
                         className={`${styles.modeButton} ${previewMode === "mobile" ? styles.active : ""}`}
