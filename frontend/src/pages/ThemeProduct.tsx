@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import styles from "../styles/pages/ThemeProduct.module.scss";
 import { get } from "../utils/api";
 
-type ThemeProduct = {
+type ThemeProductData = {
     id: string;
     name: string;
     description: string;
@@ -18,19 +18,15 @@ type ThemeProduct = {
 export function ThemeProduct() {
     const { slug } = useParams();
     const navigate = useNavigate();
-    const [theme, setTheme] = useState<ThemeProduct | null>(null);
+    const [theme, setTheme] = useState<ThemeProductData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    useEffect(() => {
-        load();
-    }, [slug]);
-
-    async function load() {
+    const load = useCallback(async () => {
         try {
             setLoading(true);
             setError("");
-            const res = await get<ThemeProduct>(`/v1/themes/store/${slug}`);
+            const res = await get<ThemeProductData>(`/v1/themes/store/${slug}`);
             if (res.success && res.data) {
                 setTheme(res.data);
             } else {
@@ -41,7 +37,11 @@ export function ThemeProduct() {
         } finally {
             setLoading(false);
         }
-    }
+    }, [slug]);
+
+    useEffect(() => {
+        load();
+    }, [load]);
 
     if (loading) {
         return (
