@@ -166,12 +166,12 @@ instale as dependencias
 go mod download
 ```
 
-e depois
+e depois vá para o frontend na pasta raiz
 
 ```
 cd frontend
 ```
-e
+e instale as dependencias com:
 ```
 npm install
 ```
