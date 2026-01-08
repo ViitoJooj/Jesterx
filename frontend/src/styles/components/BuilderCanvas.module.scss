@@ -1,9 +1,18 @@
 @use "../variables" as *;
 
-
 .canvas {
+    background: $background-color;
+    padding: 2rem 1.5rem;
+    overflow-y: auto;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.canvasInner {
+    width: 100%;
     max-width: 960px;
-    margin: 0 auto;
     background: $background-color-primary;
     border-radius: $border-radius-lg;
     box-shadow: $shadow-lg;
@@ -11,11 +20,113 @@
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    min-height: 600px;
+}
+
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background: $background-color-primary;
+    border-bottom: 1px solid $border-color;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    margin: -2rem -1.5rem 1rem;
+}
+
+.toolbarTitle {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: $font-color-secondary;
+}
+
+.previewModes {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.modeButton {
+    padding: 0.4rem 0.75rem;
+    border-radius: $border-radius-sm;
+    border: 1px solid $border-color;
+    background: $background-color;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: $transition-fast;
+    color: $font-color-secondary;
+}
+
+.modeButton:hover {
+    background: $background-color-secondary;
+}
+
+.modeButton.active {
+    background: $color-primary;
+    color: $font-color-inverse;
+    border-color: $color-primary;
+}
+
+.block {
+    position: relative;
+    border: 2px solid transparent;
+    border-radius: $border-radius-md;
+    padding: 1rem;
+    transition: $transition-fast;
+    cursor: pointer;
+}
+
+.block:hover {
+    border-color: lighten($color-primary, 20%);
+    background: lighten($background-color, 2%);
+}
+
+.block.active {
+    border-color: $color-primary;
+    background: lighten($color-primary, 45%);
+    box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
+}
+
+.blockLabel {
+    position: absolute;
+    top: -10px;
+    left: 10px;
+    background: $color-primary;
+    color: $font-color-inverse;
+    padding: 0.2rem 0.6rem;
+    border-radius: $border-radius-sm;
+    font-size: 0.75rem;
+    font-weight: 600;
+    opacity: 0;
+    transition: $transition-fast;
+}
+
+.block:hover .blockLabel,
+.block.active .blockLabel {
+    opacity: 1;
 }
 
 .empty {
     text-align: center;
     color: $font-color-muted;
     font-size: 0.95rem;
-    padding: 3rem 1rem;
+    padding: 4rem 1rem;
+}
+
+.emptyIcon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.emptyTitle {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: $font-color-secondary;
+    margin-bottom: 0.5rem;
+}
+
+.emptyText {
+    color: $font-color-muted;
 }

@@ -57,6 +57,49 @@ func ListThemeStoreService(c *gin.Context) {
 	c.JSON(200, gin.H{"success": true, "data": resp})
 }
 
+func GetThemeStoreBySlugService(c *gin.Context) {
+	slug := c.Param("slug")
+
+	var entry models.ThemeStoreEntry
+	err := config.MongoClient.Database("genyou").Collection("theme_store_entries").FindOne(
+		c.Request.Context(),
+		bson.M{"page_id": slug, "for_sale": true},
+	).Decode(&entry)
+
+	if err != nil {
+		c.JSON(404, responses.ErrorResponse{Success: false, Message: "Tema não encontrado."})
+		return
+	}
+
+	type ThemeDetailResponse struct {
+		ID              string   `json:"id"`
+		Name            string   `json:"name"`
+		Description     string   `json:"description"`
+		Images          []string `json:"images"`
+		Rating          float64  `json:"rating"`
+		Installs        int      `json:"installs"`
+		LongDescription string   `json:"long_description"`
+		PageID          string   `json:"page_id"`
+		Domain          string   `json:"domain"`
+	}
+
+	// For now, we'll return mock data for images, rating, and installs
+	// In a real scenario, this would come from the database
+	resp := ThemeDetailResponse{
+		ID:              entry.ID,
+		Name:            entry.Name,
+		Description:     "Tema moderno e responsivo para sua loja online",
+		Images:          []string{"https://via.placeholder.com/800x600?text=" + entry.Name},
+		Rating:          4.5,
+		Installs:        150,
+		LongDescription: "Este tema oferece um design limpo e profissional, perfeito para qualquer tipo de negócio. Com recursos avançados de personalização e otimizado para conversão.",
+		PageID:          entry.PageID,
+		Domain:          entry.Domain,
+	}
+
+	c.JSON(200, gin.H{"success": true, "data": resp})
+}
+
 func UpdateThemeStoreEntryService(c *gin.Context) {
 	user := c.MustGet("user").(helpers.UserData)
 	tenantID := c.MustGet("tenantID").(string)
