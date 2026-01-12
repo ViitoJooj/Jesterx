@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS sites (
 CREATE TABLE IF NOT EXISTS pages (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v7(),
     site_id UUID NOT NULL,
-    title VARCHAR(50) NOT NULL,
+    tittle VARCHAR(50) NOT NULL,
     slug VARCHAR(50) NOT NULL,
     content TEXT NOT NULL,
     use_header BOOLEAN DEFAULT TRUE,
