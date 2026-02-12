@@ -1,0 +1,11 @@
+#DOTENV
+.env
+*/.env
+
+#NPM
+node_modules
+*/node_modules
+
+#IDE
+.vscode
+*/.vscode
