@@ -17,6 +17,8 @@ type PostgresConnection struct {
 }
 
 var PGCNN = &PostgresConnection{}
+var Jwt_access_token string
+var Jwt_refresh_token string
 
 func LoadEnv() {
 	_ = godotenv.Load("../.env")
@@ -27,6 +29,9 @@ func LoadEnv() {
 	PGCNN.Port = mustGetenv("POSTGRES_PORT")
 	PGCNN.Host = mustGetenv("POSTGRES_HOST")
 	PGCNN.SSLMode = mustGetenv("POSTGRES_SSL")
+
+	Jwt_access_token = mustGetenv("JWT_ACCESS_TOKEN")
+	Jwt_refresh_token = mustGetenv("JWT_REFRESH_TOKEN")
 }
 
 func mustGetenv(key string) string {

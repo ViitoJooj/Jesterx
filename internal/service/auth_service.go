@@ -18,7 +18,7 @@ func NewAuthService(userRepo repository.UserRepository) *AuthService {
 	}
 }
 
-func (s *AuthService) Register(first_name, last_name, email, password string) (*domain.User, error) {
+func (s *AuthService) Register(first_name string, last_name string, email string, password string) (*domain.User, error) {
 	if email == "" || password == "" || len(email) > 250 || len(password) > 50 || len(email) < 5 || len(password) < 6 {
 		return nil, errors.New("Invalid email.")
 	}
@@ -47,16 +47,12 @@ func (s *AuthService) Register(first_name, last_name, email, password string) (*
 	return user, nil
 }
 
-func (s *AuthService) Login(email, password string) (*domain.User, error) {
+func (s *AuthService) Login(email string, password string) (*domain.User, error) {
 	user, err := s.userRepo.FindByEmail(email)
 	if err != nil {
 		return nil, err
 	}
 	if user == nil {
-		return nil, errors.New("Invalid.")
-	}
-
-	if user.Banned == true {
 		return nil, errors.New("Invalid.")
 	}
 

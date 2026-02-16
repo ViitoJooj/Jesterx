@@ -12,13 +12,12 @@ type User struct {
 	Last_name  string
 	Email      string
 	Password   string
-	Banned     bool
 	Updated_at string
 	Created_at string
 }
 
 func NewUser(first_name string, last_name string, email string, password_hash string) *User {
-	layout := "02/01/2006 15:04"
+	layout := "00/00/0000 00:00"
 
 	id, err := uuid.NewV7()
 	if err != nil {
@@ -31,7 +30,6 @@ func NewUser(first_name string, last_name string, email string, password_hash st
 		Last_name:  last_name,
 		Email:      email,
 		Password:   password_hash,
-		Banned:     false,
 		Updated_at: time.Now().Format(layout),
 		Created_at: time.Now().Format(layout),
 	}
