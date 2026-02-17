@@ -10,17 +10,12 @@ Ele existe para testar minhas habilidades com **Golang**, estudar arquitetura es
 
 ### Stack e decisões técnicas
 
-- **Golang + Gin** no backend
-- **React + TypeScript** no frontend
+- **Golang** api.jesterx.com.br(back)
+- **React** jesterx.com.br(Front)
 - **PostgreSQL** para usuários
 - **MongoDB** para persistência dos sites
-- **Redis** para cache e escalabilidade
-- **RabbitMQ** para notificações e tarefas assíncronas
-- Autenticação via **OAuth2**
 - APIs públicas
 - Tudo **containerizado com Docker**
-- Infraestrutura na **Azure**, com **CI/CD**
-- **Testes automatizados em Python**, escolhidos pela simplicidade e rapidez
 
 ---
 
@@ -116,15 +111,6 @@ Isso irá subir o backend, frontend, redis, rabbitMQ e banco de dados.
 - Checkout
 - Painel administrativo
 - Integrações com meios de pagamento
-
-## Desenvolvimento local
-
-Para desenvolvimento local:
-
-instale as dependencias
-```
-go mod tidy
-```
 
 ## Contribuição
 
