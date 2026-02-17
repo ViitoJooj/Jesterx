@@ -10,8 +10,8 @@ Ele existe para testar minhas habilidades com **Golang**, estudar arquitetura es
 
 ### Stack e decisões técnicas
 
-- **Golang** api.jesterx.com.br(back)
-- **React** jesterx.com.br(Front)
+- **Golang** api.jesterx.com.br (back)
+- **React** jesterx.com.br (Front)
 - **PostgreSQL** para usuários
 - **MongoDB** para persistência dos sites
 - APIs públicas
