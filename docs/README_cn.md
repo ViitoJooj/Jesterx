@@ -39,7 +39,7 @@ Jesterx 是一款**SaaS 页面构建器**。
 2. 创建分支（your-name/your-feature）
 3. 提交更改
 4. 发起 Pull Request
-- 如有任何疑问，请查看 <a href="./CONTRIBUTING.md">CONTRIBUTING.md</a> 文件
+- 如有任何疑问，请查看 <a href="../CONTRIBUTING.md">CONTRIBUTING.md</a> 文件
 
 ## 许可
-本项目采用 <a href="LICENSE.md">LICENSE.md</a> 文件进行许可。
+本项目采用 <a href="../LICENSE.md">LICENSE.md</a> 文件进行许可。
