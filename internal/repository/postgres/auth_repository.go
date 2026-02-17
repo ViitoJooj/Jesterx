@@ -20,7 +20,7 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 func (r *UserRepository) Save(user domain.User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	query := `INSERT INTO users (id, first_name, last_name, email, password, role, updated_at, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7)`
+	query := `INSERT INTO users (id, first_name, last_name, email, password, role, updated_at, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
 	_, err := r.db.ExecContext(ctx, query, user.Id, user.First_name, user.Last_name, user.Email, user.Password, user.Role, user.Updated_at, user.Created_at)
 	return err
 }

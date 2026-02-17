@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -17,11 +18,10 @@ type User struct {
 	Created_at time.Time
 }
 
-func NewUser(first_name string, last_name string, email string, password_hash string, role string) *User {
-
+func NewUser(first_name string, last_name string, email string, password_hash string) *User {
 	id, err := uuid.NewV7()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	return &User{
@@ -30,7 +30,7 @@ func NewUser(first_name string, last_name string, email string, password_hash st
 		Last_name:  last_name,
 		Email:      email,
 		Password:   password_hash,
-		Role:       role,
+		Role:       "user",
 		Updated_at: time.Now(),
 		Created_at: time.Now(),
 	}

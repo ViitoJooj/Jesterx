@@ -6,7 +6,7 @@ import (
 	"github.com/ViitoJooj/Jesterx/internal/http/handlers"
 )
 
-func NewRouter(authHandler *handlers.AuthHandler) http.Handler {
+func AuthRouters(authHandler *handlers.AuthHandler) http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /api/v1/auth/register", authHandler.Register)
 	mux.HandleFunc("POST /api/v1/auth/login", authHandler.Login)

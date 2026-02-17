@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"log"
 	"strings"
 	"time"
 
@@ -43,7 +44,7 @@ func (s *AuthService) Register(first_name string, last_name string, email string
 		return nil, err
 	}
 
-	user := domain.NewUser(first_name, last_name, email, "user", hashedPassword)
+	user := domain.NewUser(first_name, last_name, email, hashedPassword)
 
 	if err := s.userRepo.Save(*user); err != nil {
 		return nil, err
@@ -58,9 +59,11 @@ func (s *AuthService) Login(email string, password string) (*domain.User, error)
 		return nil, err
 	}
 	if user == nil {
+		log.Fatal(user)
 		return nil, errors.New("Invalid.")
 	}
 	if !security.CheckPassword(password, user.Password) {
+		log.Fatal("Invalid password")
 		return nil, errors.New("Invalid.")
 	}
 

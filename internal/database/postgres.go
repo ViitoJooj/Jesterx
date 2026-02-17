@@ -18,7 +18,7 @@ type PostgresConfig struct {
 	SSLMode  string
 }
 
-func NewPostgres(cfg PostgresConfig) (*sql.DB, error) {
+func NewPostgres(cfg PostgresConfig) *sql.DB {
 	dsn := fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s?sslmode=%s",
 		cfg.User,
@@ -31,7 +31,7 @@ func NewPostgres(cfg PostgresConfig) (*sql.DB, error) {
 
 	db, err := sql.Open("pgx", dsn)
 	if err != nil {
-		return nil, err
+		return nil
 	}
 
 	db.SetMaxOpenConns(10)
@@ -42,8 +42,8 @@ func NewPostgres(cfg PostgresConfig) (*sql.DB, error) {
 	defer cancel()
 
 	if err := db.PingContext(ctx); err != nil {
-		return nil, err
+		return nil
 	}
 
-	return db, nil
+	return db
 }
