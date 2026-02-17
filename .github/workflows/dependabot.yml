@@ -1,0 +1,62 @@
+version: 2
+
+updates:
+  # =========================
+  # 🔹 Backend Go
+  # =========================
+  - package-ecosystem: "gomod"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Sao_Paulo"
+
+    open-pull-requests-limit: 5
+
+    commit-message:
+      prefix: "deps(go)"
+      include: "scope"
+
+    labels:
+      - "dependencies"
+      - "go"
+
+  # =========================
+  # 🔹 Frontend React (www)
+  # =========================
+  - package-ecosystem: "npm"
+    directory: "/www"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Sao_Paulo"
+
+    open-pull-requests-limit: 5
+
+    commit-message:
+      prefix: "deps(web)"
+      include: "scope"
+
+    labels:
+      - "dependencies"
+      - "frontend"
+
+  # =========================
+  # 🔹 GitHub Actions
+  # =========================
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Sao_Paulo"
+
+    commit-message:
+      prefix: "deps(ci)"
+
+    labels:
+      - "dependencies"
+      - "ci"
