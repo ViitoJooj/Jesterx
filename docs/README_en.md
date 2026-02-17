@@ -42,4 +42,4 @@ The idea is to allow anyone to create an e-commerce business without much config
 - Any questions, check the <a href="./CONTRIBUTING.md">CONTRIBUTING.md</a> file
 
 ## License
-This project is licensed under the <a href="LICENSE.md">LICENSE.md</a> file
+This project is licensed under the <a href="../LICENSE.md">LICENSE.md</a> file
