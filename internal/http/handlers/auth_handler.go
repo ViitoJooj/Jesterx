@@ -2,8 +2,11 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
+	"time"
 
+	"github.com/ViitoJooj/Jesterx/internal/security"
 	"github.com/ViitoJooj/Jesterx/internal/service"
 )
 
@@ -20,16 +23,21 @@ type LoginRequest struct {
 }
 
 type UserData struct {
-	Id         string `json:"id"`
-	Email      string `json:"email"`
-	Updated_at string `json:"updated_at"`
-	Created_at string `json:"created_at"`
+	Id         string    `json:"id"`
+	Email      string    `json:"email"`
+	Updated_at time.Time `json:"updated_at"`
+	Created_at time.Time `json:"created_at"`
 }
 
 type Response struct {
 	Success  bool     `json:"success"`
 	Message  string   `json:"message"`
 	UserData UserData `json:"user"`
+}
+
+type ResponseRefreshToken struct {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
 }
 
 type AuthHandler struct {
@@ -62,6 +70,28 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	claims := security.RefreshTokenClaims{
+		Iss: "https://jesterx.com.br",
+		Sub: user.Id,
+		Exp: time.Now().Add(30 * 24 * time.Hour).Unix(),
+	}
+
+	refreshToken, err := security.RefreshToken(claims)
+	if err != nil {
+		http.Error(w, "internal error", http.StatusBadGateway)
+		return
+	}
+
+	cookie := http.Cookie{
+		Name:     "refresh_token",
+		Value:    refreshToken,
+		Path:     "/",
+		MaxAge:   2592000,
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+	}
+
 	resp := Response{
 		Success: true,
 		Message: "registered.",
@@ -72,19 +102,42 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
+	http.SetCookie(w, &cookie)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	_ = json.NewEncoder(w).Encode(resp)
+	json.NewEncoder(w).Encode(resp)
 }
 
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var req LoginRequest
-	_ = json.NewDecoder(r.Body).Decode(&req)
+	json.NewDecoder(r.Body).Decode(&req)
 
 	user, err := h.authService.Login(req.Email, req.Password)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
+	}
+
+	claims := security.RefreshTokenClaims{
+		Iss: "https://jesterx.com.br",
+		Sub: user.Id,
+		Exp: time.Now().Add(30 * 24 * time.Hour).Unix(),
+	}
+
+	refreshToken, err := security.RefreshToken(claims)
+	if err != nil {
+		http.Error(w, "Internal error", http.StatusBadGateway)
+		return
+	}
+
+	cookie := http.Cookie{
+		Name:     "refresh_token",
+		Value:    refreshToken,
+		Path:     "/",
+		MaxAge:   2592000,
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
 	}
 
 	resp := Response{
@@ -98,7 +151,47 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
+	http.SetCookie(w, &cookie)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusAccepted)
-	_ = json.NewEncoder(w).Encode(resp)
+	json.NewEncoder(w).Encode(resp)
+}
+
+func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
+	refreshCookie, err := r.Cookie("refresh_token")
+	if err != nil {
+		if err == http.ErrNoCookie {
+			log.Println("refresh parse error:", err)
+			http.Error(w, "not allowed", http.StatusUnauthorized)
+			return
+		}
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
+	}
+
+	accessToken, err := h.authService.Refresh(refreshCookie.Value)
+	if err != nil {
+		log.Println("refresh parse error:", err)
+		http.Error(w, "not allowed", http.StatusUnauthorized)
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "access_token",
+		Value:    accessToken,
+		Path:     "/",
+		MaxAge:   900,
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+	})
+
+	resp := ResponseRefreshToken{
+		Success: true,
+		Message: "success",
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusAccepted)
+	json.NewEncoder(w).Encode(resp)
 }

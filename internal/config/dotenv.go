@@ -21,7 +21,7 @@ var Jwt_access_token string
 var Jwt_refresh_token string
 
 func LoadEnv() {
-	_ = godotenv.Load("../.env")
+	_ = godotenv.Load(".env")
 
 	PGCNN.User = mustGetenv("POSTGRES_USER")
 	PGCNN.Password = mustGetenv("POSTGRES_PASSWORD")

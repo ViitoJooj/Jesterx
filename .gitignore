@@ -9,3 +9,11 @@ node_modules
 #IDE
 .vscode
 */.vscode
+
+#GO
+tmp
+*/tmp
+main.exe
+*.exe
+*/main.exe
+*/*.exe

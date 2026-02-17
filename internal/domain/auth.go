@@ -12,12 +12,12 @@ type User struct {
 	Last_name  string
 	Email      string
 	Password   string
-	Updated_at string
-	Created_at string
+	Role       string
+	Updated_at time.Time
+	Created_at time.Time
 }
 
-func NewUser(first_name string, last_name string, email string, password_hash string) *User {
-	layout := "00/00/0000 00:00"
+func NewUser(first_name string, last_name string, email string, password_hash string, role string) *User {
 
 	id, err := uuid.NewV7()
 	if err != nil {
@@ -30,7 +30,8 @@ func NewUser(first_name string, last_name string, email string, password_hash st
 		Last_name:  last_name,
 		Email:      email,
 		Password:   password_hash,
-		Updated_at: time.Now().Format(layout),
-		Created_at: time.Now().Format(layout),
+		Role:       role,
+		Updated_at: time.Now(),
+		Created_at: time.Now(),
 	}
 }
