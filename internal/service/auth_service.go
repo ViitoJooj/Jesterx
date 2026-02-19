@@ -99,3 +99,20 @@ func (s *AuthService) Refresh(refreshToken string) (string, error) {
 
 	return accessToken, nil
 }
+
+func (s *AuthService) Me(accessToken string) (*domain.User, error) {
+	claims, err := security.ParseAccessToken(accessToken)
+	if err != nil {
+		return nil, errors.New("invalid access token")
+	}
+
+	user, err := s.userRepo.FindByID(claims.Sub)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, errors.New("user not found")
+	}
+
+	return user, nil
+}

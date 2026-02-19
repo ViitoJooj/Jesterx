@@ -1,7 +1,4 @@
-export interface ValidationResult {
-  isValid: boolean;
-  error?: string;
-}
+export interface ValidationResult {isValid: boolean; error?: string;}
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const UPPERCASE_REGEX = /[A-Z]/;
@@ -49,10 +46,7 @@ export function validatePassword(password: string): ValidationResult {
   return { isValid: true };
 }
 
-export function validatePasswordConfirmation(
-  password: string,
-  confirmPassword: string
-): ValidationResult {
+export function validatePasswordConfirmation(password: string, confirmPassword: string): ValidationResult {
   if (!confirmPassword) {
     return { isValid: false, error: "Confirme sua senha" };
   }

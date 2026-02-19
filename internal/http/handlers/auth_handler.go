@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"time"
 
@@ -38,6 +37,16 @@ type Response struct {
 type ResponseRefreshToken struct {
 	Success bool   `json:"success"`
 	Message string `json:"message"`
+}
+
+type UserMeResponse struct {
+	ID        string `json:"id"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email"`
+	Role      string `json:"role"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
 }
 
 type AuthHandler struct {
@@ -109,8 +118,13 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
 	var req LoginRequest
-	json.NewDecoder(r.Body).Decode(&req)
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
 
 	user, err := h.authService.Login(req.Email, req.Password)
 	if err != nil {
@@ -158,10 +172,11 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
 	refreshCookie, err := r.Cookie("refresh_token")
 	if err != nil {
 		if err == http.ErrNoCookie {
-			log.Println("refresh parse error:", err)
 			http.Error(w, "not allowed", http.StatusUnauthorized)
 			return
 		}
@@ -171,7 +186,6 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 
 	accessToken, err := h.authService.Refresh(refreshCookie.Value)
 	if err != nil {
-		log.Println("refresh parse error:", err)
 		http.Error(w, "not allowed", http.StatusUnauthorized)
 		return
 	}
@@ -193,5 +207,37 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusAccepted)
+	json.NewEncoder(w).Encode(resp)
+}
+
+func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
+	accessCookie, err := r.Cookie("access_token")
+	if err != nil {
+		if err == http.ErrNoCookie {
+			http.Error(w, "not allowed", http.StatusUnauthorized)
+			return
+		}
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
+	}
+
+	user, err := h.authService.Me(accessCookie.Value)
+	if err != nil {
+		http.Error(w, "not allowed", http.StatusUnauthorized)
+		return
+	}
+
+	resp := UserMeResponse{
+		ID:        user.Id,
+		FirstName: user.First_name,
+		LastName:  user.Last_name,
+		Email:     user.Email,
+		Role:      user.Role,
+		CreatedAt: user.Created_at.Format(time.RFC3339),
+		UpdatedAt: user.Updated_at.Format(time.RFC3339),
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(resp)
 }
