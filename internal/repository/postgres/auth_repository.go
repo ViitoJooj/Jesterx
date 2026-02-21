@@ -9,15 +9,7 @@ import (
 	"github.com/ViitoJooj/Jesterx/internal/domain"
 )
 
-type UserRepository struct {
-	db *sql.DB
-}
-
-func NewUserRepository(db *sql.DB) *UserRepository {
-	return &UserRepository{db: db}
-}
-
-func (r *UserRepository) Save(user domain.User) error {
+func (r *connection) UserRegister(user domain.User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	query := `INSERT INTO users (id, first_name, last_name, email, password, role, updated_at, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
@@ -25,7 +17,7 @@ func (r *UserRepository) Save(user domain.User) error {
 	return err
 }
 
-func (r *UserRepository) FindByEmail(email string) (*domain.User, error) {
+func (r *connection) FindUserByEmail(email string) (*domain.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	query := `SELECT id, first_name, last_name, email, password, role, updated_at, created_at FROM users WHERE email = $1`
@@ -41,7 +33,7 @@ func (r *UserRepository) FindByEmail(email string) (*domain.User, error) {
 	return &user, nil
 }
 
-func (r *UserRepository) FindByID(id string) (*domain.User, error) {
+func (r *connection) FindUserByID(id string) (*domain.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	query := `SELECT id, first_name, last_name, email, password, role, updated_at, created_at FROM users WHERE id = $1`
@@ -57,7 +49,7 @@ func (r *UserRepository) FindByID(id string) (*domain.User, error) {
 	return &user, nil
 }
 
-func (r *UserRepository) DeleteByID(id string) error {
+func (r *connection) DeleteUserByID(id string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	query := `DELETE FROM users WHERE id = $1`

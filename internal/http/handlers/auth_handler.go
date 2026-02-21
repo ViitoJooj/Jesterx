@@ -28,10 +28,10 @@ type UserData struct {
 	Created_at time.Time `json:"created_at"`
 }
 
-type Response struct {
-	Success  bool     `json:"success"`
-	Message  string   `json:"message"`
-	UserData UserData `json:"user"`
+type AuthResponse struct {
+	Success bool     `json:"success"`
+	Message string   `json:"message"`
+	Data    UserData `json:"data"`
 }
 
 type ResponseRefreshToken struct {
@@ -101,10 +101,10 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteLaxMode,
 	}
 
-	resp := Response{
+	resp := AuthResponse{
 		Success: true,
 		Message: "registered.",
-		UserData: UserData{
+		Data: UserData{
 			Id:         user.Id,
 			Email:      user.Email,
 			Created_at: user.Created_at,
@@ -154,10 +154,10 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteLaxMode,
 	}
 
-	resp := Response{
+	resp := AuthResponse{
 		Success: true,
 		Message: "logged in.",
-		UserData: UserData{
+		Data: UserData{
 			Id:         user.Id,
 			Email:      user.Email,
 			Updated_at: user.Updated_at,

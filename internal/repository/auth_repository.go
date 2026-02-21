@@ -3,10 +3,8 @@ package repository
 import "github.com/ViitoJooj/Jesterx/internal/domain"
 
 type UserRepository interface {
-	Save(user domain.User) error
-
-	FindByEmail(email string) (*domain.User, error)
-	FindByID(id string) (*domain.User, error)
-
-	DeleteByID(id string) error
+	UserRegister(user domain.User) error
+	FindUserByEmail(email string) (*domain.User, error)
+	FindUserByID(id string) (*domain.User, error)
+	DeleteUserByID(id string) error
 }

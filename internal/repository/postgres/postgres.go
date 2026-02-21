@@ -18,6 +18,14 @@ type PostgresConfig struct {
 	SSLMode  string
 }
 
+type connection struct {
+	db *sql.DB
+}
+
+func NewRepository(db *sql.DB) *connection {
+	return &connection{db: db}
+}
+
 func NewPostgres(cfg PostgresConfig) *sql.DB {
 	dsn := fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s?sslmode=%s",

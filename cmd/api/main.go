@@ -13,12 +13,19 @@ import (
 
 func main() {
 	config.LoadEnv()
+	mux := httpRouter.NewRouter()
 	db := postgres.NewPostgres(postgres.PostgresConfig(*config.PGCNN))
-	userRepo := postgres.NewUserRepository(db)
-	authService := service.NewAuthService(userRepo)
-	authHandler := handlers.NewAuthHandler(authService)
-	router := httpRouter.Routers(authHandler)
-	handler := middleware.CORS(router)
+	repo := postgres.NewRepository(db)
 
+	authService := service.NewAuthService(repo)
+	websiteService := service.NewWebSiteService(repo)
+
+	authHandler := handlers.NewAuthHandler(authService)
+	websiteHandler := handlers.NewWebSiteHandler(websiteService)
+
+	httpRouter.RegisterAuthRoutes(mux, authHandler)
+	httpRouter.RegisterWebsiteRoutes(mux, websiteHandler)
+
+	handler := middleware.CORS(mux)
 	http.ListenAndServe(":8080", handler)
 }

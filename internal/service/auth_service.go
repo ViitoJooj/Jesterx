@@ -2,7 +2,6 @@ package service
 
 import (
 	"errors"
-	"log"
 	"strings"
 	"time"
 
@@ -31,7 +30,7 @@ func (s *AuthService) Register(first_name string, last_name string, email string
 	if first_name == "" || last_name == "" || len(first_name) > 50 || len(last_name) > 50 || len(first_name) < 2 || len(last_name) < 2 {
 		return nil, errors.New("Invalid name.")
 	}
-	existing, err := s.userRepo.FindByEmail(email)
+	existing, err := s.userRepo.FindUserByEmail(email)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +45,7 @@ func (s *AuthService) Register(first_name string, last_name string, email string
 
 	user := domain.NewUser(first_name, last_name, email, hashedPassword)
 
-	if err := s.userRepo.Save(*user); err != nil {
+	if err := s.userRepo.UserRegister(*user); err != nil {
 		return nil, err
 	}
 
@@ -54,16 +53,14 @@ func (s *AuthService) Register(first_name string, last_name string, email string
 }
 
 func (s *AuthService) Login(email string, password string) (*domain.User, error) {
-	user, err := s.userRepo.FindByEmail(email)
+	user, err := s.userRepo.FindUserByEmail(email)
 	if err != nil {
 		return nil, err
 	}
 	if user == nil {
-		log.Fatal(user)
 		return nil, errors.New("Invalid.")
 	}
 	if !security.CheckPassword(password, user.Password) {
-		log.Fatal("Invalid password")
 		return nil, errors.New("Invalid.")
 	}
 
@@ -76,7 +73,7 @@ func (s *AuthService) Refresh(refreshToken string) (string, error) {
 		return "", errors.New("invalid refresh token")
 	}
 
-	user, err := s.userRepo.FindByID(refreshClaims.Sub)
+	user, err := s.userRepo.FindUserByID(refreshClaims.Sub)
 	if err != nil {
 		return "", err
 	}
@@ -106,7 +103,7 @@ func (s *AuthService) Me(accessToken string) (*domain.User, error) {
 		return nil, errors.New("invalid access token")
 	}
 
-	user, err := s.userRepo.FindByID(claims.Sub)
+	user, err := s.userRepo.FindUserByID(claims.Sub)
 	if err != nil {
 		return nil, err
 	}
