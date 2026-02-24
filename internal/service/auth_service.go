@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"net/http"
 	"strings"
 	"time"
 
@@ -11,31 +12,46 @@ import (
 )
 
 type AuthService struct {
-	userRepo repository.UserRepository
+	userRepo    repository.UserRepository
+	webSiteRepo repository.WebsiteRepository
 }
 
-func NewAuthService(userRepo repository.UserRepository) *AuthService {
+func (s *AuthService) GetUserByID(userID string) (*domain.User, error) {
+	return s.userRepo.FindUserByID(userID)
+}
+
+func NewAuthService(userRepo repository.UserRepository, webSiteRepo repository.WebsiteRepository) *AuthService {
 	return &AuthService{
-		userRepo: userRepo,
+		userRepo:    userRepo,
+		webSiteRepo: webSiteRepo,
 	}
 }
 
-func (s *AuthService) Register(first_name string, last_name string, email string, password string) (*domain.User, error) {
-	if email == "" || len(email) > 250 || len(email) < 5 || !strings.Contains(email, "@") || !strings.Contains(email, ".") {
-		return nil, errors.New("Invalid email.")
+func (s *AuthService) Register(websiteId string, first_name string, last_name string, email string, password string) (*domain.User, error) {
+
+	if email == "" || len(email) > 250 || len(email) < 5 ||
+		!strings.Contains(email, "@") || !strings.Contains(email, ".") {
+		return nil, errors.New("invalid email")
 	}
-	if password == "" || len(password) > 50 || len(password) < 6 {
-		return nil, errors.New("Invalid password.")
+
+	if password == "" || len(password) < 6 || len(password) > 50 {
+		return nil, errors.New("invalid password")
 	}
-	if first_name == "" || last_name == "" || len(first_name) > 50 || len(last_name) > 50 || len(first_name) < 2 || len(last_name) < 2 {
-		return nil, errors.New("Invalid name.")
+
+	webSite, err := s.webSiteRepo.FindWebSiteByID(websiteId)
+	if err != nil {
+		return nil, err
 	}
-	existing, err := s.userRepo.FindUserByEmail(email)
+	if webSite == nil {
+		return nil, errors.New("website does not exist")
+	}
+
+	existing, err := s.userRepo.FindUserByEmailAndWebsite(email, websiteId)
 	if err != nil {
 		return nil, err
 	}
 	if existing != nil {
-		return nil, errors.New("Invalid.")
+		return nil, errors.New("email already registered")
 	}
 
 	hashedPassword, err := security.HashPassword(password)
@@ -43,7 +59,7 @@ func (s *AuthService) Register(first_name string, last_name string, email string
 		return nil, err
 	}
 
-	user := domain.NewUser(first_name, last_name, email, hashedPassword)
+	user := domain.NewUser(websiteId, first_name, last_name, email, hashedPassword)
 
 	if err := s.userRepo.UserRegister(*user); err != nil {
 		return nil, err
@@ -52,16 +68,25 @@ func (s *AuthService) Register(first_name string, last_name string, email string
 	return user, nil
 }
 
-func (s *AuthService) Login(email string, password string) (*domain.User, error) {
-	user, err := s.userRepo.FindUserByEmail(email)
+func (s *AuthService) Login(websiteId string, email string, password string) (*domain.User, error) {
+	webSite, err := s.webSiteRepo.FindWebSiteByID(websiteId)
+	if err != nil {
+		return nil, err
+	}
+	if webSite == nil {
+		return nil, errors.New("website does not exist")
+	}
+
+	user, err := s.userRepo.FindUserByEmailAndWebsite(email, websiteId)
 	if err != nil {
 		return nil, err
 	}
 	if user == nil {
-		return nil, errors.New("Invalid.")
+		return nil, errors.New("invalid credentials")
 	}
+
 	if !security.CheckPassword(password, user.Password) {
-		return nil, errors.New("Invalid.")
+		return nil, errors.New("invalid credentials")
 	}
 
 	return user, nil
@@ -81,12 +106,28 @@ func (s *AuthService) Refresh(refreshToken string) (string, error) {
 		return "", errors.New("user not found")
 	}
 
+	if user.WebsiteId != refreshClaims.WebsiteId {
+		return "", errors.New("invalid token context")
+	}
+
+	webSite, err := s.webSiteRepo.FindWebSiteByID(refreshClaims.WebsiteId)
+	if err != nil {
+		return "", err
+	}
+	if webSite == nil {
+		return "", errors.New("website does not exist")
+	}
+	if webSite.Banned {
+		return "", errors.New("website is banned")
+	}
+
 	accessClaims := security.AccessTokenClaims{
-		Iss:  "https://jesterx.com.br",
-		Sub:  user.Id,
-		Aud:  "https://api.jesterx.com.br",
-		Exp:  time.Now().Add(15 * time.Minute).Unix(),
-		Role: user.Role,
+		Iss:       "https://jesterx.com.br",
+		Sub:       user.Id,
+		Aud:       "https://api.jesterx.com.br",
+		WebsiteId: user.WebsiteId,
+		Role:      user.Role,
+		Exp:       time.Now().Add(15 * time.Minute).Unix(),
 	}
 
 	accessToken, err := security.AccessToken(accessClaims)
@@ -97,13 +138,8 @@ func (s *AuthService) Refresh(refreshToken string) (string, error) {
 	return accessToken, nil
 }
 
-func (s *AuthService) Me(accessToken string) (*domain.User, error) {
-	claims, err := security.ParseAccessToken(accessToken)
-	if err != nil {
-		return nil, errors.New("invalid access token")
-	}
-
-	user, err := s.userRepo.FindUserByID(claims.Sub)
+func (s *AuthService) Me(userID string) (*domain.User, error) {
+	user, err := s.userRepo.FindUserByID(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -112,4 +148,28 @@ func (s *AuthService) Me(accessToken string) (*domain.User, error) {
 	}
 
 	return user, nil
+}
+
+func (s *AuthService) Logout(w http.ResponseWriter) error {
+	http.SetCookie(w, &http.Cookie{
+		Name:     "access_token",
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   -1,
+	})
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   -1,
+	})
+
+	return nil
 }

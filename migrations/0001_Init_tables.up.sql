@@ -1,9 +1,10 @@
 CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY NOT NULL UNIQUE,
+    website_id TEXT NOT NULL,
     first_name VARCHAR(50) NOT NULL,
     last_name  VARCHAR(50) NOT NULL,
-    email VARCHAR(250) UNIQUE NOT NULL,
-    CHECK (email = LOWER(email))
+    email VARCHAR(250) NOT NULL,
+    CHECK (email = LOWER(email)),
     password TEXT NOT NULL,
     role VARCHAR(20) NOT NULL DEFAULT 'user',
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

@@ -9,20 +9,30 @@ import (
 )
 
 type AccessTokenClaims struct {
-	Iss  string
-	Sub  string
-	Aud  string
-	Exp  int64
-	Iat  int64
-	Role string
+	Iss       string
+	Sub       string
+	Aud       string
+	WebsiteId string
+	Exp       int64
+	Iat       int64
+	Role      string
 }
 
 type RefreshTokenClaims struct {
-	Iss  string
-	Sub  string
-	Exp  int64
-	Iat  int64
-	Type string
+	Iss       string
+	Sub       string
+	WebsiteId string
+	Exp       int64
+	Iat       int64
+	Type      string
+}
+
+func RefreshCookieName(websiteId string) string {
+	return "refresh_token_" + websiteId
+}
+
+func AccessCookieName(websiteId string) string {
+	return "access_token_" + websiteId
 }
 
 var jwtAccessTokenKey = []byte(config.Jwt_access_token)
@@ -47,11 +57,12 @@ func RefreshToken(claims RefreshTokenClaims) (string, error) {
 	now := time.Now().Unix()
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"iss":  claims.Iss,
-		"sub":  claims.Sub,
-		"exp":  claims.Exp,
-		"iat":  now,
-		"type": "refresh",
+		"iss":        claims.Iss,
+		"sub":        claims.Sub,
+		"website_id": claims.WebsiteId,
+		"exp":        claims.Exp,
+		"iat":        now,
+		"type":       "refresh",
 	})
 
 	return token.SignedString(jwtRefreshTokenKey)
@@ -116,11 +127,12 @@ func ParseRefreshToken(tokenString string) (*RefreshTokenClaims, error) {
 	}
 
 	claims := &RefreshTokenClaims{
-		Iss:  claimsMap["iss"].(string),
-		Sub:  claimsMap["sub"].(string),
-		Exp:  int64(claimsMap["exp"].(float64)),
-		Iat:  int64(claimsMap["iat"].(float64)),
-		Type: claimsMap["type"].(string),
+		Iss:       claimsMap["iss"].(string),
+		Sub:       claimsMap["sub"].(string),
+		WebsiteId: claimsMap["website_id"].(string),
+		Exp:       int64(claimsMap["exp"].(float64)),
+		Iat:       int64(claimsMap["iat"].(float64)),
+		Type:      claimsMap["type"].(string),
 	}
 
 	return claims, nil

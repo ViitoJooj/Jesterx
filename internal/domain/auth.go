@@ -8,6 +8,7 @@ import (
 
 type User struct {
 	Id         string
+	WebsiteId  string
 	First_name string
 	Last_name  string
 	Email      string
@@ -17,11 +18,12 @@ type User struct {
 	Created_at time.Time
 }
 
-func NewUser(first_name string, last_name string, email string, password_hash string) *User {
+func NewUser(WebsiteId string, first_name string, last_name string, email string, password_hash string) *User {
 	id, _ := uuid.NewV7()
 
 	return &User{
 		Id:         id.String(),
+		WebsiteId:  WebsiteId,
 		First_name: first_name,
 		Last_name:  last_name,
 		Email:      email,

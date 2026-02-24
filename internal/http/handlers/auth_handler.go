@@ -2,9 +2,12 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"time"
 
+	"github.com/ViitoJooj/Jesterx/internal/config"
+	middleware "github.com/ViitoJooj/Jesterx/internal/http/middlewares"
 	"github.com/ViitoJooj/Jesterx/internal/security"
 	"github.com/ViitoJooj/Jesterx/internal/service"
 )
@@ -23,6 +26,7 @@ type LoginRequest struct {
 
 type UserData struct {
 	Id         string    `json:"id"`
+	WebsiteId  string    `json:"website_id"`
 	Email      string    `json:"email"`
 	Updated_at time.Time `json:"updated_at"`
 	Created_at time.Time `json:"created_at"`
@@ -68,7 +72,15 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	params := r.URL.Query()
+	websiteId := params.Get("x-website-id")
+	if websiteId == "" {
+		http.Error(w, "invalid website id", http.StatusBadRequest)
+		return
+	}
+
 	user, err := h.authService.Register(
+		websiteId,
 		req.First_name,
 		req.Last_name,
 		req.Email,
@@ -80,9 +92,10 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	claims := security.RefreshTokenClaims{
-		Iss: "https://jesterx.com.br",
-		Sub: user.Id,
-		Exp: time.Now().Add(30 * 24 * time.Hour).Unix(),
+		Iss:       "https://jesterx.com.br",
+		Sub:       user.Id,
+		WebsiteId: user.WebsiteId,
+		Exp:       time.Now().Add(30 * 24 * time.Hour).Unix(),
 	}
 
 	refreshToken, err := security.RefreshToken(claims)
@@ -92,20 +105,23 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cookie := http.Cookie{
-		Name:     "refresh_token",
+		Name:     security.RefreshCookieName(user.WebsiteId),
 		Value:    refreshToken,
 		Path:     "/",
-		MaxAge:   2592000,
+		MaxAge:   60 * 60 * 24 * 30,
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   !config.IsDev,
 		SameSite: http.SameSiteLaxMode,
 	}
+
+	http.SetCookie(w, &cookie)
 
 	resp := AuthResponse{
 		Success: true,
 		Message: "registered.",
 		Data: UserData{
 			Id:         user.Id,
+			WebsiteId:  user.WebsiteId,
 			Email:      user.Email,
 			Created_at: user.Created_at,
 		},
@@ -126,16 +142,28 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.authService.Login(req.Email, req.Password)
+	params := r.URL.Query()
+	websiteId := params.Get("x-website-id")
+	if websiteId == "" {
+		http.Error(w, "invalid website id", http.StatusBadRequest)
+		return
+	}
+
+	user, err := h.authService.Login(
+		websiteId,
+		req.Email,
+		req.Password,
+	)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
 
 	claims := security.RefreshTokenClaims{
-		Iss: "https://jesterx.com.br",
-		Sub: user.Id,
-		Exp: time.Now().Add(30 * 24 * time.Hour).Unix(),
+		Iss:       "https://jesterx.com.br",
+		Sub:       user.Id,
+		WebsiteId: user.WebsiteId,
+		Exp:       time.Now().Add(30 * 24 * time.Hour).Unix(),
 	}
 
 	refreshToken, err := security.RefreshToken(claims)
@@ -145,12 +173,12 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cookie := http.Cookie{
-		Name:     "refresh_token",
+		Name:     security.RefreshCookieName(user.WebsiteId),
 		Value:    refreshToken,
 		Path:     "/",
-		MaxAge:   2592000,
+		MaxAge:   60 * 60 * 24 * 30,
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   !config.IsDev,
 		SameSite: http.SameSiteLaxMode,
 	}
 
@@ -159,6 +187,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		Message: "logged in.",
 		Data: UserData{
 			Id:         user.Id,
+			WebsiteId:  user.WebsiteId,
 			Email:      user.Email,
 			Updated_at: user.Updated_at,
 			Created_at: user.Created_at,
@@ -174,29 +203,32 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
-	refreshCookie, err := r.Cookie("refresh_token")
+	websiteId := r.URL.Query().Get("x-website-id")
+	if websiteId == "" {
+		http.Error(w, "invalid website id", http.StatusBadRequest)
+		return
+	}
+
+	refreshCookie, err := r.Cookie(security.RefreshCookieName(websiteId))
 	if err != nil {
-		if err == http.ErrNoCookie {
-			http.Error(w, "not allowed", http.StatusUnauthorized)
-			return
-		}
-		http.Error(w, "internal error", http.StatusInternalServerError)
+		http.Error(w, "refresh token missing", http.StatusUnauthorized)
 		return
 	}
 
 	accessToken, err := h.authService.Refresh(refreshCookie.Value)
 	if err != nil {
+		log.Println(err)
 		http.Error(w, "not allowed", http.StatusUnauthorized)
 		return
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name:     "access_token",
+		Name:     security.AccessCookieName(websiteId),
 		Value:    accessToken,
 		Path:     "/",
-		MaxAge:   900,
+		MaxAge:   60 * 15,
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   !config.IsDev,
 		SameSite: http.SameSiteLaxMode,
 	})
 
@@ -211,17 +243,13 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
-	accessCookie, err := r.Cookie("access_token")
-	if err != nil {
-		if err == http.ErrNoCookie {
-			http.Error(w, "not allowed", http.StatusUnauthorized)
-			return
-		}
-		http.Error(w, "internal error", http.StatusInternalServerError)
+	userID, ok := middleware.UserID(r.Context())
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
 
-	user, err := h.authService.Me(accessCookie.Value)
+	user, err := h.authService.Me(userID)
 	if err != nil {
 		http.Error(w, "not allowed", http.StatusUnauthorized)
 		return
@@ -240,4 +268,28 @@ func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(resp)
+}
+
+func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
+	websiteId := r.URL.Query().Get("x-website-id")
+	if websiteId == "" {
+		http.Error(w, "invalid website id", http.StatusBadRequest)
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:   security.RefreshCookieName(websiteId),
+		Value:  "",
+		Path:   "/",
+		MaxAge: -1,
+	})
+
+	http.SetCookie(w, &http.Cookie{
+		Name:   security.AccessCookieName(websiteId),
+		Value:  "",
+		Path:   "/",
+		MaxAge: -1,
+	})
+
+	w.WriteHeader(http.StatusNoContent)
 }

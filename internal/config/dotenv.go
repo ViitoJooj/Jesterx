@@ -19,6 +19,7 @@ type PostgresConnection struct {
 var PGCNN = &PostgresConnection{}
 var Jwt_access_token string
 var Jwt_refresh_token string
+var IsDev bool
 
 func LoadEnv() {
 	_ = godotenv.Load(".env")
@@ -32,6 +33,11 @@ func LoadEnv() {
 
 	Jwt_access_token = mustGetenv("JWT_ACCESS_TOKEN")
 	Jwt_refresh_token = mustGetenv("JWT_REFRESH_TOKEN")
+
+	environment := mustGetenv("ENVIRONMENT")
+	if environment == "dev" {
+		IsDev = true
+	}
 }
 
 func mustGetenv(key string) string {

@@ -15,17 +15,27 @@ func main() {
 	config.LoadEnv()
 	mux := httpRouter.NewRouter()
 	db := postgres.NewPostgres(postgres.PostgresConfig(*config.PGCNN))
-	repo := postgres.NewRepository(db)
 
-	authService := service.NewAuthService(repo)
-	websiteService := service.NewWebSiteService(repo)
+	// Repositorys
+	authRepo := postgres.NewAuthRepository(db)
+	websiteRepo := postgres.NewWebSiteRepository(db)
 
+	// Services
+	authService := service.NewAuthService(authRepo, websiteRepo)
+	websiteService := service.NewWebSiteService(websiteRepo)
+
+	// Handlers
 	authHandler := handlers.NewAuthHandler(authService)
 	websiteHandler := handlers.NewWebSiteHandler(websiteService)
 
-	httpRouter.RegisterAuthRoutes(mux, authHandler)
+	// Routers
+	httpRouter.RegisterAuthRoutes(mux, authHandler, authService)
 	httpRouter.RegisterWebsiteRoutes(mux, websiteHandler)
 
-	handler := middleware.CORS(mux)
+	// Middlewares
+	handler := middleware.IdentityMiddleware(authService)(
+		middleware.CORS(mux),
+	)
+
 	http.ListenAndServe(":8080", handler)
 }
