@@ -72,8 +72,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	params := r.URL.Query()
-	websiteId := params.Get("x-website-id")
+	websiteId := r.Header.Get("X-Website-Id")
 	if websiteId == "" {
 		http.Error(w, "invalid website id", http.StatusBadRequest)
 		return
@@ -142,8 +141,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	params := r.URL.Query()
-	websiteId := params.Get("x-website-id")
+	websiteId := r.Header.Get("X-Website-Id")
 	if websiteId == "" {
 		http.Error(w, "invalid website id", http.StatusBadRequest)
 		return
@@ -203,7 +201,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
-	websiteId := r.URL.Query().Get("x-website-id")
+	websiteId := r.Header.Get("X-Website-Id")
 	if websiteId == "" {
 		http.Error(w, "invalid website id", http.StatusBadRequest)
 		return
@@ -271,7 +269,7 @@ func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
-	websiteId := r.URL.Query().Get("x-website-id")
+	websiteId := r.Header.Get("X-Website-Id")
 	if websiteId == "" {
 		http.Error(w, "invalid website id", http.StatusBadRequest)
 		return

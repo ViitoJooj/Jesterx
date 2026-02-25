@@ -20,7 +20,7 @@ func UserID(ctx context.Context) (string, bool) {
 func IdentityMiddleware(auth *service.AuthService) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			websiteId := r.URL.Query().Get("x-website-id")
+			websiteId := r.Header.Get("X-Website-Id")
 			if websiteId == "" {
 				next.ServeHTTP(w, r)
 				return
