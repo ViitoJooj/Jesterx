@@ -68,12 +68,14 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	var req RegisterRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		log.Println(err)
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
 
 	websiteId := r.Header.Get("X-Website-Id")
 	if websiteId == "" {
+		log.Println("websiteId is null")
 		http.Error(w, "invalid website id", http.StatusBadRequest)
 		return
 	}
@@ -86,6 +88,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		req.Password,
 	)
 	if err != nil {
+		log.Println(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -126,6 +129,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
+	log.Printf("\nUser: %s; is registred", user.First_name+" "+user.Last_name)
 	http.SetCookie(w, &cookie)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
