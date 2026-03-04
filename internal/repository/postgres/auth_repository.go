@@ -21,44 +21,134 @@ func (r *connection) UserRegister(user domain.User) error {
 	return err
 }
 
-func (r *connection) FindUserByEmail(email string) (*domain.User, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	query := `SELECT id, website_id, first_name, last_name, email, verified_email password, role, updated_at, created_at FROM users WHERE email = $1`
-	var user domain.User
-	err := r.db.QueryRowContext(ctx, query, email).
-		Scan(&user.Id, &user.WebsiteId, &user.First_name, &user.Last_name, &user.Email, &user.Verified_email, &user.Password, &user.Role, &user.Updated_at, &user.Created_at)
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, err
-	}
-	return &user, nil
-}
-
 func (r *connection) FindUserByID(id string) (*domain.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	query := `SELECT id, website_id, first_name, last_name, email, verified_email, password, role, updated_at, created_at FROM users WHERE id = $1`
+
+	query := `
+	SELECT 
+		u.id,
+		u.website_id,
+		u.first_name,
+		u.last_name,
+		u.email,
+		u.verified_email,
+		u.password,
+		u.role,
+		u.updated_at,
+		u.created_at,
+		p.name AS plan_name
+	FROM users u
+	LEFT JOIN LATERAL (
+		SELECT *
+		FROM payments pay
+		WHERE pay.user_id = u.id
+		  AND pay.website_id = u.website_id
+		  AND pay.status = 'completed'
+		ORDER BY pay.purchased_in DESC
+		LIMIT 1
+	) pay ON TRUE
+	LEFT JOIN plans p
+		ON p.price = pay.amount
+	   AND p.active = true
+	WHERE u.id = $1
+	`
+
 	var user domain.User
+	var planName sql.NullString
+
 	err := r.db.QueryRowContext(ctx, query, id).
-		Scan(&user.Id, &user.WebsiteId, &user.First_name, &user.Last_name, &user.Email, &user.Verified_email, &user.Password, &user.Role, &user.Updated_at, &user.Created_at)
+		Scan(
+			&user.Id,
+			&user.WebsiteId,
+			&user.First_name,
+			&user.Last_name,
+			&user.Email,
+			&user.Verified_email,
+			&user.Password,
+			&user.Role,
+			&user.Updated_at,
+			&user.Created_at,
+			&planName,
+		)
+
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
 	if err != nil {
 		return nil, err
 	}
+
+	if planName.Valid {
+		user.Plan = &planName.String
+	}
+
 	return &user, nil
 }
 
-func (r *connection) DeleteUserByID(id string) error {
+func (r *connection) FindUserByEmail(email string) (*domain.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	query := `DELETE FROM users WHERE id = $1`
-	_, err := r.db.ExecContext(ctx, query, id)
-	return err
+
+	query := `
+	SELECT 
+		u.id,
+		u.website_id,
+		u.first_name,
+		u.last_name,
+		u.email,
+		u.verified_email,
+		u.password,
+		u.role,
+		u.updated_at,
+		u.created_at,
+		p.name AS plan_name
+	FROM users u
+	LEFT JOIN LATERAL (
+		SELECT *
+		FROM payments pay
+		WHERE pay.user_id = u.id
+		  AND pay.website_id = u.website_id
+		  AND pay.status = 'completed'
+		ORDER BY pay.purchased_in DESC
+		LIMIT 1
+	) pay ON TRUE
+	LEFT JOIN plans p
+		ON p.price = pay.amount
+	   AND p.active = true
+	WHERE u.email = $1
+	`
+
+	var user domain.User
+	var planName sql.NullString
+
+	err := r.db.QueryRowContext(ctx, query, email).
+		Scan(
+			&user.Id,
+			&user.WebsiteId,
+			&user.First_name,
+			&user.Last_name,
+			&user.Email,
+			&user.Verified_email,
+			&user.Password,
+			&user.Role,
+			&user.Updated_at,
+			&user.Created_at,
+			&planName,
+		)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	if planName.Valid {
+		user.Plan = &planName.String
+	}
+
+	return &user, nil
 }
 
 func (r *connection) FindUserByEmailAndWebsite(email string, websiteId string) (*domain.User, error) {
@@ -66,12 +156,38 @@ func (r *connection) FindUserByEmailAndWebsite(email string, websiteId string) (
 	defer cancel()
 
 	query := `
-		SELECT id, website_id, first_name, last_name, email, verified_email, password, role, updated_at, created_at
-		FROM users
-		WHERE email = $1 AND website_id = $2
+	SELECT 
+		u.id,
+		u.website_id,
+		u.first_name,
+		u.last_name,
+		u.email,
+		u.verified_email,
+		u.password,
+		u.role,
+		u.updated_at,
+		u.created_at,
+		p.name AS plan_name
+	FROM users u
+	LEFT JOIN LATERAL (
+		SELECT *
+		FROM payments pay
+		WHERE pay.user_id = u.id
+		  AND pay.website_id = u.website_id
+		  AND pay.status = 'completed'
+		ORDER BY pay.purchased_in DESC
+		LIMIT 1
+	) pay ON TRUE
+	LEFT JOIN plans p
+		ON p.price = pay.amount
+	   AND p.active = true
+	WHERE u.email = $1
+	  AND u.website_id = $2
 	`
 
 	var user domain.User
+	var planName sql.NullString
+
 	err := r.db.QueryRowContext(ctx, query, email, websiteId).
 		Scan(
 			&user.Id,
@@ -84,6 +200,7 @@ func (r *connection) FindUserByEmailAndWebsite(email string, websiteId string) (
 			&user.Role,
 			&user.Updated_at,
 			&user.Created_at,
+			&planName,
 		)
 
 	if errors.Is(err, sql.ErrNoRows) {
@@ -93,7 +210,19 @@ func (r *connection) FindUserByEmailAndWebsite(email string, websiteId string) (
 		return nil, err
 	}
 
+	if planName.Valid {
+		user.Plan = &planName.String
+	}
+
 	return &user, nil
+}
+
+func (r *connection) DeleteUserByID(id string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	query := `DELETE FROM users WHERE id = $1`
+	_, err := r.db.ExecContext(ctx, query, id)
+	return err
 }
 
 func (r *connection) DeleteExpiredUnverifiedUsers() error {

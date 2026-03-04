@@ -15,6 +15,7 @@ type User struct {
 	Verified_email bool
 	Password       string
 	Role           string
+	Plan           *string
 	Updated_at     time.Time
 	Created_at     time.Time
 }

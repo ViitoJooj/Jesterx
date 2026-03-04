@@ -29,6 +29,7 @@ type UserData struct {
 	Id         string    `json:"id"`
 	WebsiteId  string    `json:"website_id"`
 	Email      string    `json:"email"`
+	Plan       string    `json:"user_plan"`
 	Updated_at time.Time `json:"updated_at"`
 	Created_at time.Time `json:"created_at"`
 }
@@ -50,6 +51,7 @@ type UserMeResponse struct {
 	LastName  string `json:"last_name"`
 	Email     string `json:"email"`
 	Role      string `json:"role"`
+	Plan      string `json:"user_plan"`
 	CreatedAt string `json:"created_at"`
 	UpdatedAt string `json:"updated_at"`
 }
@@ -108,6 +110,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 			Id:         user.Id,
 			WebsiteId:  user.WebsiteId,
 			Email:      user.Email,
+			Plan:       *user.Plan,
 			Created_at: user.Created_at,
 		},
 	}
@@ -223,6 +226,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 			Id:         user.Id,
 			WebsiteId:  user.WebsiteId,
 			Email:      user.Email,
+			Plan:       *user.Plan,
 			Updated_at: user.Updated_at,
 			Created_at: user.Created_at,
 		},
@@ -295,6 +299,7 @@ func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
 		LastName:  user.Last_name,
 		Email:     user.Email,
 		Role:      user.Role,
+		Plan:      *user.Plan,
 		CreatedAt: user.Created_at.Format(time.RFC3339),
 		UpdatedAt: user.Updated_at.Format(time.RFC3339),
 	}
