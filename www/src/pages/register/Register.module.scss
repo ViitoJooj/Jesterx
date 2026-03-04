@@ -1,0 +1,158 @@
+@use '../../styles/variables' as *;
+
+.main {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 86svh;
+  padding: 2rem;
+  background:
+    radial-gradient(60rem 60rem at 10% -10%, rgba(255, 62, 0, 0.06), transparent 40%),
+    radial-gradient(40rem 40rem at 100% 0%, rgba(0, 0, 0, 0.06), transparent 35%),
+    $background-color;
+  color: $font-color-primary;
+}
+
+.register_container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 42rem; // 🔥 mais largo
+  padding: 2.5rem;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-lg;
+  gap: 1.5rem;
+  background: linear-gradient(180deg,
+      $background-color-primary,
+      $background-color-secondary );
+  box-shadow: $shadow-md;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(1.6rem, 1.2rem + 1vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-align: center;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form_group {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+
+  label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: $font-color-secondary;
+    margin-bottom: 0.25rem;
+  }
+}
+
+/* 🔥 Linha flexível */
+.row {
+  display: flex;
+  gap: 1rem;
+
+  >div {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+/* Responsivo */
+@media (max-width: 640px) {
+  .row {
+    flex-direction: column;
+  }
+}
+
+.error {
+  font-size: 0.875rem;
+  color: #e5484d;
+  margin-top: -0.5rem;
+}
+
+.cta_button {
+  width: 100%;
+}
+
+.links {
+  text-align: center;
+  font-size: 0.9rem;
+
+  a {
+    color: $color-primary;
+    text-decoration: none;
+    font-weight: 500;
+    transition: $transition-fast;
+
+    &:hover {
+      text-decoration: underline;
+      color: $color-primary-dark;
+    }
+  }
+}
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid $border-color;
+  }
+
+  span {
+    padding: 0 0.75rem;
+    font-size: 0.875rem;
+    color: $font-color-muted;
+  }
+}
+
+.oauth_row {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.oauth_box {
+  width: 52px;
+  height: 52px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: $background-color-primary;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-md;
+
+  cursor: pointer;
+  transition: $transition-fast;
+
+  svg {
+    color: $font-color-primary;
+  }
+
+  &:hover:not(:disabled) {
+    background: $background-color-secondary;
+    border-color: $color-primary;
+    transform: translateY(-2px);
+    box-shadow: $shadow-sm;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}

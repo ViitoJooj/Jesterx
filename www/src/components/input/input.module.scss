@@ -1,0 +1,36 @@
+@use "../../styles/variables" as *;
+
+.input {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.95rem;
+  border-radius: $border-radius-md;
+  border: 1px solid $border-color;
+  background: $background-color-primary;
+  color: $font-color-primary;
+  transition: $transition-fast;
+  box-sizing: border-box;
+
+  &:focus {
+    outline: none;
+    border-color: $color-primary;
+    box-shadow: 0 0 0 3px rgba($color-primary, 0.15);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.primary {
+  border-color: $color-primary;
+}
+
+.error {
+  border-color: $error-color;
+
+  &:focus {
+    box-shadow: 0 0 0 3px rgba($error-color, 0.15);
+  }
+}
