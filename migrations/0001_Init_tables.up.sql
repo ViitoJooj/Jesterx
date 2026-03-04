@@ -24,3 +24,28 @@ CREATE TABLE IF NOT EXISTS websites (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS plans (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) UNIQUE NOT NULL,
+    description VARCHAR(500),
+    description_md TEXT,
+    price NUMERIC(10,2) NOT NULL,
+    billing_cycle VARCHAR(20) DEFAULT 'monthly',
+    active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS payments (
+    id SERIAL PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    website_id TEXT NOT NULL,
+    reference_id TEXT NOT NULL,
+    type VARCHAR(50) NOT NULL,
+    quantity INT DEFAULT 1,
+    amount NUMERIC(10,2) NOT NULL,
+    currency VARCHAR(10) DEFAULT 'BRL',
+    status VARCHAR(50) NOT NULL CHECK (status IN ('completed','pending','canceled')),
+    purchased_in TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

@@ -1,32 +1,53 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuthContext } from "../../hooks/AuthContext";
 
 import styles from "./Login.module.scss";
 import Input from "../../components/input/input";
 import Button from "../../components/button/Button";
 
+type Feedback = {
+  type: "error" | "info" | "success";
+  text: string;
+};
+
 export const Login: React.FC = () => {
   const navigate = useNavigate();
-  const { login, loading, me } = useAuthContext();
+  const { login, loading, isAuthenticated } = useAuthContext();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<Feedback | null>(null);
 
   const canSubmit = email.trim().length > 0 && password.length > 0 && !loading;
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      setFeedback({
+        type: "success",
+        text: "Login realizado com sucesso. Redirecionando...",
+      });
+      const t = setTimeout(() => navigate("/pages", { replace: true }), 300);
+      return () => clearTimeout(t);
+    }
+  }, [isAuthenticated, navigate]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!canSubmit) return;
 
-    setError(null);
+    setFeedback({
+      type: "info",
+      text: "Validando suas credenciais...",
+    });
 
     try {
       await login({ email: email.trim(), password });
-      navigate("/", { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha no login");
+      setFeedback({
+        type: "error",
+        text: err instanceof Error ? err.message : "Falha no login",
+      });
     }
   }
 
@@ -128,7 +149,15 @@ export const Login: React.FC = () => {
             />
           </div>
 
-          {error && <p className={styles.error}>{error}</p>}
+          {feedback && (
+            <p
+              className={`${styles.feedback} ${styles[`feedback_${feedback.type}`]}`}
+              role="status"
+              aria-live="polite"
+            >
+              {feedback.text}
+            </p>
+          )}
 
           <Button
             type="submit"
@@ -141,11 +170,8 @@ export const Login: React.FC = () => {
         </form>
 
         <div className={styles.links}>
-          <p className={styles.forgot_password}>
-            Esqueceu a senha? <a href="/forgot-password">Clique aqui</a>
-          </p>
           <p className={styles.register_link}>
-            Ainda não tem conta? <a href="/register">Registre-se</a>
+            Ainda não tem conta? <Link to="/register">Registre-se</Link>
           </p>
         </div>
       </div>

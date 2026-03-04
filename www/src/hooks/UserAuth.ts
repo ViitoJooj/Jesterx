@@ -14,30 +14,21 @@ type RegisterRequest = {
 type AuthResponse<T> = {
   success: boolean;
   message: string;
-  data: T;
+  data?: T;
 };
 
-type LoginData = { id: string; websiteId: string; email: string };
-type RefreshData =
-  | { access_token: string }
-  | { accessToken: string }
-  | { token: string };
+type LoginData = { id: string; website_id: string; email: string };
+type RegisterData = { id?: string; website_id?: string; email?: string };
 
 type MeData = {
   id: string;
-  websiteId: string;
+  website_id?: string;
   email: string;
   role?: string;
   first_name?: string;
   last_name?: string;
+  avatar_url?: string;
 };
-
-function pickAccessToken(d: RefreshData): string {
-  if ("access_token" in d) return d.access_token;
-  if ("accessToken" in d) return d.accessToken;
-  if ("token" in d) return d.token;
-  throw new Error("refresh response missing access token");
-}
 
 export function useAuth(websiteId: WebsiteId) {
   const [accessToken, setAccessToken] = useState<string | null>(null);
@@ -46,7 +37,7 @@ export function useAuth(websiteId: WebsiteId) {
 
   const refreshPromiseRef = useRef<Promise<string> | null>(null);
 
-  const isAuthenticated = useMemo(() => !!accessToken, [accessToken]);
+  const isAuthenticated = useMemo(() => !!me, [me]);
 
   /**
    * LOGIN
@@ -64,13 +55,12 @@ export function useAuth(websiteId: WebsiteId) {
           }
         );
 
-        const token = await refresh();
-        await loadMe(token);
+        await refresh();
+        await loadMe();
 
-        return token;
+        return "cookie-session";
       } catch (error: any) {
-        const message =
-          error?.message || "Erro ao realizar login";
+        const message = error?.message || "Erro ao realizar login";
         throw new Error(message);
       } finally {
         setLoading(false);
@@ -86,7 +76,7 @@ export function useAuth(websiteId: WebsiteId) {
     async (req: RegisterRequest) => {
       setLoading(true);
       try {
-        await apiFetch<AuthResponse<unknown>>(
+        const resp = await apiFetch<AuthResponse<RegisterData>>(
           "/api/v1/auth/register",
           {
             method: "POST",
@@ -94,21 +84,15 @@ export function useAuth(websiteId: WebsiteId) {
             body: JSON.stringify(req),
           }
         );
-
-        // login automático após criar conta
-        return await login({
-          email: req.email,
-          password: req.password,
-        });
+        return resp;
       } catch (error: any) {
-        const message =
-          error?.message || "Erro ao criar conta";
+        const message = error?.message || "Erro ao criar conta";
         throw new Error(message);
       } finally {
         setLoading(false);
       }
     },
-    [websiteId, login]
+    [websiteId]
   );
 
   /**
@@ -118,15 +102,11 @@ export function useAuth(websiteId: WebsiteId) {
     if (refreshPromiseRef.current) return refreshPromiseRef.current;
 
     refreshPromiseRef.current = (async () => {
-      const resp = await apiFetch<AuthResponse<RefreshData>>(
-        "/api/v1/auth/refresh",
-        {
-          method: "GET",
-          websiteId,
-        }
-      );
-
-      const token = pickAccessToken(resp.data);
+      await apiFetch<AuthResponse<unknown>>("/api/v1/auth/refresh", {
+        method: "GET",
+        websiteId,
+      });
+      const token = `cookie-session-${Date.now()}`;
       setAccessToken(token);
       return token;
     })();
@@ -142,36 +122,26 @@ export function useAuth(websiteId: WebsiteId) {
    * LOAD ME
    */
   const loadMe = useCallback(
-    async (token?: string) => {
-      const t = token ?? accessToken;
-      if (!t) throw new Error("no access token");
+    async () => {
+      const resp = await apiFetch<MeData>("/api/v1/auth/me", {
+        method: "GET",
+        websiteId,
+      });
 
-      const resp = await apiFetch<AuthResponse<MeData>>(
-        "/api/v1/auth/me",
-        {
-          method: "GET",
-          websiteId,
-          accessToken: t,
-        }
-      );
-
-      setMe(resp.data);
-      return resp.data;
+      setMe(resp);
+      return resp;
     },
-    [websiteId, accessToken]
+    [websiteId]
   );
 
   /**
    * LOGOUT
    */
   const logout = useCallback(async () => {
-    await apiFetch<AuthResponse<unknown>>(
-      "/api/v1/auth/logout",
-      {
-        method: "GET",
-        websiteId,
-      }
-    );
+    await apiFetch<void>("/api/v1/auth/logout", {
+      method: "GET",
+      websiteId,
+    });
 
     setAccessToken(null);
     setMe(null);
@@ -185,9 +155,9 @@ export function useAuth(websiteId: WebsiteId) {
 
     (async () => {
       try {
-        const token = await refresh();
+        await refresh();
         if (cancelled) return;
-        await loadMe(token);
+        await loadMe();
       } catch {
         // silencioso
       }
@@ -211,5 +181,6 @@ export function useAuth(websiteId: WebsiteId) {
     authHeader: accessToken
       ? { Authorization: `Bearer ${accessToken}` }
       : {},
+    websiteId,
   };
 }

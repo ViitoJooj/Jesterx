@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuthContext } from "../../hooks/AuthContext";
 
 import styles from "./Register.module.scss";
@@ -42,7 +42,7 @@ export const Register: React.FC = () => {
         password,
       });
 
-      navigate("/", { replace: true });
+      navigate(`/verify-email?email=${encodeURIComponent(email.trim())}`, { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Falha no registro");
     }
@@ -170,7 +170,7 @@ export const Register: React.FC = () => {
 
         <div className={styles.links}>
           <p>
-            Já tem conta? <a href="/login">Entrar</a>
+            Já tem conta? <Link to="/login">Entrar</Link>
           </p>
         </div>
       </div>

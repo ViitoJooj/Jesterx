@@ -20,7 +20,7 @@ export const PaymentCancel: React.FC = () => {
         <p className={styles.description}>Caso tenha alguma dúvida sobre os planos, entre em contato com nosso suporte.</p>
 
         <div className={styles.actions}>
-          <button className={styles.primaryButton} onClick={() => navigate("/pricing")}>
+          <button className={styles.primaryButton} onClick={() => navigate("/plans")}>
             Ver planos novamente
           </button>
           <button className={styles.secondaryButton} onClick={() => navigate("/")}>

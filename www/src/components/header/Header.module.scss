@@ -93,6 +93,15 @@ body {
   }
 }
 
+.userLabel {
+  font-size: 0.9rem;
+  color: $font-color-secondary;
+  max-width: 210px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .user {
   display: none;
 
@@ -258,6 +267,28 @@ body {
   position: relative;
 }
 
+.user_trigger {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.2rem 0.3rem 0.2rem 0.2rem;
+  border-radius: 999px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: $transition-fast;
+
+  &:hover {
+    background: $background-color-secondary;
+    border-color: $border-color;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-primary;
+    outline-offset: 2px;
+  }
+}
+
 .avatar_btn {
   all: unset;
   display: inline-grid;
@@ -377,9 +408,19 @@ body {
 
 .avatar_name {
   font-size: 0.95rem;
-  font-weight: 800;
+  font-weight: 700;
   color: $font-color-primary;
-  margin-left: 0.5rem;
+  max-width: 160px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.drawer_user_label {
+  margin: 0 0 0.1rem;
+  color: $font-color-primary;
+  font-weight: 700;
+  font-size: 0.92rem;
 }
 
 [data-theme="dark"] {

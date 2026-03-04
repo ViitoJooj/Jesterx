@@ -21,6 +21,10 @@ var Jwt_access_token string
 var Jwt_refresh_token string
 var IsDev bool
 var ResendKey string
+var StripePublic string
+var StripeSecret string
+var StripeWebhookSecret string
+var FrontendURL string
 
 func LoadEnv() {
 	_ = godotenv.Load(".env")
@@ -41,12 +45,25 @@ func LoadEnv() {
 	}
 
 	ResendKey = mustGetenv("RESEND_KEY")
+
+	StripePublic = mustGetenv("STRIPE_PUBLIC_KEY")
+	StripeSecret = mustGetenv("STRIPE_SECRET_KEY")
+	StripeWebhookSecret = getEnvOrDefault("STRIPE_WEBHOOK_SECRET", "")
+	FrontendURL = getEnvOrDefault("FRONTEND_URL", "http://localhost:5173")
 }
 
 func mustGetenv(key string) string {
 	v := os.Getenv(key)
 	if v == "" {
 		log.Fatal("Error on get " + key)
+	}
+	return v
+}
+
+func getEnvOrDefault(key, fallback string) string {
+	v := os.Getenv(key)
+	if v == "" {
+		return fallback
 	}
 	return v
 }

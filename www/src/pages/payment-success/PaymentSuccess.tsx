@@ -43,9 +43,9 @@ export const PaymentSuccess: React.FC = () => {
 
           <button
             className={styles.secondaryButton}
-            onClick={() => navigate("/dashboard")}
+            onClick={() => navigate("/plans")}
           >
-            Ir para o dashboard
+            Ver detalhes do plano
           </button>
         </div>
       </div>

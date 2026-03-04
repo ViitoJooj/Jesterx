@@ -16,7 +16,7 @@ func NewAuthRepository(db *sql.DB) *connection {
 func (r *connection) UserRegister(user domain.User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	query := `INSERT INTO users (id, website_id, first_name, last_name, email, verified_email, password, role, updated_at, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
+	query := `INSERT INTO users (id, website_id, first_name, last_name, email, verified_email, password, role, updated_at, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`
 	_, err := r.db.ExecContext(ctx, query, user.Id, user.WebsiteId, user.First_name, user.Last_name, user.Email, user.Verified_email, user.Password, user.Role, user.Updated_at, user.Created_at)
 	return err
 }

@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuthContext } from "../../hooks/AuthContext";
 import styles from "./Plans.module.scss"
 
 type PlanType = string;
@@ -59,6 +61,8 @@ const plans: Plan[] = [
 ];
 
 export const Plans: React.FC = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuthContext();
   const [selectedPlan, setSelectedPlan] = useState<PlanType | null>(null);
 
   function formatPrice(cents: number) {
@@ -70,6 +74,11 @@ export const Plans: React.FC = () => {
 
   function handleSelectPlan(planId: PlanType) {
     setSelectedPlan(planId);
+    if (isAuthenticated) {
+      navigate("/pages");
+      return;
+    }
+    navigate(`/register?plan=${planId}`);
   }
 
   return (
@@ -131,7 +140,9 @@ export const Plans: React.FC = () => {
               >
                 {selectedPlan === plan.id
                   ? "Plano selecionado"
-                  : "Começar agora"}
+                  : isAuthenticated
+                  ? "Ir para minhas páginas"
+                  : "Criar conta e continuar"}
               </button>
             </div>
           ))}
@@ -141,9 +152,6 @@ export const Plans: React.FC = () => {
           <p>
             Todos os planos incluem 14 dias de teste grátis. Sem cartão de
             crédito necessário.
-          </p>
-          <p>
-            <a href="/contact">Precisa de um plano customizado?</a>
           </p>
         </div>
       </div>

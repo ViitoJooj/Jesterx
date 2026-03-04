@@ -142,6 +142,30 @@ func (h *AuthHandler) VerifyEmail(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Email verificado</title>
+<style>
+body { margin: 0; font-family: Arial, sans-serif; background: #f5f5f7; color: #1a1a1a; display: grid; place-items: center; min-height: 100vh; }
+.card { max-width: 520px; margin: 16px; padding: 24px; border: 1px solid #c8c8cc; border-radius: 16px; background: #fff; box-shadow: 0 6px 14px rgba(0,0,0,0.08); text-align: center; }
+a { color: #ff3e00; text-decoration: none; font-weight: 600; }
+a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>Email verificado com sucesso</h1>
+    <p>Sua conta foi ativada. Agora você já pode entrar na plataforma.</p>
+    <p><a href="http://localhost:5173/login">Ir para login</a></p>
+  </div>
+</body>
+</html>`))
 }
 
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {

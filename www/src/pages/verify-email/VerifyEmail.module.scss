@@ -1,0 +1,66 @@
+@use "../../styles/variables" as *;
+
+.main {
+  min-height: 82vh;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: $background-color;
+}
+
+.card {
+  width: min(620px, 100%);
+  background: linear-gradient(180deg, $background-color-primary, $background-color-secondary);
+  border: 1px solid $border-color;
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-md;
+  padding: 2rem;
+  text-align: center;
+
+  h1 {
+    margin: 0 0 0.7rem;
+    letter-spacing: -0.02em;
+  }
+
+  p {
+    margin: 0;
+    color: $font-color-secondary;
+    line-height: 1.55;
+  }
+}
+
+.subtle {
+  margin-top: 0.75rem !important;
+  color: $font-color-muted !important;
+  font-size: 0.92rem;
+}
+
+.icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: $success-color;
+  background: rgba($success-color, 0.12);
+  border: 1px solid rgba($success-color, 0.35);
+}
+
+.actions {
+  margin-top: 1.3rem;
+  display: grid;
+  gap: 0.7rem;
+  justify-items: center;
+}
+
+.link {
+  color: $font-color-secondary;
+  font-size: 0.92rem;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+    color: $font-color-primary;
+  }
+}

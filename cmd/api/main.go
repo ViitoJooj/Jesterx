@@ -20,18 +20,22 @@ func main() {
 	// Repositorys
 	authRepo := postgres.NewAuthRepository(db)
 	websiteRepo := postgres.NewWebSiteRepository(db)
+	paymentRepo := postgres.NewPaymentRepository(db)
 
 	// Services
 	authService := service.NewAuthService(authRepo, websiteRepo)
 	websiteService := service.NewWebSiteService(websiteRepo)
+	paymentService := service.NewPaymentService(paymentRepo, authRepo)
 
 	// Handlers
 	authHandler := handlers.NewAuthHandler(authService)
 	websiteHandler := handlers.NewWebSiteHandler(websiteService)
+	paymentHandler := handlers.NewPaymentHandler(paymentService)
 
 	// Routers
 	httpRouter.RegisterAuthRoutes(mux, authHandler, authService)
 	httpRouter.RegisterWebsiteRoutes(mux, websiteHandler)
+	httpRouter.RegisterPaymentRoutes(mux, paymentHandler, authService)
 
 	// Middlewares
 	handler := middleware.IdentityMiddleware(authService)(middleware.CORS(mux))

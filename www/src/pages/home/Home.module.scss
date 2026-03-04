@@ -5,6 +5,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 2rem 1rem;
 
   background:
     linear-gradient(to right, white 1px, transparent 1px),
@@ -19,18 +20,223 @@
   width: 50%;
 }
 
+.header h1 {
+  margin: 0;
+}
+
+.header h2 {
+  margin: 1rem 0 0;
+}
+
 .cta {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.2rem;
+}
+
+.section {
+  width: 100%;
+  padding: 4.5rem 1rem;
+  background: $background-color-primary;
+  border-top: 1px solid $border-color;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at 8% 12%, rgba($color-primary, 0.08), transparent 18%),
+      radial-gradient(circle at 92% 88%, rgba($info-color, 0.08), transparent 20%);
+  }
+}
+
+.alt {
+  background: linear-gradient(180deg, $background-color-secondary, $background-color);
+}
+
+.inner {
+  width: min(1320px, 100%);
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.sectionHeader {
+  margin-bottom: 1.9rem;
+  max-width: 85ch;
+
+  h3 {
+    margin: 0 0 0.4rem;
+    font-size: clamp(1.7rem, 2.6vw, 2.45rem);
+    letter-spacing: -0.03em;
+  }
+
+  p {
+    margin: 0;
+    color: $font-color-secondary;
+    line-height: 1.65;
+    font-size: 1.08rem;
+  }
+}
+
+.grid3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.4rem;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.4rem;
+}
+
+.card {
+  background: $background-color-primary;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-lg;
+  padding: 1.55rem;
+  box-shadow: $shadow-md;
+  transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
+  animation: fadeUp 700ms ease both;
+
+  &:hover {
+    transform: translateY(-6px);
+    box-shadow: $shadow-lg;
+    border-color: mix($color-primary, $border-color, 20%);
+  }
+
+  h4 {
+    margin: 0;
+    color: $font-color-primary;
+    font-size: 1.12rem;
+    letter-spacing: -0.01em;
+  }
+
+  p {
+    margin: 0.95rem 0 0;
+    color: $font-color-secondary;
+    line-height: 1.6;
+    min-height: 92px;
+  }
+}
+
+.stackRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.4rem;
+}
+
+.stackCard {
+  border-radius: $border-radius-lg;
+  border: 1px solid $border-color;
+  background: linear-gradient(180deg, $background-color-primary, mix($background-color-secondary, #fff, 45%));
+  padding: 1.55rem;
+  box-shadow: $shadow-md;
+  transition: transform .3s ease, box-shadow .3s ease;
+
+  &:hover {
+    transform: translateY(-6px);
+    box-shadow: $shadow-lg;
+  }
+
+  h4 {
+    margin: 0;
+    color: $font-color-primary;
+    font-size: 1.12rem;
+  }
+
+  p {
+    margin: .95rem 0 0;
+    color: $font-color-secondary;
+    line-height: 1.6;
+  }
+}
+
+.cardTop {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.iconBadge {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: $color-primary;
+  border: 1px solid mix($color-primary, #fff, 40%);
+  background: mix($color-primary, #fff, 90%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+  flex-shrink: 0;
+}
+
+.iconProject {
+  font-size: 1rem;
+}
+
+.examples {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+
+  span {
+    border: 1px solid $border-color;
+    background: $background-color-secondary;
+    color: $font-color-secondary;
+    border-radius: 999px;
+    padding: 0.28rem 0.62rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media screen and (max-width: 768px) {
-    .main {
-        font-size: 12px;
-    }
-    .header {
-        width: 90%;
-    }
+  .main {
+    font-size: 12px;
+    min-height: 90vh;
+  }
+
+  .header {
+    width: 90%;
+  }
+
+  .grid3,
+  .grid2,
+  .stackRow {
+    grid-template-columns: 1fr;
+  }
+
+  .section {
+    padding: 2.7rem 1rem;
+  }
+
+  .card,
+  .stackCard {
+    padding: 1.2rem;
+  }
+
+  .card p {
+    min-height: 0;
+  }
 }

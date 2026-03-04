@@ -14,7 +14,7 @@ export const NotFound: React.FC = () => {
           <Button to="/" variant="primary">
             Ir para início
           </Button>
-            <Button to="/websites" variant="secondary">
+            <Button to="/pages" variant="secondary">
                 Minhas páginas
             </Button>
         </div>

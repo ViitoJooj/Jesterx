@@ -95,6 +95,34 @@ form {
   margin-top: 0.75rem;
 }
 
+.feedback {
+  margin: 0;
+  border-radius: $border-radius-md;
+  border: 1px solid transparent;
+  padding: 0.7rem 0.85rem;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  font-weight: 600;
+}
+
+.feedback_error {
+  color: $error-color;
+  border-color: rgba($error-color, 0.35);
+  background: rgba($error-color, 0.1);
+}
+
+.feedback_success {
+  color: $success-color;
+  border-color: rgba($success-color, 0.35);
+  background: rgba($success-color, 0.1);
+}
+
+.feedback_info {
+  color: $info-color;
+  border-color: rgba($info-color, 0.35);
+  background: rgba($info-color, 0.1);
+}
+
 .links {
   text-align: center;
   font-size: 0.9rem;
