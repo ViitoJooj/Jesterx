@@ -35,6 +35,22 @@
     margin-bottom: 3rem;
 }
 
+.infoText {
+    color: $font-color-secondary;
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.errorText {
+    color: $error-color;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    padding: 0.875rem 1rem;
+    border: 1px solid $error-color;
+    border-radius: $border-radius-md;
+    background: rgba($error-color, 0.08);
+}
+
 .planCard {
     background: $background-color-primary;
     border: 2px solid $border-color;

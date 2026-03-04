@@ -162,6 +162,31 @@ func (s *PaymentService) ProcessStripeWebhook(rawBody []byte, signature string) 
 	}
 }
 
+func (s *PaymentService) ConfirmCheckoutSession(userID, sessionID string) error {
+	if userID == "" || sessionID == "" {
+		return errors.New("invalid request")
+	}
+
+	session, err := retrieveStripeCheckoutSession(sessionID)
+	if err != nil {
+		return err
+	}
+
+	metaUserID := session.Metadata["user_id"]
+	if metaUserID == "" || metaUserID != userID {
+		return errors.New("forbidden")
+	}
+
+	switch {
+	case session.Status == "complete" && (session.PaymentStatus == "paid" || session.Mode == "subscription"):
+		return s.paymentRepo.UpdatePaymentStatusByReference(session.ID, "completed")
+	case session.Status == "expired" || session.PaymentStatus == "unpaid" || session.PaymentStatus == "no_payment_required":
+		return s.paymentRepo.UpdatePaymentStatusByReference(session.ID, "canceled")
+	default:
+		return s.paymentRepo.UpdatePaymentStatusByReference(session.ID, "pending")
+	}
+}
+
 func createStripeCheckoutSession(user domain.User, plan domain.Plan, customerID string, quantity int) (*stripeCheckoutSession, error) {
 	cents := int64(plan.Price * 100)
 	if cents <= 0 {
@@ -224,6 +249,39 @@ func createStripeCheckoutSession(user domain.User, plan domain.Plan, customerID 
 		return nil, errors.New("failed to parse checkout session")
 	}
 	if session.ID == "" || session.URL == "" {
+		return nil, errors.New("invalid checkout response")
+	}
+	return &session, nil
+}
+
+func retrieveStripeCheckoutSession(sessionID string) (*stripeCheckoutSession, error) {
+	endpoint := "https://api.stripe.com/v1/checkout/sessions/" + url.QueryEscape(sessionID)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
+	if err != nil {
+		return nil, errors.New("internal error")
+	}
+	req.Header.Set("Authorization", "Bearer "+config.StripeSecret)
+
+	client := &http.Client{Timeout: 15 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, errors.New("failed to reach stripe")
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, errors.New("failed to parse stripe response")
+	}
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return nil, fmt.Errorf("stripe error: %s", string(body))
+	}
+
+	var session stripeCheckoutSession
+	if err := json.Unmarshal(body, &session); err != nil {
+		return nil, errors.New("failed to parse checkout session")
+	}
+	if session.ID == "" {
 		return nil, errors.New("invalid checkout response")
 	}
 	return &session, nil

@@ -48,6 +48,11 @@ type CheckoutResponse struct {
 	Data    CheckoutData `json:"data"`
 }
 
+type GenericResponse struct {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+}
+
 func (h *PaymentHandler) ListPlans(w http.ResponseWriter, r *http.Request) {
 	plans, err := h.paymentService.ListActivePlans()
 	if err != nil {
@@ -127,4 +132,31 @@ func (h *PaymentHandler) StripeWebhook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func (h *PaymentHandler) ConfirmCheckout(w http.ResponseWriter, r *http.Request) {
+	userID, ok := middleware.UserID(r.Context())
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	sessionID := r.URL.Query().Get("session_id")
+	if sessionID == "" {
+		http.Error(w, "session_id is required", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.paymentService.ConfirmCheckoutSession(userID, sessionID); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	resp := GenericResponse{
+		Success: true,
+		Message: "payment synchronized",
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(resp)
 }

@@ -8,6 +8,7 @@ import { DEFAULT_WEBSITE_ID } from "./hooks/api";
 
 import { Header } from "./components/header/Header";
 import { Footer } from "./components/footer/Footer";
+import { ProtectedRoute } from "./components/protectedRoute/ProtectedRoute";
 import { Home } from "./pages/home/Home";
 import { Register } from "./pages/register/Register";
 import { Login } from "./pages/login/Login";
@@ -33,10 +34,10 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/login" element={<Login />} />
 
-          <Route path="/plans" element={<Plans />} />
-          <Route path="/pages" element={<Pages />} />
-          <Route path="/payment-cancel" element={<PaymentCancel />} />
-          <Route path="/payment-success" element={<PaymentSuccess />} />
+          <Route path="/plans" element={<ProtectedRoute><Plans /></ProtectedRoute>} />
+          <Route path="/pages" element={<ProtectedRoute><Pages /></ProtectedRoute>} />
+          <Route path="/payment-cancel" element={<ProtectedRoute><PaymentCancel /></ProtectedRoute>} />
+          <Route path="/payment-success" element={<ProtectedRoute><PaymentSuccess /></ProtectedRoute>} />
         </Routes>
 
         <Footer />

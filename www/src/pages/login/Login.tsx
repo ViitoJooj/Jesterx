@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuthContext } from "../../hooks/AuthContext";
 
 import styles from "./Login.module.scss";
@@ -13,7 +13,9 @@ type Feedback = {
 
 export const Login: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login, loading, isAuthenticated } = useAuthContext();
+  const redirectTo = (location.state as { from?: string } | null)?.from ?? "/pages";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,10 +29,10 @@ export const Login: React.FC = () => {
         type: "success",
         text: "Login realizado com sucesso. Redirecionando...",
       });
-      const t = setTimeout(() => navigate("/pages", { replace: true }), 300);
+      const t = setTimeout(() => navigate(redirectTo, { replace: true }), 300);
       return () => clearTimeout(t);
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, redirectTo]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
