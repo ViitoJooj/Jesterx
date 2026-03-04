@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/ViitoJooj/Jesterx/internal/config"
@@ -115,6 +116,32 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(resp)
+}
+
+func (h *AuthHandler) VerifyEmail(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
+	path := r.URL.Path
+	prefix := "/api/v1/auth/verify/"
+
+	if !strings.HasPrefix(path, prefix) {
+		http.NotFound(w, r)
+		return
+	}
+
+	id := strings.TrimPrefix(path, prefix)
+	if id == "" {
+		log.Println("ID is requered")
+		http.Error(w, "token error", http.StatusBadRequest)
+		return
+	}
+
+	err := h.authService.VerifyEmail(id)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 }
 
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {

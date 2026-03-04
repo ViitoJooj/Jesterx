@@ -72,6 +72,27 @@ func (s *AuthService) Register(websiteId string, first_name string, last_name st
 	return user, nil
 }
 
+func (s *AuthService) VerifyEmail(user_id string) error {
+	user, err := s.userRepo.FindUserByID(user_id)
+	if err != nil {
+		return err
+	}
+	if user == nil {
+		return errors.New("user not found")
+	}
+
+	if user.Verified_email {
+		return errors.New("user already verified.")
+	}
+
+	err = s.userRepo.UpdateVerifiedEmailToTrue(user_id)
+	if err != nil {
+		return errors.New("Internal error")
+	}
+
+	return nil
+}
+
 func (s *AuthService) Login(websiteId string, email string, password string) (*domain.User, error) {
 	webSite, err := s.webSiteRepo.FindWebSiteByID(websiteId)
 	if err != nil {

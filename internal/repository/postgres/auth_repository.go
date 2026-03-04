@@ -107,3 +107,11 @@ func (r *connection) DeleteExpiredUnverifiedUsers() error {
 	`)
 	return err
 }
+
+func (r *connection) UpdateVerifiedEmailToTrue(id string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	query := `UPDATE users SET verified_email = true WHERE id = $1`
+	_, err := r.db.ExecContext(ctx, query, id)
+	return err
+}

@@ -14,6 +14,7 @@ func NewRouter() *http.ServeMux {
 
 func RegisterAuthRoutes(mux *http.ServeMux, h *handlers.AuthHandler, authService *service.AuthService) {
 	mux.HandleFunc("POST /api/v1/auth/register", h.Register)
+	mux.HandleFunc("GET /api/v1/auth/verify/", h.VerifyEmail)
 	mux.HandleFunc("POST /api/v1/auth/login", h.Login)
 	mux.HandleFunc("GET /api/v1/auth/refresh", h.Refresh)
 	mux.Handle("GET /api/v1/auth/me", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.Me))))

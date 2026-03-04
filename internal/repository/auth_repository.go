@@ -9,4 +9,5 @@ type UserRepository interface {
 	FindUserByID(id string) (*domain.User, error)
 	DeleteUserByID(id string) error
 	DeleteExpiredUnverifiedUsers() error
+	UpdateVerifiedEmailToTrue(id string) error
 }
