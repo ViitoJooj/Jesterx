@@ -16,18 +16,18 @@ func NewAuthRepository(db *sql.DB) *connection {
 func (r *connection) UserRegister(user domain.User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	query := `INSERT INTO users (id, website_id, first_name, last_name, email, password, role, updated_at, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
-	_, err := r.db.ExecContext(ctx, query, user.Id, user.WebsiteId, user.First_name, user.Last_name, user.Email, user.Password, user.Role, user.Updated_at, user.Created_at)
+	query := `INSERT INTO users (id, website_id, first_name, last_name, email, verified_email, password, role, updated_at, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
+	_, err := r.db.ExecContext(ctx, query, user.Id, user.WebsiteId, user.First_name, user.Last_name, user.Email, user.Verified_email, user.Password, user.Role, user.Updated_at, user.Created_at)
 	return err
 }
 
 func (r *connection) FindUserByEmail(email string) (*domain.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	query := `SELECT id, website_id, first_name, last_name, email, password, role, updated_at, created_at FROM users WHERE email = $1`
+	query := `SELECT id, website_id, first_name, last_name, email, verified_email password, role, updated_at, created_at FROM users WHERE email = $1`
 	var user domain.User
 	err := r.db.QueryRowContext(ctx, query, email).
-		Scan(&user.Id, &user.WebsiteId, &user.First_name, &user.Last_name, &user.Email, &user.Password, &user.Role, &user.Updated_at, &user.Created_at)
+		Scan(&user.Id, &user.WebsiteId, &user.First_name, &user.Last_name, &user.Email, &user.Verified_email, &user.Password, &user.Role, &user.Updated_at, &user.Created_at)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
@@ -40,10 +40,10 @@ func (r *connection) FindUserByEmail(email string) (*domain.User, error) {
 func (r *connection) FindUserByID(id string) (*domain.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	query := `SELECT id, website_id, first_name, last_name, email, password, role, updated_at, created_at FROM users WHERE id = $1`
+	query := `SELECT id, website_id, first_name, last_name, email, verified_email, password, role, updated_at, created_at FROM users WHERE id = $1`
 	var user domain.User
 	err := r.db.QueryRowContext(ctx, query, id).
-		Scan(&user.Id, &user.WebsiteId, &user.First_name, &user.Last_name, &user.Email, &user.Password, &user.Role, &user.Updated_at, &user.Created_at)
+		Scan(&user.Id, &user.WebsiteId, &user.First_name, &user.Last_name, &user.Email, &user.Verified_email, &user.Password, &user.Role, &user.Updated_at, &user.Created_at)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
@@ -66,7 +66,7 @@ func (r *connection) FindUserByEmailAndWebsite(email string, websiteId string) (
 	defer cancel()
 
 	query := `
-		SELECT id, website_id, first_name, last_name, email, password, role, updated_at, created_at
+		SELECT id, website_id, first_name, last_name, email, verified_email, password, role, updated_at, created_at
 		FROM users
 		WHERE email = $1 AND website_id = $2
 	`
@@ -79,6 +79,7 @@ func (r *connection) FindUserByEmailAndWebsite(email string, websiteId string) (
 			&user.First_name,
 			&user.Last_name,
 			&user.Email,
+			&user.Verified_email,
 			&user.Password,
 			&user.Role,
 			&user.Updated_at,
@@ -93,4 +94,16 @@ func (r *connection) FindUserByEmailAndWebsite(email string, websiteId string) (
 	}
 
 	return &user, nil
+}
+
+func (r *connection) DeleteExpiredUnverifiedUsers() error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_, err := r.db.ExecContext(ctx, `
+		DELETE FROM users
+		WHERE verified_email = false
+		AND created_at < NOW() - INTERVAL '10 minutes'
+	`)
+	return err
 }

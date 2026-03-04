@@ -20,6 +20,7 @@ var PGCNN = &PostgresConnection{}
 var Jwt_access_token string
 var Jwt_refresh_token string
 var IsDev bool
+var ResendKey string
 
 func LoadEnv() {
 	_ = godotenv.Load(".env")
@@ -38,6 +39,8 @@ func LoadEnv() {
 	if environment == "dev" {
 		IsDev = true
 	}
+
+	ResendKey = mustGetenv("RESEND_KEY")
 }
 
 func mustGetenv(key string) string {

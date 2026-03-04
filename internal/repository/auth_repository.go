@@ -8,4 +8,5 @@ type UserRepository interface {
 	FindUserByEmailAndWebsite(email string, website string) (*domain.User, error)
 	FindUserByID(id string) (*domain.User, error)
 	DeleteUserByID(id string) error
+	DeleteExpiredUnverifiedUsers() error
 }

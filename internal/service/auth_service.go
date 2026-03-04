@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -27,10 +28,13 @@ func NewAuthService(userRepo repository.UserRepository, webSiteRepo repository.W
 	}
 }
 
-func (s *AuthService) Register(websiteId string, first_name string, last_name string, email string, password string) (*domain.User, error) {
+// function used for delete not verifieds users in 10 minutes
+func (s *AuthService) DeleteExpiredUnverifiedUsers() error {
+	return s.userRepo.DeleteExpiredUnverifiedUsers()
+}
 
-	if email == "" || len(email) > 250 || len(email) < 5 ||
-		!strings.Contains(email, "@") || !strings.Contains(email, ".") {
+func (s *AuthService) Register(websiteId string, first_name string, last_name string, email string, password string) (*domain.User, error) {
+	if email == "" || len(email) > 250 || len(email) < 5 || !strings.Contains(email, "@") || !strings.Contains(email, ".") || strings.Contains(email, " ") {
 		return nil, errors.New("invalid email")
 	}
 
@@ -71,9 +75,11 @@ func (s *AuthService) Register(websiteId string, first_name string, last_name st
 func (s *AuthService) Login(websiteId string, email string, password string) (*domain.User, error) {
 	webSite, err := s.webSiteRepo.FindWebSiteByID(websiteId)
 	if err != nil {
-		return nil, err
+		log.Println(err)
+		return nil, errors.New("Internal error")
 	}
 	if webSite == nil {
+		log.Println("Website no exists")
 		return nil, errors.New("website does not exist")
 	}
 
@@ -82,11 +88,18 @@ func (s *AuthService) Login(websiteId string, email string, password string) (*d
 		return nil, err
 	}
 	if user == nil {
+		log.Println("User not exists")
 		return nil, errors.New("invalid credentials")
 	}
 
 	if !security.CheckPassword(password, user.Password) {
+		log.Println("Incorrect password")
 		return nil, errors.New("invalid credentials")
+	}
+
+	if !user.Verified_email {
+		log.Println("Email is not verified")
+		return nil, errors.New("Email is not verified")
 	}
 
 	return user, nil
@@ -121,6 +134,11 @@ func (s *AuthService) Refresh(refreshToken string) (string, error) {
 		return "", errors.New("website is banned")
 	}
 
+	if !user.Verified_email {
+		log.Println("Email is not verified")
+		return "", errors.New("Email is not verified")
+	}
+
 	accessClaims := security.AccessTokenClaims{
 		Iss:       "https://jesterx.com.br",
 		Sub:       user.Id,
@@ -145,6 +163,11 @@ func (s *AuthService) Me(userID string) (*domain.User, error) {
 	}
 	if user == nil {
 		return nil, errors.New("user not found")
+	}
+
+	if !user.Verified_email {
+		log.Println("Email is not verified")
+		return nil, errors.New("Email is not verified")
 	}
 
 	return user, nil

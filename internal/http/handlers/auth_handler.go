@@ -93,34 +93,16 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	claims := security.RefreshTokenClaims{
-		Iss:       "https://jesterx.com.br",
-		Sub:       user.Id,
-		WebsiteId: user.WebsiteId,
-		Exp:       time.Now().Add(30 * 24 * time.Hour).Unix(),
-	}
-
-	refreshToken, err := security.RefreshToken(claims)
+	err = security.SendVerifyEmail(user.Email, user.Id)
 	if err != nil {
-		http.Error(w, "internal error", http.StatusBadGateway)
+		log.Println("Error on sending email")
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	cookie := http.Cookie{
-		Name:     security.RefreshCookieName(user.WebsiteId),
-		Value:    refreshToken,
-		Path:     "/",
-		MaxAge:   60 * 60 * 24 * 30,
-		HttpOnly: true,
-		Secure:   !config.IsDev,
-		SameSite: http.SameSiteLaxMode,
-	}
-
-	http.SetCookie(w, &cookie)
-
 	resp := AuthResponse{
 		Success: true,
-		Message: "registered.",
+		Message: "registered, please verify you email.",
 		Data: UserData{
 			Id:         user.Id,
 			WebsiteId:  user.WebsiteId,
@@ -129,8 +111,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	log.Printf("\nUser: %s; is registred", user.First_name+" "+user.Last_name)
-	http.SetCookie(w, &cookie)
+	log.Printf("User: %s; is registred", user.First_name+" "+user.Last_name)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(resp)

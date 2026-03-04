@@ -7,6 +7,7 @@ import (
 	httpRouter "github.com/ViitoJooj/Jesterx/internal/http"
 	"github.com/ViitoJooj/Jesterx/internal/http/handlers"
 	middleware "github.com/ViitoJooj/Jesterx/internal/http/middlewares"
+	"github.com/ViitoJooj/Jesterx/internal/jobs"
 	"github.com/ViitoJooj/Jesterx/internal/repository/postgres"
 	"github.com/ViitoJooj/Jesterx/internal/service"
 )
@@ -33,9 +34,9 @@ func main() {
 	httpRouter.RegisterWebsiteRoutes(mux, websiteHandler)
 
 	// Middlewares
-	handler := middleware.IdentityMiddleware(authService)(
-		middleware.CORS(mux),
-	)
+	handler := middleware.IdentityMiddleware(authService)(middleware.CORS(mux))
+
+	go jobs.StartCleanupUserWorker(authService)
 
 	http.ListenAndServe(":8080", handler)
 }
