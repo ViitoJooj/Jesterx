@@ -25,6 +25,7 @@ type MeData = {
   website_id?: string;
   email: string;
   role?: string;
+  user_plan?: string;
   first_name?: string;
   last_name?: string;
   avatar_url?: string;

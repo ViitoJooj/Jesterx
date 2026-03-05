@@ -1,0 +1,100 @@
+.wrap {
+  border: 1px solid #293142;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #0f1724;
+  color: #d6deee;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.wrapFlat {
+  border: 0 !important;
+  border-radius: 0 !important;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 34px;
+  padding: 0 10px;
+  background: #151f30;
+  border-bottom: 1px solid #202b3f;
+  flex-shrink: 0;
+}
+
+.lang {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #8ea0bd;
+}
+
+/* row with gutter + code stack */
+.body {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  flex: 1;
+  overflow: auto;
+  min-height: 520px;
+}
+
+.gutter {
+  border-right: 1px solid #202b3f;
+  background: #0b1320;
+  color: #647897;
+  text-align: right;
+  padding: 8px 6px 8px 0;
+  font-family: "Cascadia Code", "Consolas", monospace;
+  font-size: 0.82rem;
+  line-height: 1.45rem;
+  user-select: none;
+  overflow: hidden;
+}
+
+.lineNumber {
+  height: 1.45rem;
+}
+
+/* Overlay: pre + textarea share the same grid cell */
+.codeStack {
+  display: grid;
+  overflow: auto;
+  position: relative;
+
+  > * {
+    grid-area: 1 / 1;
+    font-family: "Cascadia Code", "Consolas", monospace;
+    font-size: 0.84rem;
+    line-height: 1.45rem;
+    tab-size: 2;
+    padding: 8px 10px;
+    margin: 0;
+    min-height: 520px;
+    white-space: pre;
+    word-break: normal;
+    overflow-wrap: normal;
+    box-sizing: border-box;
+  }
+}
+
+.highlightPre {
+  pointer-events: none;
+  overflow: hidden;
+  border: 0;
+  background: transparent;
+  color: #d6deee;
+}
+
+.codeTA {
+  color: transparent;
+  caret-color: #d4d4d4;
+  background: transparent;
+  resize: none;
+  border: 0;
+  outline: none;
+  position: relative;
+  z-index: 1;
+}

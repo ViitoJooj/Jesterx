@@ -3,47 +3,120 @@
 .main {
   min-height: calc(100vh - 72px);
   background: $background-color;
-  padding: 2rem 1rem 3rem;
-}
-
-.container {
-  max-width: 920px;
+  padding: 1.5rem 1rem 3rem;
+  max-width: 1200px;
   margin: 0 auto;
-  background: $background-color-primary;
-  border: 1px solid $border-color;
-  border-radius: $border-radius-lg;
-  box-shadow: $shadow-md;
-  padding: 1.5rem;
 }
 
-.header {
-  margin-bottom: 1.25rem;
+.topBar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 
-  h1 {
-    margin: 0 0 0.4rem;
-  }
+  h1 { margin: 0 0 .25rem; }
+  p { margin: 0; color: $font-color-secondary; font-size: .9rem; }
+}
 
-  p {
-    margin: 0;
+.topActions {
+  display: flex;
+  gap: .5rem;
+  flex-shrink: 0;
+}
+
+.error {
+  color: $error-color;
+  background: rgba(209, 58, 47, .08);
+  border: 1px solid rgba(209, 58, 47, .2);
+  border-radius: $border-radius-md;
+  padding: .65rem .85rem;
+  margin-bottom: 1rem;
+  font-size: .92rem;
+}
+
+.successBanner {
+  background: rgba(5, 150, 105, .1);
+  border: 1px solid rgba(5, 150, 105, .3);
+  border-radius: $border-radius-md;
+  padding: .65rem .85rem;
+  margin-bottom: 1rem;
+  font-size: .92rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  button {
+    background: none;
+    border: none;
+    cursor: pointer;
     color: $font-color-secondary;
   }
 }
 
+/* ───── Create form ───── */
+.createForm {
+  background: $background-color-primary;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-lg;
+  padding: 1.25rem;
+  margin-bottom: 2rem;
+
+  h2 { margin: 0 0 1rem; font-size: 1.1rem; }
+}
+
+.typeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: .6rem;
+  margin-bottom: 1.25rem;
+}
+
+.typeCard {
+  display: grid;
+  gap: .3rem;
+  text-align: center;
+  border: 2px solid $border-color;
+  border-radius: $border-radius-md;
+  background: $background-color-primary;
+  color: $font-color-primary;
+  padding: .85rem .6rem;
+  cursor: pointer;
+  transition: $transition-base;
+
+  strong { font-size: .9rem; }
+
+  span {
+    color: $font-color-secondary;
+    font-size: .78rem;
+    line-height: 1.35;
+  }
+
+  &:hover {
+    border-color: var(--type-color, $color-primary);
+  }
+}
+
+.typeCardActive {
+  border-color: var(--type-color, $color-primary) !important;
+  box-shadow: 0 0 0 3px rgba(255, 96, 41, .18);
+}
+
+.typeIcon {
+  font-size: 1.6rem;
+}
+
 .form {
   display: grid;
-  gap: 1rem;
+  gap: .85rem;
 }
 
 .fieldGroup {
   display: grid;
-  gap: 0.4rem;
+  gap: .35rem;
 
-  label {
-    font-weight: 600;
-    color: $font-color-primary;
-  }
+  label { font-weight: 600; font-size: .9rem; color: $font-color-primary; }
 
-  select,
   textarea {
     width: 100%;
     box-sizing: border-box;
@@ -51,40 +124,246 @@
     border-radius: $border-radius-md;
     background: $background-color-primary;
     color: $font-color-primary;
-    padding: 0.7rem 0.85rem;
+    padding: .65rem .8rem;
     font-family: inherit;
-    font-size: 0.95rem;
-  }
-
-  textarea {
+    font-size: .92rem;
     resize: vertical;
-    min-height: 120px;
+    min-height: 80px;
   }
 }
 
-.actions {
+.textInput {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-md;
+  background: $background-color-primary;
+  color: $font-color-primary;
+  padding: .65rem .8rem;
+  font-family: inherit;
+  font-size: .92rem;
+
+  &:focus {
+    outline: 2px solid $color-primary;
+    border-color: transparent;
+  }
+}
+
+.editorRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: .5rem;
+}
+
+.editorChip {
+  display: grid;
+  gap: .2rem;
+  text-align: left;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-md;
+  background: $background-color-primary;
+  color: $font-color-primary;
+  padding: .65rem .75rem;
+  cursor: pointer;
+  transition: $transition-base;
+
+  strong { font-size: .85rem; }
+  span { font-size: .75rem; color: $font-color-secondary; }
+
+  &:hover { border-color: $color-primary; }
+}
+
+.editorChipActive {
+  border-color: $color-primary !important;
+  background: rgba(255, 96, 41, .06) !important;
+}
+
+.routeSection {
+  border: 1px solid $border-color;
+  border-radius: $border-radius-md;
+  padding: .85rem;
+  display: grid;
+  gap: .6rem;
+}
+
+.routeHeader {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+
+  h3 { margin: 0; font-size: .95rem; }
+  span { font-size: .85rem; color: $font-color-secondary; }
 }
 
-.error {
-  margin: 0;
-  color: $error-color;
-  font-size: 0.95rem;
+.routeList { display: grid; gap: .5rem; }
+
+.routeItem {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto auto;
+  gap: .4rem;
+  align-items: center;
+  background: $background-color-secondary;
+  border-radius: $border-radius-sm;
+  padding: .5rem;
 }
 
-.result {
-  margin-top: 1.25rem;
+.routeCheck {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  font-size: .82rem;
+  color: $font-color-secondary;
+  white-space: nowrap;
+}
+
+.removeRoute {
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: $font-color-secondary;
+  padding: .2rem .35rem;
+  border-radius: 4px;
+
+  &:hover { background: rgba(209, 58, 47, .12); color: $error-color; }
+  &:disabled { opacity: .35; cursor: not-allowed; }
+}
+
+.actions { display: flex; gap: .65rem; flex-wrap: wrap; }
+
+/* ───── Website grid ───── */
+.empty {
+  text-align: center;
+  padding: 3rem;
+  color: $font-color-secondary;
+  border: 1px dashed $border-color;
+  border-radius: $border-radius-lg;
+}
+
+.typeSection {
+  margin-bottom: 2rem;
+}
+
+.typeSectionHeader {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  margin-bottom: .85rem;
+
+  h2 { margin: 0; font-size: 1rem; }
+}
+
+.typeSectionIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.typeCount {
+  font-size: .82rem;
+  color: $font-color-secondary;
+  background: $background-color-secondary;
+  border-radius: 12px;
+  padding: .15rem .55rem;
+}
+
+.siteGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: .85rem;
+}
+
+.siteCard {
+  border: 1px solid $border-color;
+  border-radius: $border-radius-md;
+  background: $background-color-primary;
+  overflow: hidden;
+  transition: $transition-base;
+
+  &:hover { box-shadow: 0 4px 16px rgba(15, 24, 43, .1); }
+}
+
+.siteCardTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: .6rem;
+  padding: .85rem;
+  border-left: 3px solid $border-color;
+}
+
+.siteInfo {
+  display: grid;
+  gap: .2rem;
+
+  strong { font-size: .95rem; }
+  span { font-size: .8rem; color: $font-color-secondary; }
+}
+
+.deleteBtn {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: .2rem .3rem;
+  border-radius: 6px;
+  flex-shrink: 0;
+  opacity: .55;
+  transition: opacity .15s, background .15s;
+
+  &:hover { opacity: 1; background: rgba(209, 58, 47, .1); }
+  &:disabled { opacity: .25; cursor: not-allowed; }
+}
+
+.siteActions {
+  display: flex;
+  gap: .35rem;
+  padding: .6rem .85rem;
   border-top: 1px solid $border-color;
-  padding-top: 1rem;
+  background: $background-color-secondary;
+  flex-wrap: wrap;
+}
 
-  h2 {
-    margin: 0 0 0.7rem;
-  }
+.editorBtn {
+  border: 1px solid $border-color;
+  background: $background-color-primary;
+  border-radius: $border-radius-sm;
+  padding: .35rem .6rem;
+  cursor: pointer;
+  font-size: .8rem;
+  color: $font-color-primary;
+  transition: $transition-base;
 
-  p {
-    margin: 0.2rem 0;
-    color: $font-color-secondary;
-  }
+  &:hover { border-color: $color-primary; color: $color-primary; }
+}
+
+.editorBtnDim {
+  opacity: .45;
+  font-size: .75rem;
+}
+
+.openBtn {
+  text-decoration: none;
+  border: 1px solid $color-primary;
+  color: $color-primary;
+  border-radius: $border-radius-sm;
+  padding: .35rem .6rem;
+  font-size: .8rem;
+  margin-left: auto;
+
+  &:hover { background: rgba(255, 96, 41, .08); }
+}
+
+.centerBox {
+  max-width: 480px;
+  margin: 4rem auto;
+  text-align: center;
+  display: grid;
+  gap: 1rem;
+
+  p { color: $font-color-secondary; }
 }

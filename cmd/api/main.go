@@ -24,7 +24,7 @@ func main() {
 
 	// Services
 	authService := service.NewAuthService(authRepo, websiteRepo)
-	websiteService := service.NewWebSiteService(websiteRepo)
+	websiteService := service.NewWebSiteService(websiteRepo, authRepo)
 	paymentService := service.NewPaymentService(paymentRepo, authRepo)
 
 	// Handlers
@@ -34,7 +34,7 @@ func main() {
 
 	// Routers
 	httpRouter.RegisterAuthRoutes(mux, authHandler, authService)
-	httpRouter.RegisterWebsiteRoutes(mux, websiteHandler)
+	httpRouter.RegisterWebsiteRoutes(mux, websiteHandler, authService)
 	httpRouter.RegisterPaymentRoutes(mux, paymentHandler, authService)
 
 	// Middlewares

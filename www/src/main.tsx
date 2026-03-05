@@ -15,6 +15,9 @@ import { Login } from "./pages/login/Login";
 import { VerifyEmail } from "./pages/verify-email/VerifyEmail";
 import { Plans } from "./pages/plans/Plans";
 import { Pages } from "./pages/pages/Pages";
+import { ElementorEditor } from "./pages/elementor-editor/ElementorEditor";
+import { ReactEditor } from "./pages/react-editor/ReactEditor";
+import { SvelteEditor } from "./pages/svelte-editor/SvelteEditor";
 import { PaymentSuccess } from "./pages/payment-success/PaymentSuccess";
 import { PaymentCancel } from "./pages/payment-cancel/PaymentCancel";
 import { NotFound } from "./pages/not-found/NotFound";
@@ -26,20 +29,20 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <BrowserRouter>
       <AuthProvider websiteId={websiteId}>
         <Header />
-
         <Routes>
           <Route path="*" element={<NotFound />} />
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/login" element={<Login />} />
-
           <Route path="/plans" element={<ProtectedRoute><Plans /></ProtectedRoute>} />
           <Route path="/pages" element={<ProtectedRoute><Pages /></ProtectedRoute>} />
+          <Route path="/pages/:siteId/elementor" element={<ProtectedRoute><ElementorEditor /></ProtectedRoute>} />
+          <Route path="/pages/:siteId/react" element={<ProtectedRoute><ReactEditor /></ProtectedRoute>} />
+          <Route path="/pages/:siteId/svelte" element={<ProtectedRoute><SvelteEditor /></ProtectedRoute>} />
           <Route path="/payment-cancel" element={<ProtectedRoute><PaymentCancel /></ProtectedRoute>} />
           <Route path="/payment-success" element={<ProtectedRoute><PaymentSuccess /></ProtectedRoute>} />
         </Routes>
-
         <Footer />
       </AuthProvider>
     </BrowserRouter>

@@ -21,8 +21,20 @@ func RegisterAuthRoutes(mux *http.ServeMux, h *handlers.AuthHandler, authService
 	mux.HandleFunc("GET /api/v1/auth/logout", h.Logout)
 }
 
-func RegisterWebsiteRoutes(mux *http.ServeMux, h *handlers.WebSiteHandler) {
-	mux.HandleFunc("POST /api/v1/websites", h.CreateWebSite)
+func RegisterWebsiteRoutes(mux *http.ServeMux, h *handlers.WebSiteHandler, authService *service.AuthService) {
+	mux.Handle("GET /p/{siteID}/{path...}", http.HandlerFunc(h.PublicRender))
+	mux.Handle("GET /p/{siteID}", http.HandlerFunc(h.PublicRender))
+
+	mux.Handle("GET /api/v1/websites", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.ListWebSites))))
+	mux.Handle("GET /api/v1/site-apis", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.ListSiteAPIs))))
+	mux.Handle("POST /api/v1/websites", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.CreateWebSite))))
+	mux.Handle("DELETE /api/v1/sites/{siteID}", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.DeleteWebSite))))
+	mux.Handle("POST /api/v1/sites/{siteID}/routes", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.ReplaceRoutes))))
+	mux.Handle("GET /api/v1/sites/{siteID}/routes", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.ListRoutes))))
+	mux.Handle("GET /api/v1/sites/{siteID}/versions", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.ListVersions))))
+	mux.Handle("POST /api/v1/sites/{siteID}/versions", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.CreateVersion))))
+	mux.Handle("POST /api/v1/sites/{siteID}/publish/{version}", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.PublishVersion))))
+	mux.Handle("GET /api/v1/sites/{siteID}/scan-reports/{version}", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.GetScanReport))))
 }
 
 func RegisterPaymentRoutes(mux *http.ServeMux, h *handlers.PaymentHandler, authService *service.AuthService) {
