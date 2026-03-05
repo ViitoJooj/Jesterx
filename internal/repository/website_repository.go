@@ -14,6 +14,7 @@ type WebsiteRepository interface {
 	FindWebSiteByName(name string) (*domain.WebSite, error)
 	UpdateWebSiteByID(id string, website domain.WebSite) error
 	DeleteWebSiteByID(id string) error
+	CountWebSitesByUserID(userID string) (int, error)
 	ReplaceRoutesByWebsiteID(websiteID string, routes []domain.WebSiteRoute) error
 	ListRoutesByWebsiteID(websiteID string) ([]domain.WebSiteRoute, error)
 	FindRouteByWebsiteIDAndPath(websiteID string, path string) (*domain.WebSiteRoute, error)

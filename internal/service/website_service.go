@@ -20,12 +20,14 @@ type RouteInput struct {
 type WebSiteService struct {
 	webSiteRepo repository.WebsiteRepository
 	userRepo    repository.UserRepository
+	paymentRepo repository.PaymentRepository
 }
 
-func NewWebSiteService(webSiteRepo repository.WebsiteRepository, userRepo repository.UserRepository) *WebSiteService {
+func NewWebSiteService(webSiteRepo repository.WebsiteRepository, userRepo repository.UserRepository, paymentRepo repository.PaymentRepository) *WebSiteService {
 	return &WebSiteService{
 		webSiteRepo: webSiteRepo,
 		userRepo:    userRepo,
+		paymentRepo: paymentRepo,
 	}
 }
 
@@ -96,21 +98,22 @@ func routeMatches(pattern string, target string) bool {
 	return true
 }
 
-func getPlanRouteLimit(plan string) int {
-	normalized := strings.ToLower(strings.TrimSpace(plan))
-	if normalized == "" {
-		return 0
+func (s *WebSiteService) getPlanLimits(planName string) (maxSites int, maxRoutes int) {
+	if s.paymentRepo != nil {
+		plan, err := s.paymentRepo.FindPlanByName(planName)
+		if err == nil && plan != nil {
+			return plan.MaxSites, plan.MaxRoutes
+		}
 	}
-	if strings.Contains(normalized, "enterprise") || strings.Contains(normalized, "ultra") || strings.Contains(normalized, "scale") {
-		return 100
+	// Fallback: infer from name
+	normalized := strings.ToLower(strings.TrimSpace(planName))
+	if strings.Contains(normalized, "enterprise") || strings.Contains(normalized, "ultra") {
+		return 50, 100
 	}
 	if strings.Contains(normalized, "pro") || strings.Contains(normalized, "business") {
-		return 30
+		return 10, 30
 	}
-	if strings.Contains(normalized, "starter") || strings.Contains(normalized, "basic") || strings.Contains(normalized, "essencial") {
-		return 8
-	}
-	return 15
+	return 3, 8
 }
 
 func (s *WebSiteService) ensureActivePlan(userID string) (string, error) {
@@ -146,8 +149,18 @@ func (s *WebSiteService) CreateWebSite(Type string, Image []byte, Name string, S
 	Type = strings.ToUpper(strings.TrimSpace(Type))
 	Name = strings.TrimSpace(Name)
 
-	if _, err := s.ensureActivePlan(Creator_id); err != nil {
+	plan, err := s.ensureActivePlan(Creator_id)
+	if err != nil {
 		return nil, err
+	}
+
+	maxSites, _ := s.getPlanLimits(plan)
+	count, err := s.webSiteRepo.CountWebSitesByUserID(Creator_id)
+	if err != nil {
+		return nil, err
+	}
+	if count >= maxSites {
+		return nil, fmt.Errorf("site limit reached for your plan (%d/%d)", count, maxSites)
 	}
 
 	if !isValidType(Type) {
@@ -184,7 +197,7 @@ func (s *WebSiteService) ReplaceRoutes(userID string, websiteID string, routes [
 		return nil, err
 	}
 
-	limit := getPlanRouteLimit(plan)
+	_, limit := s.getPlanLimits(plan)
 	if len(routes) == 0 {
 		return nil, errors.New("at least one route is required")
 	}

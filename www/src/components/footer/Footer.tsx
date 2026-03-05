@@ -22,15 +22,14 @@ export const Footer: React.FC = () => {
               <Link to="/">Início</Link>
               <Link to="/pages">Minhas páginas</Link>
               <Link to="/products">Meus produtos</Link>
-              <Link to="/temas">Loja de temas</Link>
-              <Link to="/api">API</Link>
+              <Link to="/plans">Planos</Link>
             </div>
             <div className={styles.col}>
               <h4>Empresa</h4>
               <Link to="/about">Sobre</Link>
-              <Link to="/support">Suporte</Link>
               <Link to="/docs">Documentação</Link>
               <Link to="/status">Status</Link>
+              <a href="mailto:suporte@jesterx.com">Suporte</a>
             </div>
           </div>
         </div>

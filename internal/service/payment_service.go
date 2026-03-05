@@ -162,6 +162,51 @@ func (s *PaymentService) ProcessStripeWebhook(rawBody []byte, signature string) 
 	}
 }
 
+func (s *PaymentService) CancelSubscription(userID string) error {
+	payment, err := s.paymentRepo.FindLatestCompletedPaymentByUserID(userID)
+	if err != nil {
+		return errors.New("internal error")
+	}
+	if payment == nil {
+		return errors.New("no active subscription found")
+	}
+
+	session, err := retrieveStripeCheckoutSession(payment.ReferenceID)
+	if err != nil {
+		return err
+	}
+	if session.Subscription == "" {
+		return errors.New("no stripe subscription associated")
+	}
+
+	if err := cancelStripeSubscription(session.Subscription); err != nil {
+		return err
+	}
+
+	return s.paymentRepo.UpdatePaymentStatusByReference(payment.ReferenceID, "canceled")
+}
+
+func cancelStripeSubscription(subscriptionID string) error {
+	endpoint := "https://api.stripe.com/v1/subscriptions/" + url.QueryEscape(subscriptionID)
+	req, err := http.NewRequest(http.MethodDelete, endpoint, nil)
+	if err != nil {
+		return errors.New("internal error")
+	}
+	req.Header.Set("Authorization", "Bearer "+config.StripeSecret)
+
+	client := &http.Client{Timeout: 15 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return errors.New("failed to reach stripe")
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		body, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("stripe error: %s", string(body))
+	}
+	return nil
+}
+
 func (s *PaymentService) ConfirmCheckoutSession(userID, sessionID string) error {
 	if userID == "" || sessionID == "" {
 		return errors.New("invalid request")

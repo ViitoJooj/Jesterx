@@ -10,6 +10,8 @@ type Plan struct {
 	Price        float64
 	BillingCycle string
 	Active       bool
+	MaxSites     int
+	MaxRoutes    int
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }

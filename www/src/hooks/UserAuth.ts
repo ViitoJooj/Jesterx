@@ -28,7 +28,10 @@ type MeData = {
   user_plan?: string;
   first_name?: string;
   last_name?: string;
+  cpf_cnpj?: string;
   avatar_url?: string;
+  plan_max_sites?: number;
+  plan_max_routes?: number;
 };
 
 export function useAuth(websiteId: WebsiteId) {
@@ -136,6 +139,37 @@ export function useAuth(websiteId: WebsiteId) {
   );
 
   /**
+   * UPDATE PROFILE
+   */
+  const updateProfile = useCallback(
+    async (data: {
+      first_name: string;
+      last_name: string;
+      cpf_cnpj?: string | null;
+      avatar_url?: string | null;
+    }) => {
+      await apiFetch<void>("/api/v1/auth/me", {
+        method: "PATCH",
+        websiteId,
+        body: JSON.stringify(data),
+      });
+      await loadMe();
+    },
+    [websiteId, loadMe]
+  );
+
+  /**
+   * CANCEL PLAN
+   */
+  const cancelPlan = useCallback(async () => {
+    await apiFetch<void>("/api/v1/payments/cancel", {
+      method: "POST",
+      websiteId,
+    });
+    await loadMe();
+  }, [websiteId, loadMe]);
+
+  /**
    * LOGOUT
    */
   const logout = useCallback(async () => {
@@ -179,6 +213,8 @@ export function useAuth(websiteId: WebsiteId) {
     refresh,
     loadMe,
     logout,
+    updateProfile,
+    cancelPlan,
     authHeader: accessToken
       ? { Authorization: `Bearer ${accessToken}` }
       : {},

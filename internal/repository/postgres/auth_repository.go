@@ -37,6 +37,8 @@ func (r *connection) FindUserByID(id string) (*domain.User, error) {
 		u.role,
 		u.updated_at,
 		u.created_at,
+		u.cpf_cnpj,
+		u.avatar_url,
 		p.name AS plan_name
 	FROM users u
 	LEFT JOIN LATERAL (
@@ -56,6 +58,8 @@ func (r *connection) FindUserByID(id string) (*domain.User, error) {
 
 	var user domain.User
 	var planName sql.NullString
+	var cpfCnpj sql.NullString
+	var avatarUrl sql.NullString
 
 	err := r.db.QueryRowContext(ctx, query, id).
 		Scan(
@@ -69,6 +73,8 @@ func (r *connection) FindUserByID(id string) (*domain.User, error) {
 			&user.Role,
 			&user.Updated_at,
 			&user.Created_at,
+			&cpfCnpj,
+			&avatarUrl,
 			&planName,
 		)
 
@@ -81,6 +87,12 @@ func (r *connection) FindUserByID(id string) (*domain.User, error) {
 
 	if planName.Valid {
 		user.Plan = &planName.String
+	}
+	if cpfCnpj.Valid {
+		user.CpfCnpj = &cpfCnpj.String
+	}
+	if avatarUrl.Valid {
+		user.AvatarUrl = &avatarUrl.String
 	}
 
 	return &user, nil
@@ -92,62 +104,36 @@ func (r *connection) FindUserByEmail(email string) (*domain.User, error) {
 
 	query := `
 	SELECT 
-		u.id,
-		u.website_id,
-		u.first_name,
-		u.last_name,
-		u.email,
-		u.verified_email,
-		u.password,
-		u.role,
-		u.updated_at,
-		u.created_at,
+		u.id, u.website_id, u.first_name, u.last_name, u.email, u.verified_email,
+		u.password, u.role, u.updated_at, u.created_at, u.cpf_cnpj, u.avatar_url,
 		p.name AS plan_name
 	FROM users u
 	LEFT JOIN LATERAL (
-		SELECT *
-		FROM payments pay
-		WHERE pay.user_id = u.id
-		  AND pay.website_id = u.website_id
-		  AND pay.status = 'completed'
-		ORDER BY pay.purchased_in DESC
-		LIMIT 1
+		SELECT * FROM payments pay
+		WHERE pay.user_id = u.id AND pay.website_id = u.website_id AND pay.status = 'completed'
+		ORDER BY pay.purchased_in DESC LIMIT 1
 	) pay ON TRUE
-	LEFT JOIN plans p
-		ON p.price = pay.amount
-	   AND p.active = true
+	LEFT JOIN plans p ON p.price = pay.amount AND p.active = true
 	WHERE u.email = $1
 	`
 
 	var user domain.User
-	var planName sql.NullString
+	var planName, cpfCnpj, avatarUrl sql.NullString
 
-	err := r.db.QueryRowContext(ctx, query, email).
-		Scan(
-			&user.Id,
-			&user.WebsiteId,
-			&user.First_name,
-			&user.Last_name,
-			&user.Email,
-			&user.Verified_email,
-			&user.Password,
-			&user.Role,
-			&user.Updated_at,
-			&user.Created_at,
-			&planName,
-		)
-
+	err := r.db.QueryRowContext(ctx, query, email).Scan(
+		&user.Id, &user.WebsiteId, &user.First_name, &user.Last_name, &user.Email,
+		&user.Verified_email, &user.Password, &user.Role, &user.Updated_at, &user.Created_at,
+		&cpfCnpj, &avatarUrl, &planName,
+	)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
 	if err != nil {
 		return nil, err
 	}
-
-	if planName.Valid {
-		user.Plan = &planName.String
-	}
-
+	if planName.Valid { user.Plan = &planName.String }
+	if cpfCnpj.Valid  { user.CpfCnpj = &cpfCnpj.String }
+	if avatarUrl.Valid { user.AvatarUrl = &avatarUrl.String }
 	return &user, nil
 }
 
@@ -157,64 +143,47 @@ func (r *connection) FindUserByEmailAndWebsite(email string, websiteId string) (
 
 	query := `
 	SELECT 
-		u.id,
-		u.website_id,
-		u.first_name,
-		u.last_name,
-		u.email,
-		u.verified_email,
-		u.password,
-		u.role,
-		u.updated_at,
-		u.created_at,
+		u.id, u.website_id, u.first_name, u.last_name, u.email, u.verified_email,
+		u.password, u.role, u.updated_at, u.created_at, u.cpf_cnpj, u.avatar_url,
 		p.name AS plan_name
 	FROM users u
 	LEFT JOIN LATERAL (
-		SELECT *
-		FROM payments pay
-		WHERE pay.user_id = u.id
-		  AND pay.website_id = u.website_id
-		  AND pay.status = 'completed'
-		ORDER BY pay.purchased_in DESC
-		LIMIT 1
+		SELECT * FROM payments pay
+		WHERE pay.user_id = u.id AND pay.website_id = u.website_id AND pay.status = 'completed'
+		ORDER BY pay.purchased_in DESC LIMIT 1
 	) pay ON TRUE
-	LEFT JOIN plans p
-		ON p.price = pay.amount
-	   AND p.active = true
-	WHERE u.email = $1
-	  AND u.website_id = $2
+	LEFT JOIN plans p ON p.price = pay.amount AND p.active = true
+	WHERE u.email = $1 AND u.website_id = $2
 	`
 
 	var user domain.User
-	var planName sql.NullString
+	var planName, cpfCnpj, avatarUrl sql.NullString
 
-	err := r.db.QueryRowContext(ctx, query, email, websiteId).
-		Scan(
-			&user.Id,
-			&user.WebsiteId,
-			&user.First_name,
-			&user.Last_name,
-			&user.Email,
-			&user.Verified_email,
-			&user.Password,
-			&user.Role,
-			&user.Updated_at,
-			&user.Created_at,
-			&planName,
-		)
-
+	err := r.db.QueryRowContext(ctx, query, email, websiteId).Scan(
+		&user.Id, &user.WebsiteId, &user.First_name, &user.Last_name, &user.Email,
+		&user.Verified_email, &user.Password, &user.Role, &user.Updated_at, &user.Created_at,
+		&cpfCnpj, &avatarUrl, &planName,
+	)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
 	if err != nil {
 		return nil, err
 	}
-
-	if planName.Valid {
-		user.Plan = &planName.String
-	}
-
+	if planName.Valid { user.Plan = &planName.String }
+	if cpfCnpj.Valid  { user.CpfCnpj = &cpfCnpj.String }
+	if avatarUrl.Valid { user.AvatarUrl = &avatarUrl.String }
 	return &user, nil
+}
+
+func (r *connection) UpdateUserProfile(id string, firstName string, lastName string, cpfCnpj *string, avatarUrl *string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	_, err := r.db.ExecContext(ctx,
+		`UPDATE users SET first_name=$1, last_name=$2, cpf_cnpj=$3, avatar_url=$4, updated_at=NOW() WHERE id=$5`,
+		firstName, lastName, cpfCnpj, avatarUrl, id,
+	)
+	return err
 }
 
 func (r *connection) DeleteUserByID(id string) error {

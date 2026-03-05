@@ -18,6 +18,7 @@ func RegisterAuthRoutes(mux *http.ServeMux, h *handlers.AuthHandler, authService
 	mux.HandleFunc("POST /api/v1/auth/login", h.Login)
 	mux.HandleFunc("GET /api/v1/auth/refresh", h.Refresh)
 	mux.Handle("GET /api/v1/auth/me", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.Me))))
+	mux.Handle("PATCH /api/v1/auth/me", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.UpdateProfile))))
 	mux.HandleFunc("GET /api/v1/auth/logout", h.Logout)
 }
 
@@ -41,5 +42,6 @@ func RegisterPaymentRoutes(mux *http.ServeMux, h *handlers.PaymentHandler, authS
 	mux.HandleFunc("GET /api/v1/plans", h.ListPlans)
 	mux.Handle("POST /api/v1/payments/checkout", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.CreateCheckout))))
 	mux.Handle("GET /api/v1/payments/confirm", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.ConfirmCheckout))))
+	mux.Handle("POST /api/v1/payments/cancel", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.CancelSubscription))))
 	mux.HandleFunc("POST /api/v1/payments/webhook", h.StripeWebhook)
 }

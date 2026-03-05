@@ -23,8 +23,8 @@ func main() {
 	paymentRepo := postgres.NewPaymentRepository(db)
 
 	// Services
-	authService := service.NewAuthService(authRepo, websiteRepo)
-	websiteService := service.NewWebSiteService(websiteRepo, authRepo)
+	authService := service.NewAuthService(authRepo, websiteRepo, paymentRepo)
+	websiteService := service.NewWebSiteService(websiteRepo, authRepo, paymentRepo)
 	paymentService := service.NewPaymentService(paymentRepo, authRepo)
 
 	// Handlers

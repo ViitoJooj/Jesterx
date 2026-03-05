@@ -10,4 +10,5 @@ type UserRepository interface {
 	DeleteUserByID(id string) error
 	DeleteExpiredUnverifiedUsers() error
 	UpdateVerifiedEmailToTrue(id string) error
+	UpdateUserProfile(id string, firstName string, lastName string, cpfCnpj *string, avatarUrl *string) error
 }

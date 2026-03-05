@@ -21,6 +21,11 @@ import { SvelteEditor } from "./pages/svelte-editor/SvelteEditor";
 import { PaymentSuccess } from "./pages/payment-success/PaymentSuccess";
 import { PaymentCancel } from "./pages/payment-cancel/PaymentCancel";
 import { NotFound } from "./pages/not-found/NotFound";
+import { Docs } from "./pages/docs/Docs";
+import { About } from "./pages/about/About";
+import { Status } from "./pages/status/Status";
+
+import { Profile } from "./pages/profile/Profile";
 
 const websiteId = (import.meta.env.VITE_WEBSITE_ID as string | undefined) ?? DEFAULT_WEBSITE_ID;
 
@@ -42,6 +47,10 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           <Route path="/pages/:siteId/svelte" element={<ProtectedRoute><SvelteEditor /></ProtectedRoute>} />
           <Route path="/payment-cancel" element={<ProtectedRoute><PaymentCancel /></ProtectedRoute>} />
           <Route path="/payment-success" element={<ProtectedRoute><PaymentSuccess /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/docs" element={<Docs />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/status" element={<Status />} />
         </Routes>
         <Footer />
       </AuthProvider>

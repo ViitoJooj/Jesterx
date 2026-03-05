@@ -16,6 +16,8 @@ type User struct {
 	Password       string
 	Role           string
 	Plan           *string
+	CpfCnpj        *string
+	AvatarUrl      *string
 	Updated_at     time.Time
 	Created_at     time.Time
 }

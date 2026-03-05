@@ -15,16 +15,18 @@ import (
 type AuthService struct {
 	userRepo    repository.UserRepository
 	webSiteRepo repository.WebsiteRepository
+	paymentRepo repository.PaymentRepository
 }
 
 func (s *AuthService) GetUserByID(userID string) (*domain.User, error) {
 	return s.userRepo.FindUserByID(userID)
 }
 
-func NewAuthService(userRepo repository.UserRepository, webSiteRepo repository.WebsiteRepository) *AuthService {
+func NewAuthService(userRepo repository.UserRepository, webSiteRepo repository.WebsiteRepository, paymentRepo repository.PaymentRepository) *AuthService {
 	return &AuthService{
 		userRepo:    userRepo,
 		webSiteRepo: webSiteRepo,
+		paymentRepo: paymentRepo,
 	}
 }
 
@@ -185,13 +187,49 @@ func (s *AuthService) Me(userID string) (*domain.User, error) {
 	if user == nil {
 		return nil, errors.New("user not found")
 	}
-
 	if !user.Verified_email {
-		log.Println("Email is not verified")
 		return nil, errors.New("Email is not verified")
 	}
-
 	return user, nil
+}
+
+// MeWithPlan returns the user and [maxSites, maxRoutes] from their active plan.
+func (s *AuthService) MeWithPlan(userID string) (*domain.User, [2]int, error) {
+	user, err := s.Me(userID)
+	if err != nil {
+		return nil, [2]int{}, err
+	}
+	limits := [2]int{1, 5} // conservative defaults
+	if user.Plan != nil && *user.Plan != "" {
+		plan, err := s.paymentRepo.FindPlanByName(*user.Plan)
+		if err == nil && plan != nil {
+			limits = [2]int{plan.MaxSites, plan.MaxRoutes}
+		}
+	}
+	return user, limits, nil
+}
+
+func (s *AuthService) UpdateProfile(userID string, firstName string, lastName string, cpfCnpj *string, avatarUrl *string) error {
+	firstName = strings.TrimSpace(firstName)
+	lastName  = strings.TrimSpace(lastName)
+	if len(firstName) < 1 || len(firstName) > 50 {
+		return errors.New("invalid first name")
+	}
+	if len(lastName) < 1 || len(lastName) > 50 {
+		return errors.New("invalid last name")
+	}
+	if cpfCnpj != nil {
+		raw := strings.TrimSpace(*cpfCnpj)
+		if len(raw) > 18 {
+			return errors.New("invalid cpf/cnpj")
+		}
+		if raw == "" {
+			cpfCnpj = nil
+		} else {
+			cpfCnpj = &raw
+		}
+	}
+	return s.userRepo.UpdateUserProfile(userID, firstName, lastName, cpfCnpj, avatarUrl)
 }
 
 func (s *AuthService) Logout(w http.ResponseWriter) error {

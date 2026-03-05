@@ -46,14 +46,25 @@ type ResponseRefreshToken struct {
 }
 
 type UserMeResponse struct {
-	ID        string `json:"id"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	Email     string `json:"email"`
-	Role      string `json:"role"`
-	Plan      string `json:"user_plan"`
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
+	ID          string  `json:"id"`
+	FirstName   string  `json:"first_name"`
+	LastName    string  `json:"last_name"`
+	Email       string  `json:"email"`
+	Role        string  `json:"role"`
+	Plan        string  `json:"user_plan"`
+	CpfCnpj     string  `json:"cpf_cnpj"`
+	AvatarUrl   string  `json:"avatar_url"`
+	PlanMaxSites  int   `json:"plan_max_sites"`
+	PlanMaxRoutes int   `json:"plan_max_routes"`
+	CreatedAt   string  `json:"created_at"`
+	UpdatedAt   string  `json:"updated_at"`
+}
+
+type UpdateProfileRequest struct {
+	FirstName string  `json:"first_name"`
+	LastName  string  `json:"last_name"`
+	CpfCnpj   *string `json:"cpf_cnpj"`
+	AvatarUrl *string `json:"avatar_url"`
 }
 
 type AuthHandler struct {
@@ -287,26 +298,61 @@ func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.authService.Me(userID)
+	user, planLimits, err := h.authService.MeWithPlan(userID)
 	if err != nil {
 		http.Error(w, "not allowed", http.StatusUnauthorized)
 		return
 	}
 
 	resp := UserMeResponse{
-		ID:        user.Id,
-		FirstName: user.First_name,
-		LastName:  user.Last_name,
-		Email:     user.Email,
-		Role:      user.Role,
-		Plan:      *user.Plan,
-		CreatedAt: user.Created_at.Format(time.RFC3339),
-		UpdatedAt: user.Updated_at.Format(time.RFC3339),
+		ID:            user.Id,
+		FirstName:     user.First_name,
+		LastName:      user.Last_name,
+		Email:         user.Email,
+		Role:          user.Role,
+		Plan:          derefString(user.Plan),
+		CpfCnpj:       derefString(user.CpfCnpj),
+		AvatarUrl:     derefString(user.AvatarUrl),
+		PlanMaxSites:  planLimits[0],
+		PlanMaxRoutes: planLimits[1],
+		CreatedAt:     user.Created_at.Format(time.RFC3339),
+		UpdatedAt:     user.Updated_at.Format(time.RFC3339),
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(resp)
+}
+
+func derefString(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
+}
+
+func (h *AuthHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
+	userID, ok := middleware.UserID(r.Context())
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	defer r.Body.Close()
+	var req UpdateProfileRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.authService.UpdateProfile(userID, req.FirstName, req.LastName, req.CpfCnpj, req.AvatarUrl); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]any{"success": true, "message": "profile updated"})
 }
 
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {

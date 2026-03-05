@@ -19,7 +19,9 @@ func (r *connection) ListActivePlans() ([]domain.Plan, error) {
 
 	query := `
 		SELECT id, name, COALESCE(description, ''), COALESCE(description_md, ''), price,
-		       COALESCE(billing_cycle, 'monthly'), active, created_at, updated_at
+		       COALESCE(billing_cycle, 'monthly'), active,
+		       COALESCE(max_sites, 1), COALESCE(max_routes, 5),
+		       created_at, updated_at
 		FROM plans
 		WHERE active = true
 		ORDER BY price ASC
@@ -35,26 +37,16 @@ func (r *connection) ListActivePlans() ([]domain.Plan, error) {
 	for rows.Next() {
 		var plan domain.Plan
 		if err := rows.Scan(
-			&plan.ID,
-			&plan.Name,
-			&plan.Description,
-			&plan.DescriptionM,
-			&plan.Price,
-			&plan.BillingCycle,
-			&plan.Active,
-			&plan.CreatedAt,
-			&plan.UpdatedAt,
+			&plan.ID, &plan.Name, &plan.Description, &plan.DescriptionM,
+			&plan.Price, &plan.BillingCycle, &plan.Active,
+			&plan.MaxSites, &plan.MaxRoutes,
+			&plan.CreatedAt, &plan.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
 		plans = append(plans, plan)
 	}
-
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return plans, nil
+	return plans, rows.Err()
 }
 
 func (r *connection) FindPlanByID(id int64) (*domain.Plan, error) {
@@ -63,22 +55,18 @@ func (r *connection) FindPlanByID(id int64) (*domain.Plan, error) {
 
 	query := `
 		SELECT id, name, COALESCE(description, ''), COALESCE(description_md, ''), price,
-		       COALESCE(billing_cycle, 'monthly'), active, created_at, updated_at
-		FROM plans
-		WHERE id = $1
+		       COALESCE(billing_cycle, 'monthly'), active,
+		       COALESCE(max_sites, 1), COALESCE(max_routes, 5),
+		       created_at, updated_at
+		FROM plans WHERE id = $1
 	`
 
 	var plan domain.Plan
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
-		&plan.ID,
-		&plan.Name,
-		&plan.Description,
-		&plan.DescriptionM,
-		&plan.Price,
-		&plan.BillingCycle,
-		&plan.Active,
-		&plan.CreatedAt,
-		&plan.UpdatedAt,
+		&plan.ID, &plan.Name, &plan.Description, &plan.DescriptionM,
+		&plan.Price, &plan.BillingCycle, &plan.Active,
+		&plan.MaxSites, &plan.MaxRoutes,
+		&plan.CreatedAt, &plan.UpdatedAt,
 	)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
@@ -87,6 +75,57 @@ func (r *connection) FindPlanByID(id int64) (*domain.Plan, error) {
 		return nil, err
 	}
 	return &plan, nil
+}
+
+func (r *connection) FindPlanByName(name string) (*domain.Plan, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+		SELECT id, name, COALESCE(description, ''), COALESCE(description_md, ''), price,
+		       COALESCE(billing_cycle, 'monthly'), active,
+		       COALESCE(max_sites, 1), COALESCE(max_routes, 5),
+		       created_at, updated_at
+		FROM plans WHERE LOWER(name) = LOWER($1) AND active = true LIMIT 1
+	`
+
+	var plan domain.Plan
+	err := r.db.QueryRowContext(ctx, query, name).Scan(
+		&plan.ID, &plan.Name, &plan.Description, &plan.DescriptionM,
+		&plan.Price, &plan.BillingCycle, &plan.Active,
+		&plan.MaxSites, &plan.MaxRoutes,
+		&plan.CreatedAt, &plan.UpdatedAt,
+	)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &plan, nil
+}
+
+func (r *connection) FindLatestCompletedPaymentByUserID(userID string) (*domain.Payment, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	var p domain.Payment
+	err := r.db.QueryRowContext(ctx, `
+		SELECT id, user_id, website_id, reference_id, type, quantity, amount, currency, status, purchased_in
+		FROM payments
+		WHERE user_id = $1 AND status = 'completed'
+		ORDER BY purchased_in DESC LIMIT 1
+	`, userID).Scan(
+		&p.ID, &p.UserID, &p.WebsiteID, &p.ReferenceID, &p.Type,
+		&p.Quantity, &p.Amount, &p.Currency, &p.Status, &p.PurchasedIn,
+	)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &p, nil
 }
 
 func (r *connection) CreatePayment(payment domain.Payment) (*domain.Payment, error) {
