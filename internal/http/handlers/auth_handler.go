@@ -230,6 +230,11 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteLaxMode,
 	}
 
+	var plan string
+	if user.Plan != nil {
+		plan = *user.Plan
+	}
+
 	resp := AuthResponse{
 		Success: true,
 		Message: "logged in.",
@@ -237,7 +242,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 			Id:         user.Id,
 			WebsiteId:  user.WebsiteId,
 			Email:      user.Email,
-			Plan:       *user.Plan,
+			Plan:       plan,
 			Updated_at: user.Updated_at,
 			Created_at: user.Created_at,
 		},

@@ -229,7 +229,7 @@ export const ElementorEditor = () => {
 
   const [doc, setDoc] = useState<BuilderDoc>({
     title: "Site",
-    canvas: { width: 1400, height: 900, background: "#f8f9ff" },
+    canvas: { width: 2000, height: 900, background: "#f8f9ff" },
     header: { enabled: false, height: 80, background: "#1a2740", blocks: [] },
     footer: { enabled: false, height: 100, background: "#1a2740", blocks: [] },
     pages: { "/": { title: "Pagina Inicial", blocks: [] } },
