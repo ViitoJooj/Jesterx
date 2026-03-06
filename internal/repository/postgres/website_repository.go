@@ -37,22 +37,6 @@ func (r *connection) FindWebSiteByID(id string) (*domain.WebSite, error) {
 	return &website, nil
 }
 
-func (r *connection) FindWebSiteByUserID(id string) (*domain.WebSite, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	query := `SELECT * FROM websites WHERE creator_id = $1`
-	var website domain.WebSite
-	err := r.db.QueryRowContext(ctx, query, id).
-		Scan(&website.Id, &website.Type, &website.Image, &website.Name, &website.Short_description, &website.Description, &website.Creator_id, &website.Banned, &website.Updated_at, &website.Created_at)
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, err
-	}
-	return &website, nil
-}
-
 func (r *connection) ListWebSitesByUserID(id string) ([]domain.WebSite, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

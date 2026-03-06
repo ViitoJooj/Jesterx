@@ -9,7 +9,6 @@ import (
 type WebsiteRepository interface {
 	SaveWebSite(website domain.WebSite) error
 	FindWebSiteByID(id string) (*domain.WebSite, error)
-	FindWebSiteByUserID(id string) (*domain.WebSite, error)
 	ListWebSitesByUserID(id string) ([]domain.WebSite, error)
 	FindWebSiteByName(name string) (*domain.WebSite, error)
 	UpdateWebSiteByID(id string, website domain.WebSite) error

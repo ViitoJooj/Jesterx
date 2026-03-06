@@ -8,22 +8,27 @@ import styles from "./ElementorEditor.module.scss";
 type BlockType =
   | "heading" | "paragraph" | "button" | "image" | "carousel"
   | "input_var" | "variable_text" | "profile_card" | "product_card"
-  | "video" | "admin_add_btn" | "divider";
+  | "video" | "divider" | "product_list" | "user_avatar";
 
 type StyleMap = Record<string, string>;
 
 type Block = {
   id: string; type: BlockType; text?: string; label?: string; href?: string;
-  action_type?: "navigate" | "call_api"; action_target?: string; api_id?: string;
-  src?: string; object_fit?: "cover" | "contain" | "fill"; images?: string[];
+  action_type?: "navigate" | "call_api" | "store_login" | "store_logout" | "add_to_cart" | "open_popup" | "close_popup" | "store_register" | "add_product";
+  action_target?: string; api_id?: string;
+  src?: string; object_fit?: "cover" | "contain" | "fill"; images?: string[]; var_src?: string;
   var_name?: string; placeholder?: string; profile_name?: string;
   profile_subtitle?: string; profile_image?: string; video_url?: string;
   admin_only?: boolean; btn_action_type?: "add_product" | "add_video";
-  style: StyleMap; x: number; y: number; w: number; h: number;
+  product_id?: string; page_size?: number;
+  popup_id?: string; email_var?: string; password_var?: string; register_mode?: boolean;
+  first_name_var?: string; last_name_var?: string; input_type?: string;
+  inner_blocks?: Block[]; style: StyleMap;x: number; y: number; w: number; h: number;
   rotation: number; z: number;
 };
 
 type PageDoc = { title: string; blocks: Block[] };
+type PopupDoc = { title: string; blocks: Block[]; width: number; height: number; background: string };
 type GlobalSection = { enabled: boolean; height: number; background: string; blocks: Block[] };
 type BuilderDoc = {
   title: string;
@@ -31,6 +36,7 @@ type BuilderDoc = {
   header: GlobalSection;
   footer: GlobalSection;
   pages: Record<string, PageDoc>;
+  popups: Record<string, PopupDoc>;
 };
 type LegacyDoc = { title?: string; blocks?: Block[] };
 
@@ -44,7 +50,7 @@ type SiteAPIsResponse = { success: boolean; message: string; data: SiteAPI[] };
 
 type GuideState = { vertical: number | null; horizontal: number | null };
 type EditSection = "page" | "header" | "footer";
-type LeftTab = "elements" | "layers" | "settings" | "templates";
+type LeftTab = "elements" | "layers" | "settings" | "templates" | "popups";
 
 type Interaction =
   | { mode: "drag"; id: string; section: EditSection; dx: number; dy: number }
@@ -57,8 +63,9 @@ const ZOOM_LEVELS = [0.4, 0.5, 0.65, 0.75, 1.0, 1.25];
 const BLOCK_CATEGORIES = [
   { label: "Texto", items: [{ type: "heading" as BlockType, icon: "🔤", label: "Titulo" }, { type: "paragraph" as BlockType, icon: "📝", label: "Paragrafo" }, { type: "variable_text" as BlockType, icon: "��", label: "Texto Variavel" }] },
   { label: "Midia", items: [{ type: "image" as BlockType, icon: "🖼", label: "Imagem" }, { type: "carousel" as BlockType, icon: "🎠", label: "Carousel" }, { type: "video" as BlockType, icon: "▶", label: "Video" }] },
-  { label: "Interativo", items: [{ type: "button" as BlockType, icon: "🔘", label: "Botao" }, { type: "input_var" as BlockType, icon: "📌", label: "Input Variavel" }, { type: "admin_add_btn" as BlockType, icon: "🔒", label: "Botao Admin" }] },
-  { label: "Layout", items: [{ type: "profile_card" as BlockType, icon: "👤", label: "Perfil" }, { type: "product_card" as BlockType, icon: "🛍", label: "Product Card" }, { type: "divider" as BlockType, icon: "➖", label: "Divider" }] },
+  { label: "Interativo", items: [{ type: "button" as BlockType, icon: "🔘", label: "Botao" }, { type: "input_var" as BlockType, icon: "📌", label: "Input Variavel" }] },
+  { label: "Loja", items: [{ type: "product_card" as BlockType, icon: "🛍", label: "Product Card" }, { type: "product_list" as BlockType, icon: "📦", label: "Lista de Produtos" }] },
+  { label: "Layout", items: [{ type: "profile_card" as BlockType, icon: "👤", label: "Perfil" }, { type: "user_avatar" as BlockType, icon: "🙂", label: "Avatar Usuario" }, { type: "divider" as BlockType, icon: "➖", label: "Divider" }] },
 ];
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
@@ -86,7 +93,8 @@ function newBlock(type: BlockType, z: number): Block {
   if (type === "profile_card") return { id: nextId("blk"), type, profile_name: "Nome do usuario", profile_subtitle: "Cliente Premium", profile_image: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80", style: { ...DEFAULT_STYLE, border: "1px solid #dde4f4", background: "#ffffff", padding: "16px" }, x: 860, y: 370, w: 280, h: 210, rotation: 0, z };
   if (type === "product_card") return { id: nextId("blk"), type, style: { ...DEFAULT_STYLE, border: "1px solid #dde4f4", background: "#ffffff", padding: "12px" }, x: 860, y: 610, w: 300, h: 280, rotation: 0, z };
   if (type === "video") return { id: nextId("blk"), type, video_url: "", style: { ...DEFAULT_STYLE, padding: "0", background: "#000" }, x: 120, y: 400, w: 640, h: 360, rotation: 0, z };
-  if (type === "admin_add_btn") return { id: nextId("blk"), type, label: "Adicionar produto", btn_action_type: "add_product", admin_only: true, style: { ...DEFAULT_STYLE, background: "#1a2740", color: "#ffffff", padding: "10px 18px", "border-radius": "8px" }, x: 120, y: 500, w: 220, h: 50, rotation: 0, z };
+  if (type === "user_avatar") return { id: nextId("blk"), type, object_fit: "cover", style: { ...DEFAULT_STYLE, padding: "0", background: "#e6ebf5", "border-radius": "50%" }, x: 860, y: 100, w: 100, h: 100, rotation: 0, z };
+  if (type === "product_list") return { id: nextId("blk"), type, page_size: 6, style: { ...DEFAULT_STYLE, border: "1px solid #dde4f4", background: "#f8f9ff", padding: "8px" }, x: 80, y: 400, w: 900, h: 480, rotation: 0, z };
   return { id: nextId("blk"), type: "divider", style: { ...DEFAULT_STYLE, background: "#cad3e7", padding: "0" }, x: 120, y: 740, w: 720, h: 2, rotation: 0, z };
 }
 
@@ -119,6 +127,7 @@ function parseDoc(source: string | undefined, routes: RouteItem[]): BuilderDoc |
       header: parsed.header || defaultHeader,
       footer: parsed.footer || defaultFooter,
       pages,
+      popups: (parsed as any).popups || {},
     };
   } catch { return null; }
 }
@@ -152,7 +161,7 @@ function computeSnap(x: number, y: number, w: number, h: number, movingID: strin
 }
 
 function getBlockIcon(type: BlockType): string {
-  const icons: Record<BlockType, string> = { heading: "🔤", paragraph: "📝", button: "🔘", image: "🖼", carousel: "🎠", input_var: "📌", variable_text: "💬", profile_card: "👤", product_card: "🛍", video: "▶", admin_add_btn: "🔒", divider: "➖" };
+  const icons: Record<string, string> = { heading: "🔤", paragraph: "📝", button: "🔘", image: "🖼", carousel: "🎠", input_var: "📌", variable_text: "💬", profile_card: "👤", product_card: "🛍", product_list: "📦", video: "▶", divider: "➖", user_avatar: "🙂" };
   return icons[type] ?? "▪";
 }
 
@@ -160,19 +169,20 @@ function renderBlock(block: Block) {
   if (block.type === "heading") return <h1 style={{ fontSize: block.style["font-size"], fontWeight: block.style["font-weight"], margin: 0, lineHeight: 1.15, overflow: "hidden" }}>{block.text}</h1>;
   if (block.type === "paragraph") return <p style={{ fontSize: block.style["font-size"], margin: 0, lineHeight: 1.45, overflow: "hidden" }}>{block.text}</p>;
   if (block.type === "button") return <span className={styles.inlineButton}>{block.label || "Botao"}</span>;
-  if (block.type === "image") { const fit = block.object_fit || "cover"; return block.src ? <img src={block.src} alt="imagem" style={{ width: "100%", height: "100%", objectFit: fit, display: "block" }} /> : <div className={styles.imagePlaceholder}>🖼 Imagem</div>; }
+  if (block.type === "user_avatar") return <div className={styles.imagePlaceholder}>🙂 Avatar do Usuário</div>;
+  if (block.type === "image") { const fit = block.object_fit || "cover"; if (block.var_src) return <div className={styles.imagePlaceholder}>🖼 {block.var_src}</div>; return block.src ? <img src={block.src} alt="imagem" style={{ width: "100%", height: "100%", objectFit: fit, display: "block" }} /> : <div className={styles.imagePlaceholder}>🖼 Imagem</div>; }
   if (block.type === "carousel") { const first = block.images?.[0]; return first ? <img src={first} alt="carousel" className={styles.image} /> : <div className={styles.imagePlaceholder}>🖼 Carousel</div>; }
   if (block.type === "input_var") return <div className={styles.inputVarWrap}><input className={styles.previewInput} placeholder={block.placeholder || "Digite"} readOnly />{block.var_name && <span className={styles.varBadge}>📌 {block.var_name}</span>}</div>;
   if (block.type === "variable_text") return <p style={{ fontSize: block.style["font-size"], margin: 0, overflow: "hidden" }}>{block.text || "Texto dinamico {{var}}"}</p>;
   if (block.type === "profile_card") return <div className={styles.profileCard}>{block.profile_image && <img src={block.profile_image} alt="perfil" />}<h4>{block.profile_name || "Nome"}</h4><p>{block.profile_subtitle || "Descricao"}</p></div>;
-  if (block.type === "product_card") return <div className={styles.productCard}><strong>Product card</strong><small>Usa API /api/store/products</small></div>;
+  if (block.type === "product_card") return <div className={styles.productCard}><strong>🛍 Product Card</strong><small>{block.product_id ? `Produto: ${block.product_id.slice(0,8)}…` : "Exibe 1º produto da loja"}</small></div>;
+  if (block.type === "product_list") return <div className={styles.productCard}><strong>📦 Lista de Produtos</strong><small>{`${block.page_size || 6} por página · ordenado por + vendidos`}</small></div>;
   if (block.type === "video") {
     const url = block.video_url || "";
     const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([\w-]+)/);
     const embedSrc = ytMatch ? `https://www.youtube.com/embed/${ytMatch[1]}` : url;
     return url ? <iframe src={embedSrc} allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowFullScreen style={{ width: "100%", height: "100%", border: "none", display: "block" }} title="video" /> : <div className={styles.videoPlaceholder}>▶ Adicione uma URL de video</div>;
   }
-  if (block.type === "admin_add_btn") return <div className={styles.adminAddBtn}>{block.admin_only && <span className={styles.adminBadge}>🔒 Admin</span>}<span>{block.label || (block.btn_action_type === "add_video" ? "Adicionar video" : "Adicionar produto")}</span></div>;
   return <div className={styles.dividerPreview} />;
 }
 
@@ -181,6 +191,7 @@ function makeLandingTemplate(): BuilderDoc {
   return {
     title: "Site",
     canvas: { width: 1400, height: 900, background: "#f8f9ff" },
+    popups: {},
     header: {
       enabled: true, height: 80, background: "#1a2740",
       blocks: [
@@ -233,6 +244,7 @@ export const ElementorEditor = () => {
     header: { enabled: false, height: 80, background: "#1a2740", blocks: [] },
     footer: { enabled: false, height: 100, background: "#1a2740", blocks: [] },
     pages: { "/": { title: "Pagina Inicial", blocks: [] } },
+    popups: {},
   });
   const docRef = useRef<BuilderDoc>(doc);
   docRef.current = doc;
@@ -243,6 +255,15 @@ export const ElementorEditor = () => {
   activeRouteRef.current = activeRoute;
 
   const [selected, setSelected] = useState<string | null>(null);
+  const [editingPopup, setEditingPopup] = useState<string | null>(null);
+  const editingPopupRef = useRef<string | null>(null);
+  editingPopupRef.current = editingPopup;
+  const [editingProductCard, setEditingProductCard] = useState<string | null>(null);
+  const [editingProductCardSection, setEditingProductCardSection] = useState<EditSection>("page");
+  const editingProductCardRef = useRef<string | null>(null);
+  const editingProductCardSectionRef = useRef<EditSection>("page");
+  editingProductCardRef.current = editingProductCard;
+  editingProductCardSectionRef.current = editingProductCardSection;
   const [editSection, setEditSection] = useState<EditSection>("page");
   const [leftTab, setLeftTab] = useState<LeftTab>("elements");
   const [zoom, setZoom] = useState(1.0);
@@ -264,10 +285,23 @@ export const ElementorEditor = () => {
 
   // ─ Derived ──────────────────────────────────────────────────────────────────
   const currentBlocks = useMemo(() => {
+    if (editingPopup) return doc.popups[editingPopup]?.blocks || [];
+    if (editingProductCard) {
+      const pcSec = editingProductCardSection;
+      const src = pcSec === "header" ? doc.header.blocks : pcSec === "footer" ? doc.footer.blocks : doc.pages[activeRoute]?.blocks || [];
+      return src.find(b => b.id === editingProductCard)?.inner_blocks || [];
+    }
     if (editSection === "header") return doc.header.blocks;
     if (editSection === "footer") return doc.footer.blocks;
     return doc.pages[activeRoute]?.blocks || [];
-  }, [editSection, doc, activeRoute]);
+  }, [editSection, doc, activeRoute, editingPopup, editingProductCard, editingProductCardSection]);
+
+  const pcCardBlock = useMemo(() => {
+    if (!editingProductCard) return null;
+    const pcSec = editingProductCardSection;
+    const src = pcSec === "header" ? doc.header.blocks : pcSec === "footer" ? doc.footer.blocks : doc.pages[activeRoute]?.blocks || [];
+    return src.find(b => b.id === editingProductCard) ?? null;
+  }, [editingProductCard, editingProductCardSection, doc, activeRoute]);
 
   const selectedBlock = useMemo(() => currentBlocks.find(b => b.id === selected) || null, [currentBlocks, selected]);
 
@@ -300,8 +334,20 @@ export const ElementorEditor = () => {
   }
 
   // ─ Block mutation ────────────────────────────────────────────────────────────
+  function clampBlock(block: Block, cw: number, ch: number): Block {
+    const w = Math.min(block.w, cw);
+    const h = Math.min(block.h, ch);
+    const x = Math.max(0, Math.min(block.x, cw - w));
+    const y = Math.max(0, Math.min(block.y, ch - h));
+    return { ...block, x, y, w, h };
+  }
+
   function updateBlock(section: EditSection, id: string, patch: Partial<Block>) {
     setDoc(prev => {
+      const pid = editingPopupRef.current;
+      if (pid) return { ...prev, popups: { ...prev.popups, [pid]: { ...prev.popups[pid], blocks: (prev.popups[pid]?.blocks || []).map(b => b.id === id ? { ...b, ...patch } : b) } } };
+      const pcId = editingProductCardRef.current;
+      if (pcId) { const pcSec = editingProductCardSectionRef.current; const mp = (bl: Block[]) => bl.map(b => b.id === pcId ? { ...b, inner_blocks: (b.inner_blocks || []).map(ib => ib.id === id ? { ...ib, ...patch } : ib) } : b); if (pcSec === "header") return { ...prev, header: { ...prev.header, blocks: mp(prev.header.blocks) } }; if (pcSec === "footer") return { ...prev, footer: { ...prev.footer, blocks: mp(prev.footer.blocks) } }; const r = activeRouteRef.current; return { ...prev, pages: { ...prev.pages, [r]: { ...prev.pages[r], blocks: mp(prev.pages[r]?.blocks || []) } } }; }
       if (section === "header") return { ...prev, header: { ...prev.header, blocks: prev.header.blocks.map(b => b.id === id ? { ...b, ...patch } : b) } };
       if (section === "footer") return { ...prev, footer: { ...prev.footer, blocks: prev.footer.blocks.map(b => b.id === id ? { ...b, ...patch } : b) } };
       const route = activeRouteRef.current;
@@ -311,9 +357,29 @@ export const ElementorEditor = () => {
 
   function addBlock(type: BlockType) {
     const maxZ = currentBlocks.reduce((acc, b) => Math.max(acc, b.z || 0), 0);
-    const block = newBlock(type, maxZ + 1);
+    let block = newBlock(type, maxZ + 1);
+    // Clamp to canvas dimensions so block is always visible on add
+    const pid = editingPopupRef.current;
+    const pcIdClamp = editingProductCardRef.current;
+    if (pcIdClamp) {
+      const pcSecC = editingProductCardSectionRef.current;
+      const srcC = pcSecC === "header" ? doc.header.blocks : pcSecC === "footer" ? doc.footer.blocks : doc.pages[activeRoute]?.blocks || [];
+      const pcBl = srcC.find(b => b.id === pcIdClamp);
+      block = clampBlock(block, pcBl?.w || 300, pcBl?.h || 280);
+    } else if (pid) {
+      const popup = doc.popups[pid];
+      block = clampBlock(block, popup?.width || 480, popup?.height || 560);
+    } else if (editSection === "header") {
+      block = clampBlock(block, doc.canvas.width, doc.header.height || 80);
+    } else if (editSection === "footer") {
+      block = clampBlock(block, doc.canvas.width, doc.footer.height || 100);
+    }
     pushHistory();
     setDoc(prev => {
+      const pid = editingPopupRef.current;
+      const pcIdAdd = editingProductCardRef.current;
+      if (pcIdAdd) { const pcSecA = editingProductCardSectionRef.current; const mpA = (bl: Block[]) => bl.map(b => b.id === pcIdAdd ? { ...b, inner_blocks: [...(b.inner_blocks || []), block] } : b); if (pcSecA === "header") return { ...prev, header: { ...prev.header, blocks: mpA(prev.header.blocks) } }; if (pcSecA === "footer") return { ...prev, footer: { ...prev.footer, blocks: mpA(prev.footer.blocks) } }; const rA = activeRouteRef.current; return { ...prev, pages: { ...prev.pages, [rA]: { ...prev.pages[rA], blocks: mpA(prev.pages[rA]?.blocks || []) } } }; }
+      if (pid) return { ...prev, popups: { ...prev.popups, [pid]: { ...prev.popups[pid], blocks: [...(prev.popups[pid]?.blocks || []), block] } } };
       if (editSection === "header") return { ...prev, header: { ...prev.header, blocks: [...prev.header.blocks, block] } };
       if (editSection === "footer") return { ...prev, footer: { ...prev.footer, blocks: [...prev.footer.blocks, block] } };
       const route = activeRouteRef.current;
@@ -325,6 +391,10 @@ export const ElementorEditor = () => {
   function removeBlock(id: string) {
     pushHistory();
     setDoc(prev => {
+      const pid = editingPopupRef.current;
+      const pcIdRm = editingProductCardRef.current;
+      if (pcIdRm) { const pcSecR = editingProductCardSectionRef.current; const mpR = (bl: Block[]) => bl.map(b => b.id === pcIdRm ? { ...b, inner_blocks: (b.inner_blocks || []).filter(ib => ib.id !== id) } : b); if (pcSecR === "header") return { ...prev, header: { ...prev.header, blocks: mpR(prev.header.blocks) } }; if (pcSecR === "footer") return { ...prev, footer: { ...prev.footer, blocks: mpR(prev.footer.blocks) } }; const rR = activeRouteRef.current; return { ...prev, pages: { ...prev.pages, [rR]: { ...prev.pages[rR], blocks: mpR(prev.pages[rR]?.blocks || []) } } }; }
+      if (pid) return { ...prev, popups: { ...prev.popups, [pid]: { ...prev.popups[pid], blocks: (prev.popups[pid]?.blocks || []).filter(b => b.id !== id) } } };
       if (editSection === "header") return { ...prev, header: { ...prev.header, blocks: prev.header.blocks.filter(b => b.id !== id) } };
       if (editSection === "footer") return { ...prev, footer: { ...prev.footer, blocks: prev.footer.blocks.filter(b => b.id !== id) } };
       const route = activeRouteRef.current;
@@ -340,6 +410,10 @@ export const ElementorEditor = () => {
     const copy: Block = { ...source, id: nextId("blk"), x: source.x + 24, y: source.y + 24, z: maxZ + 1 };
     pushHistory();
     setDoc(prev => {
+      const pid = editingPopupRef.current;
+      const pcIdDup = editingProductCardRef.current;
+      if (pcIdDup) { const pcSecD = editingProductCardSectionRef.current; const mpD = (bl: Block[]) => bl.map(b => b.id === pcIdDup ? { ...b, inner_blocks: [...(b.inner_blocks || []), copy] } : b); if (pcSecD === "header") return { ...prev, header: { ...prev.header, blocks: mpD(prev.header.blocks) } }; if (pcSecD === "footer") return { ...prev, footer: { ...prev.footer, blocks: mpD(prev.footer.blocks) } }; const rD = activeRouteRef.current; return { ...prev, pages: { ...prev.pages, [rD]: { ...prev.pages[rD], blocks: mpD(prev.pages[rD]?.blocks || []) } } }; }
+      if (pid) return { ...prev, popups: { ...prev.popups, [pid]: { ...prev.popups[pid], blocks: [...(prev.popups[pid]?.blocks || []), copy] } } };
       if (editSection === "header") return { ...prev, header: { ...prev.header, blocks: [...prev.header.blocks, copy] } };
       if (editSection === "footer") return { ...prev, footer: { ...prev.footer, blocks: [...prev.footer.blocks, copy] } };
       const route = activeRouteRef.current;
@@ -356,8 +430,10 @@ export const ElementorEditor = () => {
     if (action === "duplicate") { duplicateBlock(block.id); setMenu(null); return; }
     if (action === "bringForward") { const maxZ = currentBlocks.reduce((acc, b) => Math.max(acc, b.z || 0), 0); updateBlock(editSection, block.id, { z: maxZ + 1 }); setMenu(null); return; }
     if (action === "sendBackward") { const minZ = currentBlocks.reduce((acc, b) => Math.min(acc, b.z || 0), Infinity); updateBlock(editSection, block.id, { z: Math.max(0, minZ - 1) }); setMenu(null); return; }
-    if (action === "width100") { updateBlock(editSection, block.id, { w: doc.canvas.width }); setMenu(null); return; }
-    const canvasH = editSection === "header" ? doc.header.height : editSection === "footer" ? doc.footer.height : doc.canvas.height;
+    if (action === "width100") { const _epid = editingPopupRef.current; const _pcid = editingProductCardRef.current; const w = _pcid ? (pcCardBlock?.w || 300) : _epid ? (doc.popups[_epid]?.width || 480) : doc.canvas.width; updateBlock(editSection, block.id, { w }); setMenu(null); return; }
+    const _epid2 = editingPopupRef.current;
+    const _pcid2 = editingProductCardRef.current;
+    const canvasH = _pcid2 ? (pcCardBlock?.h || 280) : _epid2 ? (doc.popups[_epid2]?.height || 560) : (editSection === "header" ? doc.header.height : editSection === "footer" ? doc.footer.height : doc.canvas.height);
     updateBlock(editSection, block.id, { h: canvasH }); setMenu(null);
   }
 
@@ -383,6 +459,21 @@ export const ElementorEditor = () => {
     }
   }
 
+  function addPopup() {
+    const id = nextId("popup");
+    const title = `Popup ${Object.keys(doc.popups).length + 1}`;
+    pushHistory();
+    setDoc(prev => ({ ...prev, popups: { ...prev.popups, [id]: { title, blocks: [], width: 480, height: 560, background: "#ffffff" } } }));
+    setEditingPopup(id);
+    setEditSection("page");
+  }
+
+  function removePopup(id: string) {
+    pushHistory();
+    setDoc(prev => { const p = { ...prev.popups }; delete p[id]; return { ...prev, popups: p }; });
+    if (editingPopup === id) setEditingPopup(null);
+  }
+
   function applyTemplate(type: "landing" | "blank") {
     if (type === "landing") {
       const t = makeLandingTemplate();
@@ -391,7 +482,7 @@ export const ElementorEditor = () => {
       setRoutes(routeKeys.map((path, i) => ({ id: nextId("rt"), path, title: t.pages[path].title, requires_auth: false, position: i })));
       setActiveRoute("/");
     } else {
-      const blankDoc: BuilderDoc = { title: "Site", canvas: { width: 1400, height: 900, background: "#f8f9ff" }, header: { enabled: false, height: 80, background: "#1a2740", blocks: [] }, footer: { enabled: false, height: 100, background: "#1a2740", blocks: [] }, pages: { "/": { title: "Pagina Inicial", blocks: [] } } };
+      const blankDoc: BuilderDoc = { title: "Site", canvas: { width: 1400, height: 900, background: "#f8f9ff" }, header: { enabled: false, height: 80, background: "#1a2740", blocks: [] }, footer: { enabled: false, height: 100, background: "#1a2740", blocks: [] }, pages: { "/": { title: "Pagina Inicial", blocks: [] } }, popups: {} };
       setDoc(blankDoc);
       if (routes.length === 0) setRoutes([{ id: nextId("rt"), path: "/", title: "Pagina Inicial", requires_auth: false, position: 0 }]);
       setActiveRoute("/");
@@ -452,6 +543,7 @@ export const ElementorEditor = () => {
             header: { enabled: false, height: 80, background: "#1a2740", blocks: [] },
             footer: { enabled: false, height: 100, background: "#1a2740", blocks: [] },
             pages: Object.fromEntries(availableRoutes.map(r => [ensurePath(r.path), { title: r.title || ensurePath(r.path), blocks: [] }])),
+            popups: {},
           };
           setDoc(blankDoc);
           setShowTemplateModal(true);
@@ -472,17 +564,25 @@ export const ElementorEditor = () => {
       const ref = interaction.section === "header" ? headerCanvasRef : interaction.section === "footer" ? footerCanvasRef : pageCanvasRef;
       if (!ref.current) return;
       const rect = ref.current.getBoundingClientRect();
-      const blocks = interaction.section === "header" ? doc.header.blocks : interaction.section === "footer" ? doc.footer.blocks : (doc.pages[activeRoute]?.blocks || []);
-      const canvasH = interaction.section === "header" ? doc.header.height : interaction.section === "footer" ? doc.footer.height : doc.canvas.height;
+      const _epid = editingPopupRef.current;
+      const _pcidMov = editingProductCardRef.current;
+      let blocks: Block[];
+      let canvasH: number;
+      let canvasW: number;
+      if (interaction.section === "header") { blocks = doc.header.blocks; canvasH = doc.header.height; canvasW = doc.canvas.width; }
+      else if (interaction.section === "footer") { blocks = doc.footer.blocks; canvasH = doc.footer.height; canvasW = doc.canvas.width; }
+      else if (_pcidMov) { const pcSecMov = editingProductCardSectionRef.current; const srcMov = pcSecMov === "header" ? doc.header.blocks : pcSecMov === "footer" ? doc.footer.blocks : doc.pages[activeRoute]?.blocks || []; const pcBl = srcMov.find(b => b.id === _pcidMov); blocks = pcBl?.inner_blocks || []; canvasH = pcBl?.h || 280; canvasW = pcBl?.w || 300; }
+      else if (_epid) { blocks = doc.popups[_epid]?.blocks || []; canvasH = doc.popups[_epid]?.height || 560; canvasW = doc.popups[_epid]?.width || 480; }
+      else { blocks = doc.pages[activeRoute]?.blocks || []; canvasH = doc.canvas.height; canvasW = doc.canvas.width; }
 
       if (interaction.mode === "drag") {
         const block = blocks.find(b => b.id === interaction.id);
         if (!block) return;
         const nextX = (e.clientX - rect.left - interaction.dx) / zoom;
         const nextY = (e.clientY - rect.top - interaction.dy) / zoom;
-        const snapped = computeSnap(nextX, nextY, block.w, block.h, block.id, blocks, doc.canvas.width, canvasH);
+        const snapped = computeSnap(nextX, nextY, block.w, block.h, block.id, blocks, canvasW, canvasH);
         setGuides(snapped.guides);
-        updateBlock(interaction.section, interaction.id, { x: Math.max(0, Math.min(doc.canvas.width - block.w, snapped.x)), y: Math.max(0, Math.min(canvasH - block.h, snapped.y)) });
+        updateBlock(interaction.section, interaction.id, { x: Math.max(0, Math.min(canvasW - block.w, snapped.x)), y: Math.max(0, Math.min(canvasH - block.h, snapped.y)) });
         return;
       }
       if (interaction.mode === "resize") {
@@ -493,9 +593,9 @@ export const ElementorEditor = () => {
         if (interaction.edge === "bottom" || interaction.edge === "corner") h = interaction.start.h + dy;
         if (interaction.edge === "left") { x = interaction.start.x + dx; w = interaction.start.w - dx; }
         if (interaction.edge === "top") { y = interaction.start.y + dy; h = interaction.start.h - dy; }
-        w = Math.max(48, Math.min(doc.canvas.width, Math.round(w)));
+        w = Math.max(48, Math.min(canvasW, Math.round(w)));
         h = Math.max(24, Math.min(canvasH, Math.round(h)));
-        x = Math.max(0, Math.min(doc.canvas.width - w, Math.round(x)));
+        x = Math.max(0, Math.min(canvasW - w, Math.round(x)));
         y = Math.max(0, Math.min(canvasH - h, Math.round(y)));
         const block = blocks.find(b => b.id === interaction.id);
         if (block && isTextBlock(block.type) && interaction.baseFontSize && interaction.start.h > 0) {
@@ -531,7 +631,7 @@ export const ElementorEditor = () => {
 
   // ─ Block renderer helper ─────────────────────────────────────────────────────
   function renderSectionBlocks(blocks: Block[], section: EditSection) {
-    const isActive = editSection === section;
+    const isActive = editSection === section || (section === "page" && (!!editingPopupRef.current || !!editingProductCardRef.current));
     return [...blocks].sort((a, b) => (a.z || 0) - (b.z || 0)).map(block => (
       <article
         key={block.id}
@@ -552,6 +652,7 @@ export const ElementorEditor = () => {
           setInteraction({ mode: "drag", id: block.id, section, dx: e.clientX - blockRect.left, dy: e.clientY - blockRect.top });
           setSelected(block.id); setMenu(null); e.stopPropagation();
         }}
+        onClick={e => e.stopPropagation()}
         onContextMenu={e => {
           if (!isActive) return;
           e.preventDefault(); setSelected(block.id); setMenu({ x: e.clientX, y: e.clientY, id: block.id });
@@ -606,9 +707,9 @@ export const ElementorEditor = () => {
         </div>
         <div className={styles.headerCenter}>
           <div className={styles.editSectionTabs}>
-            <button type="button" className={editSection === "page" ? styles.editTabActive : styles.editTab} onClick={() => { setEditSection("page"); setSelected(null); }}>📄 Pagina</button>
-            <button type="button" className={editSection === "header" ? styles.editTabActive : styles.editTab} onClick={() => { setEditSection("header"); setSelected(null); }}>⬆ Header</button>
-            <button type="button" className={editSection === "footer" ? styles.editTabActive : styles.editTab} onClick={() => { setEditSection("footer"); setSelected(null); }}>⬇ Footer</button>
+            <button type="button" className={editSection === "page" ? styles.editTabActive : styles.editTab} onClick={() => { setEditSection("page"); setEditingPopup(null); setEditingProductCard(null); setSelected(null); }}>📄 Pagina</button>
+            <button type="button" className={editSection === "header" ? styles.editTabActive : styles.editTab} onClick={() => { setEditSection("header"); setEditingPopup(null); setEditingProductCard(null); setSelected(null); if (!doc.header.enabled) setDoc(prev => ({ ...prev, header: { ...prev.header, enabled: true } })); }}>⬆ Header</button>
+            <button type="button" className={editSection === "footer" ? styles.editTabActive : styles.editTab} onClick={() => { setEditSection("footer"); setEditingPopup(null); setEditingProductCard(null); setSelected(null); if (!doc.footer.enabled) setDoc(prev => ({ ...prev, footer: { ...prev.footer, enabled: true } })); }}>⬇ Footer</button>
           </div>
           <div className={styles.zoomControl}>
             {ZOOM_LEVELS.map(z => (
@@ -636,10 +737,13 @@ export const ElementorEditor = () => {
             <button type="button" className={leftTab === "layers" ? styles.leftTabActive : styles.leftTabBtn} onClick={() => setLeftTab("layers")} title="Camadas">📐</button>
             <button type="button" className={leftTab === "settings" ? styles.leftTabActive : styles.leftTabBtn} onClick={() => setLeftTab("settings")} title="Configuracoes">⚙</button>
             <button type="button" className={leftTab === "templates" ? styles.leftTabActive : styles.leftTabBtn} onClick={() => setLeftTab("templates")} title="Templates">🎨</button>
+            <button type="button" className={leftTab === "popups" ? styles.leftTabActive : styles.leftTabBtn} onClick={() => setLeftTab("popups")} title="Popups">📌</button>
           </div>
 
           {leftTab === "elements" && (
             <div className={styles.blockList}>
+              {editingProductCard && <div className={styles.varHint} style={{ padding: "6px 10px", margin: "0 0 6px", background: "#e0f2fe", borderRadius: 6, fontSize: ".75rem", color: "#0369a1" }}>🛍 <strong>Vars produto:</strong> {"{{product_name}}"} {"{{product_price}}"} {"{{product_image}}"} {"{{product_description}}"} {"{{product_sku}}"}</div>}
+              {!editingProductCard && <div className={styles.varHint} style={{ padding: "6px 10px", margin: "0 0 6px", background: "#f1f5f9", borderRadius: 6, fontSize: ".75rem" }}>👤 <strong>Vars usuário:</strong> {"{{user_name}}"} {"{{user_email}}"} {"{{cart_count}}"}</div>}
               {BLOCK_CATEGORIES.map(cat => (
                 <div key={cat.label}>
                   <div className={styles.catLabel}>{cat.label}</div>
@@ -744,13 +848,68 @@ export const ElementorEditor = () => {
               </div>
             </div>
           )}
+
+          {leftTab === "popups" && (
+            <div className={styles.layersList}>
+              <div className={styles.layersHeader}>Popups</div>
+              {Object.entries(doc.popups).map(([id, popup]) => (
+                <div key={id} className={`${styles.layerItem} ${editingPopup === id ? styles.layerSelected : ""}`}
+                  onClick={() => { setEditingPopup(id); setEditingProductCard(null); setEditSection("page"); setSelected(null); }}>
+                  <span className={styles.layerIcon}>📌</span>
+                  <span className={styles.layerName}>{popup.title}</span>
+                  <button type="button" className={styles.layerDelete} onClick={e => { e.stopPropagation(); removePopup(id); }}>🗑</button>
+                </div>
+              ))}
+              {Object.keys(doc.popups).length === 0 && <div className={styles.emptyLayers}>Nenhum popup criado</div>}
+              <button type="button" className={styles.addPageBtn} onClick={addPopup}>+ Novo Popup</button>
+            </div>
+          )}
         </aside>
 
         {/* ─ Canvas ─ */}
         <section className={styles.canvasWrap}>
+          {editingProductCard && !editingPopup && (
+            <div style={{ background: "#0ea5e9", color: "#fff", padding: "8px 16px", fontSize: ".82rem", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+              <strong>🛍 Editando Layout do Product Card</strong>
+              <span style={{ opacity: .7, fontSize: ".75rem" }}>Vars: {"{{product_name}}"} {"{{product_price}}"} {"{{product_image}}"} {"{{product_description}}"} {"{{cart_count}}"}</span>
+              <button type="button" onClick={() => { setEditingProductCard(null); setSelected(null); }} style={{ background: "none", border: "1px solid rgba(255,255,255,.5)", color: "#fff", borderRadius: 6, padding: "2px 10px", cursor: "pointer", fontSize: ".8rem", marginLeft: "auto" }}>← Sair do Product Card</button>
+            </div>
+          )}
+          {editingPopup && (
+            <div style={{ background: "#7c3aed", color: "#fff", padding: "8px 16px", fontSize: ".82rem", display: "flex", alignItems: "center", gap: 10 }}>
+              <strong>📌 Editando Popup: {doc.popups[editingPopup]?.title}</strong>
+              <button type="button" onClick={() => setEditingPopup(null)} style={{ background: "none", border: "1px solid rgba(255,255,255,.5)", color: "#fff", borderRadius: 6, padding: "2px 10px", cursor: "pointer", fontSize: ".8rem" }}>← Sair do Popup</button>
+            </div>
+          )}
           <div className={styles.canvasScroll}>
             <div className={styles.canvasZoomHost} style={{ zoom }}>
               <div className={styles.canvasStack}>
+                {editingPopup ? (
+                  <div
+                    ref={pageCanvasRef}
+                    className={`${styles.sectionCanvas} ${styles.sectionActive}`}
+                    style={{ width: doc.popups[editingPopup]?.width || 480, height: doc.popups[editingPopup]?.height || 560, backgroundColor: doc.popups[editingPopup]?.background || "#ffffff", backgroundImage: "linear-gradient(to right,rgba(152,167,198,.14) 1px,transparent 1px),linear-gradient(to bottom,rgba(152,167,198,.14) 1px,transparent 1px)", backgroundSize: "20px 20px" }}
+                    onClick={() => setSelected(null)}
+                  >
+                    <div className={styles.sectionLabel}>POPUP · {doc.popups[editingPopup]?.title}</div>
+                    {renderSectionBlocks(doc.popups[editingPopup]?.blocks || [], "page")}
+                    {guides.vertical !== null && <span className={styles.guideV} style={{ left: guides.vertical }} />}
+                    {guides.horizontal !== null && <span className={styles.guideH} style={{ top: guides.horizontal }} />}
+                  </div>
+                ) : editingProductCard ? (
+                  <div
+                    ref={pageCanvasRef}
+                    className={`${styles.sectionCanvas} ${styles.sectionActive}`}
+                    style={{ width: pcCardBlock?.w || 300, height: pcCardBlock?.h || 280, backgroundColor: pcCardBlock?.style.background || "#ffffff", backgroundImage: "linear-gradient(to right,rgba(152,167,198,.14) 1px,transparent 1px),linear-gradient(to bottom,rgba(152,167,198,.14) 1px,transparent 1px)", backgroundSize: "20px 20px" }}
+                    onClick={() => setSelected(null)}
+                  >
+                    <div className={styles.sectionLabel}>PRODUCT CARD · Layout</div>
+                    {renderSectionBlocks(currentBlocks, "page")}
+                    {guides.vertical !== null && <span className={styles.guideV} style={{ left: guides.vertical }} />}
+                    {guides.horizontal !== null && <span className={styles.guideH} style={{ top: guides.horizontal }} />}
+                  </div>
+                ) : (
+                  <>
                 {doc.header.enabled && (
                   <div
                     ref={headerCanvasRef}
@@ -767,7 +926,7 @@ export const ElementorEditor = () => {
                 <div
                   ref={pageCanvasRef}
                   className={`${styles.sectionCanvas} ${editSection === "page" ? styles.sectionActive : styles.sectionInactive}`}
-                  style={{ width: doc.canvas.width, height: doc.canvas.height, background: doc.canvas.background, backgroundImage: editSection === "page" ? "linear-gradient(to right,rgba(152,167,198,.14) 1px,transparent 1px),linear-gradient(to bottom,rgba(152,167,198,.14) 1px,transparent 1px)" : undefined, backgroundSize: editSection === "page" ? "20px 20px" : undefined }}
+                  style={{ width: doc.canvas.width, height: doc.canvas.height, backgroundColor: doc.canvas.background, backgroundImage: editSection === "page" ? "linear-gradient(to right,rgba(152,167,198,.14) 1px,transparent 1px),linear-gradient(to bottom,rgba(152,167,198,.14) 1px,transparent 1px)" : undefined, backgroundSize: editSection === "page" ? "20px 20px" : undefined }}
                   onClick={() => { if (editSection !== "page") { setEditSection("page"); setSelected(null); } }}
                 >
                   <div className={styles.sectionLabel}>PAGINA</div>
@@ -787,6 +946,8 @@ export const ElementorEditor = () => {
                     {editSection === "footer" && guides.vertical !== null && <span className={styles.guideV} style={{ left: guides.vertical }} />}
                     {editSection === "footer" && guides.horizontal !== null && <span className={styles.guideH} style={{ top: guides.horizontal }} />}
                   </div>
+                )}
+                  </>
                 )}
               </div>
             </div>
@@ -818,9 +979,16 @@ export const ElementorEditor = () => {
                     <label>Texto do botao</label>
                     <input value={selectedBlock.label || ""} onChange={e => updateBlock(editSection, selectedBlock.id, { label: e.target.value })} />
                     <label>Acao</label>
-                    <select value={selectedBlock.action_type || "navigate"} onChange={e => updateBlock(editSection, selectedBlock.id, { action_type: e.target.value as "navigate" | "call_api" })}>
+                    <select value={selectedBlock.action_type || "navigate"} onChange={e => updateBlock(editSection, selectedBlock.id, { action_type: e.target.value as Block["action_type"] })}>
                       <option value="navigate">Navegar para rota</option>
                       <option value="call_api">Chamar API</option>
+                      <option value="store_login">Login na loja</option>
+                      <option value="store_logout">Logout da loja</option>
+                      <option value="store_register">Registrar na loja</option>
+                      <option value="add_to_cart">Adicionar ao carrinho</option>
+                      <option value="add_product">Adicionar produto (admin)</option>
+                      <option value="open_popup">Abrir Popup</option>
+                      <option value="close_popup">Fechar Popup</option>
                     </select>
                     {selectedBlock.action_type === "call_api" ? (
                       <>
@@ -831,22 +999,83 @@ export const ElementorEditor = () => {
                         </select>
                         {selectedBlock.api_id && (() => { const api = apis.find(a => a.id === selectedBlock.api_id); return api ? (<div className={styles.apiTestBox}><p className={styles.apiDesc}>{api.description}</p><button type="button" className={styles.apiTestBtn} disabled={apiTesting} onClick={() => testApi(api)}>{apiTesting ? "Testando..." : "▶ Testar API"}</button>{apiTestResult && <pre className={styles.apiResult}>{apiTestResult}</pre>}</div>) : null; })()}
                       </>
-                    ) : (
+                    ) : selectedBlock.action_type === "add_to_cart" ? (
                       <>
-                        <label>Rota destino</label>
-                        <select value={selectedBlock.action_target || "/"} onChange={e => updateBlock(editSection, selectedBlock.id, { action_target: e.target.value, href: e.target.value })}>
-                          {routes.map(r => <option key={r.id} value={ensurePath(r.path)}>{r.title} ({ensurePath(r.path)})</option>)}
-                        </select>
+                        <label>ID do produto</label>
+                        <input value={selectedBlock.product_id || ""} onChange={e => updateBlock(editSection, selectedBlock.id, { product_id: e.target.value })} placeholder="UUID do produto" />
+                        <p className={styles.varHint}>Deixe vazio para usar o 1º produto da loja.</p>
                       </>
-                    )}
+                    ) : selectedBlock.action_type === "open_popup" ? (
+                       <>
+                         <label>Popup</label>
+                         <select value={selectedBlock.popup_id || ""} onChange={e => updateBlock(editSection, selectedBlock.id, { popup_id: e.target.value })}>
+                           <option value="">— Selecione Popup —</option>
+                           {Object.entries(doc.popups).map(([id, popup]) => <option key={id} value={id}>{popup.title}</option>)}
+                         </select>
+                       </>
+                     ) : selectedBlock.action_type === "store_login" || selectedBlock.action_type === "store_register" ? (
+                       <>
+                         <label>Var email</label>
+                         <input value={selectedBlock.email_var || ""} onChange={e => updateBlock(editSection, selectedBlock.id, { email_var: e.target.value })} placeholder="nome da variavel de email" />
+                         <label>Var senha</label>
+                         <input value={selectedBlock.password_var || ""} onChange={e => updateBlock(editSection, selectedBlock.id, { password_var: e.target.value })} placeholder="nome da variavel de senha" />
+                         {selectedBlock.action_type === "store_register" && (<>
+                           <label>Var nome</label>
+                           <input value={selectedBlock.first_name_var || ""} onChange={e => updateBlock(editSection, selectedBlock.id, { first_name_var: e.target.value })} placeholder="nome da variavel de nome" />
+                           <label>Var sobrenome</label>
+                           <input value={selectedBlock.last_name_var || ""} onChange={e => updateBlock(editSection, selectedBlock.id, { last_name_var: e.target.value })} placeholder="nome da variavel de sobrenome" />
+                         </>)}
+                         <p className={styles.varHint}>Deixe vazio para abrir o modal de login/registro.</p>
+                       </>
+                     ) : selectedBlock.action_type === "navigate" || !selectedBlock.action_type ? (
+                       <>
+                         <label>Rota destino</label>
+                         <select value={selectedBlock.action_target || "/"} onChange={e => updateBlock(editSection, selectedBlock.id, { action_target: e.target.value, href: e.target.value })}>
+                           {routes.map(r => <option key={r.id} value={ensurePath(r.path)}>{r.title} ({ensurePath(r.path)})</option>)}
+                         </select>
+                       </>
+                     ) : null}
+                     <div className={styles.toggleRow} style={{ marginTop: 8 }}>
+                       <label>Visivel somente para admins</label>
+                       <input type="checkbox" checked={!!selectedBlock.admin_only} onChange={e => updateBlock(editSection, selectedBlock.id, { admin_only: e.target.checked })} />
+                     </div>
+                     {selectedBlock.admin_only && <p className={styles.varHint}>Oculto para visitantes; visivel apenas para o dono da loja.</p>}
+                  </>
+                )}
+                {selectedBlock.type === "product_card" && (
+                  <>
+                    <label>ID do produto</label>
+                    <input value={selectedBlock.product_id || ""} onChange={e => updateBlock(editSection, selectedBlock.id, { product_id: e.target.value })} placeholder="UUID do produto (opcional)" />
+                    <p className={styles.varHint}>Deixe vazio para exibir o 1º produto ativo da loja.</p>
+                    {!editingPopup && <button type="button" className={styles.editSectionBtn} style={{ marginTop: 6 }} onClick={() => { setEditingProductCard(selectedBlock.id); setEditingProductCardSection(editSection); setSelected(null); }}>✏️ Editar Layout Interno ({selectedBlock.inner_blocks?.length || 0} blocos)</button>}
+                    {(selectedBlock.inner_blocks?.length || 0) > 0 && <button type="button" className={styles.apiTestBtn} style={{ marginTop: 4, background: "#fee2e2", color: "#b91c1c", border: "1px solid #fecaca" }} onClick={() => updateBlock(editSection, selectedBlock.id, { inner_blocks: [] })}>🗑 Limpar layout</button>}
+                    <p className={styles.varHint}>Vars: {"{{product_name}}"} {"{{product_price}}"} {"{{product_image}}"} {"{{product_description}}"} {"{{product_sku}}"}</p>
+                  </>
+                )}
+                {selectedBlock.type === "product_list" && (
+                  <>
+                    <label>Produtos por pagina</label>
+                    <input type="number" min={1} max={50} value={selectedBlock.page_size || 6} onChange={e => updateBlock(editSection, selectedBlock.id, { page_size: Math.max(1, Number(e.target.value) || 6) })} />
+                    <p className={styles.varHint}>Ordenados por mais vendidos. Botoes de pagina aparecem automaticamente.</p>
                   </>
                 )}
                 {selectedBlock.type === "image" && (
                   <>
                     <label>URL da imagem</label>
                     <input value={selectedBlock.src || ""} onChange={e => updateBlock(editSection, selectedBlock.id, { src: e.target.value })} placeholder="https://..." />
+                    <label>Var source (opcional)</label>
+                    <input value={selectedBlock.var_src || ""} onChange={e => updateBlock(editSection, selectedBlock.id, { var_src: e.target.value })} placeholder="ex: {{product_image}}" />
                     <label>Upload</label>
                     <input type="file" accept="image/*" onChange={async e => { const file = e.target.files?.[0]; if (!file) return; try { updateBlock(editSection, selectedBlock.id, { src: await readFileAsDataURL(file) }); } catch { setError("Falha ao carregar imagem"); } }} />
+                    <label>Ajuste</label>
+                    <select value={selectedBlock.object_fit || "cover"} onChange={e => updateBlock(editSection, selectedBlock.id, { object_fit: e.target.value as "cover" | "contain" | "fill" })}>
+                      <option value="cover">Cover</option><option value="contain">Contain</option><option value="fill">Fill</option>
+                    </select>
+                  </>
+                )}
+                {selectedBlock.type === "user_avatar" && (
+                  <>
+                    <p className={styles.varHint}>Exibe o avatar do usuário logado. Atualiza após login/logout.</p>
                     <label>Ajuste</label>
                     <select value={selectedBlock.object_fit || "cover"} onChange={e => updateBlock(editSection, selectedBlock.id, { object_fit: e.target.value as "cover" | "contain" | "fill" })}>
                       <option value="cover">Cover</option><option value="contain">Contain</option><option value="fill">Fill</option>
@@ -872,6 +1101,14 @@ export const ElementorEditor = () => {
                     <p className={styles.varHint}>Use {"{{" + (selectedBlock.var_name || "nome") + "}}"} em blocos Texto Variavel.</p>
                     <label>Placeholder</label>
                     <input value={selectedBlock.placeholder || ""} onChange={e => updateBlock(editSection, selectedBlock.id, { placeholder: e.target.value })} />
+                    <label>Tipo do campo</label>
+                    <select value={selectedBlock.input_type || "text"} onChange={e => updateBlock(editSection, selectedBlock.id, { input_type: e.target.value })}>
+                      <option value="text">Texto</option>
+                      <option value="email">Email</option>
+                      <option value="password">Senha (oculta)</option>
+                      <option value="number">Numero</option>
+                      <option value="tel">Telefone</option>
+                    </select>
                   </>
                 )}
                 {selectedBlock.type === "profile_card" && (
@@ -882,21 +1119,6 @@ export const ElementorEditor = () => {
                     <input value={selectedBlock.profile_subtitle || ""} onChange={e => updateBlock(editSection, selectedBlock.id, { profile_subtitle: e.target.value })} />
                     <label>URL da imagem</label>
                     <input value={selectedBlock.profile_image || ""} onChange={e => updateBlock(editSection, selectedBlock.id, { profile_image: e.target.value })} />
-                  </>
-                )}
-                {selectedBlock.type === "admin_add_btn" && (
-                  <>
-                    <label>Texto</label>
-                    <input value={selectedBlock.label || ""} onChange={e => updateBlock(editSection, selectedBlock.id, { label: e.target.value })} />
-                    <label>Tipo</label>
-                    <select value={selectedBlock.btn_action_type || "add_product"} onChange={e => updateBlock(editSection, selectedBlock.id, { btn_action_type: e.target.value as "add_product" | "add_video" })}>
-                      <option value="add_product">Adicionar Produto</option><option value="add_video">Adicionar Video</option>
-                    </select>
-                    <div className={styles.toggleRow}>
-                      <label>Somente admin</label>
-                      <input type="checkbox" checked={selectedBlock.admin_only !== false} onChange={e => updateBlock(editSection, selectedBlock.id, { admin_only: e.target.checked })} />
-                    </div>
-                    <p className={styles.varHint}>Visivel apenas para role=admin no site publicado.</p>
                   </>
                 )}
               </div>

@@ -8,16 +8,28 @@ import (
 	"time"
 
 	"github.com/ViitoJooj/Jesterx/internal/config"
+	"github.com/ViitoJooj/Jesterx/internal/domain"
 	middleware "github.com/ViitoJooj/Jesterx/internal/http/middlewares"
 	"github.com/ViitoJooj/Jesterx/internal/security"
 	"github.com/ViitoJooj/Jesterx/internal/service"
 )
 
 type RegisterRequest struct {
-	First_name string `json:"first_name"`
-	Last_name  string `json:"last_name"`
-	Email      string `json:"email"`
-	Password   string `json:"password"`
+	First_name        string  `json:"first_name"`
+	Last_name         string  `json:"last_name"`
+	Email             string  `json:"email"`
+	Password          string  `json:"password"`
+	AccountType       string  `json:"account_type"`
+	CompanyName       *string `json:"company_name"`
+	TradeName         *string `json:"trade_name"`
+	CpfCnpj           *string `json:"cpf_cnpj"`
+	Phone             *string `json:"phone"`
+	ZipCode           *string `json:"zip_code"`
+	AddressStreet     *string `json:"address_street"`
+	AddressNumber     *string `json:"address_number"`
+	AddressComplement *string `json:"address_complement"`
+	AddressCity       *string `json:"address_city"`
+	AddressState      *string `json:"address_state"`
 }
 
 type LoginRequest struct {
@@ -46,25 +58,45 @@ type ResponseRefreshToken struct {
 }
 
 type UserMeResponse struct {
-	ID          string  `json:"id"`
-	FirstName   string  `json:"first_name"`
-	LastName    string  `json:"last_name"`
-	Email       string  `json:"email"`
-	Role        string  `json:"role"`
-	Plan        string  `json:"user_plan"`
-	CpfCnpj     string  `json:"cpf_cnpj"`
-	AvatarUrl   string  `json:"avatar_url"`
-	PlanMaxSites  int   `json:"plan_max_sites"`
-	PlanMaxRoutes int   `json:"plan_max_routes"`
-	CreatedAt   string  `json:"created_at"`
-	UpdatedAt   string  `json:"updated_at"`
+	ID                string `json:"id"`
+	FirstName         string `json:"first_name"`
+	LastName          string `json:"last_name"`
+	Email             string `json:"email"`
+	Role              string `json:"role"`
+	Plan              string `json:"user_plan"`
+	CpfCnpj           string `json:"cpf_cnpj"`
+	AvatarUrl         string `json:"avatar_url"`
+	PlanMaxSites      int    `json:"plan_max_sites"`
+	PlanMaxRoutes     int    `json:"plan_max_routes"`
+	AccountType       string `json:"account_type"`
+	CompanyName       string `json:"company_name"`
+	TradeName         string `json:"trade_name"`
+	Phone             string `json:"phone"`
+	ZipCode           string `json:"zip_code"`
+	AddressStreet     string `json:"address_street"`
+	AddressNumber     string `json:"address_number"`
+	AddressComplement string `json:"address_complement"`
+	AddressCity       string `json:"address_city"`
+	AddressState      string `json:"address_state"`
+	AddressCountry    string `json:"address_country"`
+	CreatedAt         string `json:"created_at"`
+	UpdatedAt         string `json:"updated_at"`
 }
 
 type UpdateProfileRequest struct {
-	FirstName string  `json:"first_name"`
-	LastName  string  `json:"last_name"`
-	CpfCnpj   *string `json:"cpf_cnpj"`
-	AvatarUrl *string `json:"avatar_url"`
+	FirstName         string  `json:"first_name"`
+	LastName          string  `json:"last_name"`
+	CpfCnpj           *string `json:"cpf_cnpj"`
+	AvatarUrl         *string `json:"avatar_url"`
+	CompanyName        *string `json:"company_name"`
+	TradeName          *string `json:"trade_name"`
+	Phone              *string `json:"phone"`
+	ZipCode            *string `json:"zip_code"`
+	AddressStreet      *string `json:"address_street"`
+	AddressNumber      *string `json:"address_number"`
+	AddressComplement  *string `json:"address_complement"`
+	AddressCity        *string `json:"address_city"`
+	AddressState       *string `json:"address_state"`
 }
 
 type AuthHandler struct {
@@ -94,13 +126,24 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.authService.Register(
-		websiteId,
-		req.First_name,
-		req.Last_name,
-		req.Email,
-		req.Password,
-	)
+	user, err := h.authService.Register(service.RegisterInput{
+		WebsiteId:         websiteId,
+		FirstName:         req.First_name,
+		LastName:          req.Last_name,
+		Email:             req.Email,
+		Password:          req.Password,
+		AccountType:       req.AccountType,
+		CompanyName:       req.CompanyName,
+		TradeName:         req.TradeName,
+		CpfCnpj:           req.CpfCnpj,
+		Phone:             req.Phone,
+		ZipCode:           req.ZipCode,
+		AddressStreet:     req.AddressStreet,
+		AddressNumber:     req.AddressNumber,
+		AddressComplement: req.AddressComplement,
+		AddressCity:       req.AddressCity,
+		AddressState:      req.AddressState,
+	})
 	if err != nil {
 		log.Println(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -121,7 +164,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 			Id:         user.Id,
 			WebsiteId:  user.WebsiteId,
 			Email:      user.Email,
-			Plan:       *user.Plan,
+			Plan:       derefString(user.Plan),
 			Created_at: user.Created_at,
 		},
 	}
@@ -150,36 +193,62 @@ func (h *AuthHandler) VerifyEmail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := h.authService.VerifyEmail(id)
+	user, err := h.authService.VerifyEmail(id)
 	if err != nil {
 		log.Println(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Email verificado</title>
-<style>
-body { margin: 0; font-family: Arial, sans-serif; background: #f5f5f7; color: #1a1a1a; display: grid; place-items: center; min-height: 100vh; }
-.card { max-width: 520px; margin: 16px; padding: 24px; border: 1px solid #c8c8cc; border-radius: 16px; background: #fff; box-shadow: 0 6px 14px rgba(0,0,0,0.08); text-align: center; }
-a { color: #ff3e00; text-decoration: none; font-weight: 600; }
-a:hover { text-decoration: underline; }
-</style>
-</head>
-<body>
-  <div class="card">
-    <h1>Email verificado com sucesso</h1>
-    <p>Sua conta foi ativada. Agora você já pode entrar na plataforma.</p>
-    <p><a href="http://localhost:5173/login">Ir para login</a></p>
-  </div>
-</body>
-</html>`))
+	refreshClaims := security.RefreshTokenClaims{
+		Iss:       "https://jesterx.com.br",
+		Sub:       user.Id,
+		WebsiteId: user.WebsiteId,
+		Exp:       time.Now().Add(30 * 24 * time.Hour).Unix(),
+	}
+	refreshToken, err := security.RefreshToken(refreshClaims)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
+	}
+
+	accessClaims := security.AccessTokenClaims{
+		Iss:       "https://jesterx.com.br",
+		Sub:       user.Id,
+		Aud:       "https://api.jesterx.com.br",
+		WebsiteId: user.WebsiteId,
+		Role:      user.Role,
+		Exp:       time.Now().Add(15 * time.Minute).Unix(),
+	}
+	accessToken, err := security.AccessToken(accessClaims)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
+	}
+
+	secure := !config.IsDev
+	http.SetCookie(w, &http.Cookie{
+		Name:     security.RefreshCookieName(user.WebsiteId),
+		Value:    refreshToken,
+		Path:     "/",
+		MaxAge:   60 * 60 * 24 * 30,
+		HttpOnly: true,
+		Secure:   secure,
+		SameSite: http.SameSiteLaxMode,
+	})
+	http.SetCookie(w, &http.Cookie{
+		Name:     security.AccessCookieName(user.WebsiteId),
+		Value:    accessToken,
+		Path:     "/",
+		MaxAge:   60 * 15,
+		HttpOnly: true,
+		Secure:   secure,
+		SameSite: http.SameSiteLaxMode,
+	})
+
+	http.Redirect(w, r, strings.TrimRight(config.FrontendURL, "/"), http.StatusFound)
 }
 
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
@@ -310,18 +379,29 @@ func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := UserMeResponse{
-		ID:            user.Id,
-		FirstName:     user.First_name,
-		LastName:      user.Last_name,
-		Email:         user.Email,
-		Role:          user.Role,
-		Plan:          derefString(user.Plan),
-		CpfCnpj:       derefString(user.CpfCnpj),
-		AvatarUrl:     derefString(user.AvatarUrl),
-		PlanMaxSites:  planLimits[0],
-		PlanMaxRoutes: planLimits[1],
-		CreatedAt:     user.Created_at.Format(time.RFC3339),
-		UpdatedAt:     user.Updated_at.Format(time.RFC3339),
+		ID:                user.Id,
+		FirstName:         user.First_name,
+		LastName:          user.Last_name,
+		Email:             user.Email,
+		Role:              user.Role,
+		Plan:              derefString(user.Plan),
+		CpfCnpj:           derefString(user.CpfCnpj),
+		AvatarUrl:         derefString(user.AvatarUrl),
+		PlanMaxSites:      planLimits[0],
+		PlanMaxRoutes:     planLimits[1],
+		AccountType:       user.AccountType,
+		CompanyName:       derefString(user.CompanyName),
+		TradeName:         derefString(user.TradeName),
+		Phone:             derefString(user.Phone),
+		ZipCode:           derefString(user.ZipCode),
+		AddressStreet:     derefString(user.AddressStreet),
+		AddressNumber:     derefString(user.AddressNumber),
+		AddressComplement: derefString(user.AddressComplement),
+		AddressCity:       derefString(user.AddressCity),
+		AddressState:      derefString(user.AddressState),
+		AddressCountry:    derefString(user.AddressCountry),
+		CreatedAt:         user.Created_at.Format(time.RFC3339),
+		UpdatedAt:         user.Updated_at.Format(time.RFC3339),
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -350,7 +430,21 @@ func (h *AuthHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.authService.UpdateProfile(userID, req.FirstName, req.LastName, req.CpfCnpj, req.AvatarUrl); err != nil {
+	if err := h.authService.UpdateProfile(userID, domain.UpdateProfileData{
+		FirstName:         req.FirstName,
+		LastName:          req.LastName,
+		CpfCnpj:           req.CpfCnpj,
+		AvatarUrl:         req.AvatarUrl,
+		CompanyName:        req.CompanyName,
+		TradeName:          req.TradeName,
+		Phone:              req.Phone,
+		ZipCode:            req.ZipCode,
+		AddressStreet:      req.AddressStreet,
+		AddressNumber:      req.AddressNumber,
+		AddressComplement:  req.AddressComplement,
+		AddressCity:        req.AddressCity,
+		AddressState:       req.AddressState,
+	}); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}

@@ -9,6 +9,17 @@ type RegisterRequest = {
   last_name: string;
   email: string;
   password: string;
+  account_type: "personal" | "business";
+  company_name?: string;
+  trade_name?: string;
+  cpf_cnpj?: string;
+  phone?: string;
+  zip_code?: string;
+  address_street?: string;
+  address_number?: string;
+  address_complement?: string;
+  address_city?: string;
+  address_state?: string;
 };
 
 type AuthResponse<T> = {
@@ -32,6 +43,17 @@ type MeData = {
   avatar_url?: string;
   plan_max_sites?: number;
   plan_max_routes?: number;
+  account_type?: "personal" | "business";
+  company_name?: string;
+  trade_name?: string;
+  phone?: string;
+  zip_code?: string;
+  address_street?: string;
+  address_number?: string;
+  address_complement?: string;
+  address_city?: string;
+  address_state?: string;
+  address_country?: string;
 };
 
 export function useAuth(websiteId: WebsiteId) {
@@ -147,6 +169,15 @@ export function useAuth(websiteId: WebsiteId) {
       last_name: string;
       cpf_cnpj?: string | null;
       avatar_url?: string | null;
+      company_name?: string | null;
+      trade_name?: string | null;
+      phone?: string | null;
+      zip_code?: string | null;
+      address_street?: string | null;
+      address_number?: string | null;
+      address_complement?: string | null;
+      address_city?: string | null;
+      address_state?: string | null;
     }) => {
       await apiFetch<void>("/api/v1/auth/me", {
         method: "PATCH",

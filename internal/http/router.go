@@ -38,6 +38,18 @@ func RegisterWebsiteRoutes(mux *http.ServeMux, h *handlers.WebSiteHandler, authS
 	mux.Handle("GET /api/v1/sites/{siteID}/scan-reports/{version}", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.GetScanReport))))
 }
 
+func RegisterProductRoutes(mux *http.ServeMux, h *handlers.ProductHandler, authService *service.AuthService) {
+	// Rotas privadas (dono da loja / admin)
+	mux.Handle("POST /api/v1/sites/{siteID}/products", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.CreateProduct))))
+	mux.Handle("GET /api/v1/sites/{siteID}/products", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.ListProducts))))
+	mux.Handle("PATCH /api/v1/sites/{siteID}/products/{productID}", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.UpdateProduct))))
+	mux.Handle("DELETE /api/v1/sites/{siteID}/products/{productID}", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.DeleteProduct))))
+
+	// Rotas públicas da loja (sem autenticação — cada loja acessa apenas a sua)
+	mux.HandleFunc("GET /api/store/{siteID}/products", h.PublicListProducts)
+	mux.HandleFunc("GET /api/store/{siteID}/products/{productID}", h.PublicGetProduct)
+}
+
 func RegisterPaymentRoutes(mux *http.ServeMux, h *handlers.PaymentHandler, authService *service.AuthService) {
 	mux.HandleFunc("GET /api/v1/plans", h.ListPlans)
 	mux.Handle("POST /api/v1/payments/checkout", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.CreateCheckout))))

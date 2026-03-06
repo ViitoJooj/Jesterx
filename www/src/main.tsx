@@ -40,7 +40,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           <Route path="/register" element={<Register />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/plans" element={<ProtectedRoute><Plans /></ProtectedRoute>} />
+          <Route path="/plans" element={<Plans />} />
           <Route path="/pages" element={<ProtectedRoute><Pages /></ProtectedRoute>} />
           <Route path="/pages/:siteId/elementor" element={<ProtectedRoute><ElementorEditor /></ProtectedRoute>} />
           <Route path="/pages/:siteId/react" element={<ProtectedRoute><ReactEditor /></ProtectedRoute>} />

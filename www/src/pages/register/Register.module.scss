@@ -156,3 +156,101 @@ form {
     cursor: not-allowed;
   }
 }
+
+/* Toggle Pessoa Física / Empresa */
+.account_type_toggle {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.account_type_option {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.875rem 0.5rem;
+  border: 1.5px solid $border-color;
+  border-radius: $border-radius-md;
+  background: $background-color-primary;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: $font-color-secondary;
+  transition: $transition-fast;
+  position: relative;
+
+  &:hover {
+    border-color: $color-primary;
+    color: $font-color-primary;
+  }
+
+  &.active {
+    border-color: $color-primary;
+    background: rgba(255, 62, 0, 0.04);
+    color: $font-color-primary;
+  }
+}
+
+.account_type_icon {
+  font-size: 1.25rem;
+}
+
+.trust_badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #059669;
+  background: rgba(5, 150, 105, 0.1);
+  border: 1px solid rgba(5, 150, 105, 0.25);
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+  white-space: nowrap;
+}
+
+/* Bloco de campos empresa */
+.business_fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.25rem;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-md;
+  background: $background-color-secondary;
+}
+
+.business_section_title {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: $font-color-muted;
+}
+
+.zip_field {
+  flex: 0 0 140px !important;
+}
+
+.number_field {
+  flex: 0 0 120px !important;
+}
+
+.select {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-sm;
+  background: $background-color-primary;
+  color: $font-color-primary;
+  font-size: 0.95rem;
+  font-family: inherit;
+  appearance: none;
+  cursor: pointer;
+  transition: $transition-fast;
+
+  &:focus {
+    outline: none;
+    border-color: $color-primary;
+    box-shadow: 0 0 0 3px rgba(255, 62, 0, 0.12);
+  }
+}

@@ -35,16 +35,63 @@ func (s *AuthService) DeleteExpiredUnverifiedUsers() error {
 	return s.userRepo.DeleteExpiredUnverifiedUsers()
 }
 
-func (s *AuthService) Register(websiteId string, first_name string, last_name string, email string, password string) (*domain.User, error) {
-	if email == "" || len(email) > 250 || len(email) < 5 || !strings.Contains(email, "@") || !strings.Contains(email, ".") || strings.Contains(email, " ") {
+type RegisterInput struct {
+	WebsiteId         string
+	FirstName         string
+	LastName          string
+	Email             string
+	Password          string
+	AccountType       string
+	CompanyName       *string
+	TradeName         *string
+	CpfCnpj           *string
+	Phone             *string
+	ZipCode           *string
+	AddressStreet     *string
+	AddressNumber     *string
+	AddressComplement *string
+	AddressCity       *string
+	AddressState      *string
+}
+
+func (s *AuthService) Register(input RegisterInput) (*domain.User, error) {
+	if input.Email == "" || len(input.Email) > 250 || len(input.Email) < 5 || !strings.Contains(input.Email, "@") || !strings.Contains(input.Email, ".") || strings.Contains(input.Email, " ") {
 		return nil, errors.New("invalid email")
 	}
 
-	if password == "" || len(password) < 6 || len(password) > 50 {
+	if input.Password == "" || len(input.Password) < 6 || len(input.Password) > 50 {
 		return nil, errors.New("invalid password")
 	}
 
-	webSite, err := s.webSiteRepo.FindWebSiteByID(websiteId)
+	if input.AccountType != "personal" && input.AccountType != "business" {
+		input.AccountType = "personal"
+	}
+
+	if input.AccountType == "business" {
+		if input.CompanyName == nil || strings.TrimSpace(*input.CompanyName) == "" {
+			return nil, errors.New("company name is required for business accounts")
+		}
+		if input.CpfCnpj == nil || strings.TrimSpace(*input.CpfCnpj) == "" {
+			return nil, errors.New("CNPJ is required for business accounts")
+		}
+		if input.Phone == nil || strings.TrimSpace(*input.Phone) == "" {
+			return nil, errors.New("phone is required for business accounts")
+		}
+		if input.ZipCode == nil || strings.TrimSpace(*input.ZipCode) == "" {
+			return nil, errors.New("zip code is required for business accounts")
+		}
+		if input.AddressStreet == nil || strings.TrimSpace(*input.AddressStreet) == "" {
+			return nil, errors.New("address is required for business accounts")
+		}
+		if input.AddressCity == nil || strings.TrimSpace(*input.AddressCity) == "" {
+			return nil, errors.New("city is required for business accounts")
+		}
+		if input.AddressState == nil || strings.TrimSpace(*input.AddressState) == "" {
+			return nil, errors.New("state is required for business accounts")
+		}
+	}
+
+	webSite, err := s.webSiteRepo.FindWebSiteByID(input.WebsiteId)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +99,7 @@ func (s *AuthService) Register(websiteId string, first_name string, last_name st
 		return nil, errors.New("website does not exist")
 	}
 
-	existing, err := s.userRepo.FindUserByEmailAndWebsite(email, websiteId)
+	existing, err := s.userRepo.FindUserByEmailAndWebsite(input.Email, input.WebsiteId)
 	if err != nil {
 		return nil, err
 	}
@@ -60,12 +107,26 @@ func (s *AuthService) Register(websiteId string, first_name string, last_name st
 		return nil, errors.New("email already registered")
 	}
 
-	hashedPassword, err := security.HashPassword(password)
+	hashedPassword, err := security.HashPassword(input.Password)
 	if err != nil {
 		return nil, err
 	}
 
-	user := domain.NewUser(websiteId, first_name, last_name, email, hashedPassword)
+	user := domain.NewUser(input.WebsiteId, input.FirstName, input.LastName, input.Email, hashedPassword, input.AccountType)
+	user.CpfCnpj = input.CpfCnpj
+	user.CompanyName = input.CompanyName
+	user.TradeName = input.TradeName
+	user.Phone = input.Phone
+	user.ZipCode = input.ZipCode
+	user.AddressStreet = input.AddressStreet
+	user.AddressNumber = input.AddressNumber
+	user.AddressComplement = input.AddressComplement
+	user.AddressCity = input.AddressCity
+	user.AddressState = input.AddressState
+	if input.AccountType == "business" {
+		country := "Brasil"
+		user.AddressCountry = &country
+	}
 
 	if err := s.userRepo.UserRegister(*user); err != nil {
 		return nil, err
@@ -74,25 +135,25 @@ func (s *AuthService) Register(websiteId string, first_name string, last_name st
 	return user, nil
 }
 
-func (s *AuthService) VerifyEmail(user_id string) error {
+func (s *AuthService) VerifyEmail(user_id string) (*domain.User, error) {
 	user, err := s.userRepo.FindUserByID(user_id)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if user == nil {
-		return errors.New("user not found")
+		return nil, errors.New("user not found")
 	}
 
 	if user.Verified_email {
-		return errors.New("user already verified.")
+		return nil, errors.New("user already verified.")
 	}
 
 	err = s.userRepo.UpdateVerifiedEmailToTrue(user_id)
 	if err != nil {
-		return errors.New("Internal error")
+		return nil, errors.New("Internal error")
 	}
 
-	return nil
+	return user, nil
 }
 
 func (s *AuthService) Login(websiteId string, email string, password string) (*domain.User, error) {
@@ -209,27 +270,27 @@ func (s *AuthService) MeWithPlan(userID string) (*domain.User, [2]int, error) {
 	return user, limits, nil
 }
 
-func (s *AuthService) UpdateProfile(userID string, firstName string, lastName string, cpfCnpj *string, avatarUrl *string) error {
-	firstName = strings.TrimSpace(firstName)
-	lastName  = strings.TrimSpace(lastName)
-	if len(firstName) < 1 || len(firstName) > 50 {
+func (s *AuthService) UpdateProfile(userID string, data domain.UpdateProfileData) error {
+	data.FirstName = strings.TrimSpace(data.FirstName)
+	data.LastName  = strings.TrimSpace(data.LastName)
+	if len(data.FirstName) < 1 || len(data.FirstName) > 50 {
 		return errors.New("invalid first name")
 	}
-	if len(lastName) < 1 || len(lastName) > 50 {
+	if len(data.LastName) < 1 || len(data.LastName) > 50 {
 		return errors.New("invalid last name")
 	}
-	if cpfCnpj != nil {
-		raw := strings.TrimSpace(*cpfCnpj)
+	if data.CpfCnpj != nil {
+		raw := strings.TrimSpace(*data.CpfCnpj)
 		if len(raw) > 18 {
 			return errors.New("invalid cpf/cnpj")
 		}
 		if raw == "" {
-			cpfCnpj = nil
+			data.CpfCnpj = nil
 		} else {
-			cpfCnpj = &raw
+			data.CpfCnpj = &raw
 		}
 	}
-	return s.userRepo.UpdateUserProfile(userID, firstName, lastName, cpfCnpj, avatarUrl)
+	return s.userRepo.UpdateUserProfile(userID, data)
 }
 
 func (s *AuthService) Logout(w http.ResponseWriter) error {

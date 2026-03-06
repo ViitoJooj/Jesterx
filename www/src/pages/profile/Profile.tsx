@@ -3,17 +3,34 @@ import { useAuthContext } from "../../hooks/AuthContext";
 import { uploadImage } from "../../lib/supabase";
 import styles from "./Profile.module.scss";
 
+const BR_STATES = [
+  "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS",
+  "MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC",
+  "SP","SE","TO",
+];
+
 export function Profile() {
   const { me, updateProfile, cancelPlan, loading } = useAuthContext();
+
+  const isBusiness = me?.account_type === "business";
 
   const [firstName, setFirstName] = useState(me?.first_name ?? "");
   const [lastName, setLastName] = useState(me?.last_name ?? "");
   const [cpfCnpj, setCpfCnpj] = useState(me?.cpf_cnpj ?? "");
   const [avatarUrl, setAvatarUrl] = useState(me?.avatar_url ?? "");
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(
-    me?.avatar_url ?? null
-  );
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(me?.avatar_url ?? null);
+
+  // business fields
+  const [companyName, setCompanyName] = useState(me?.company_name ?? "");
+  const [tradeName, setTradeName] = useState(me?.trade_name ?? "");
+  const [phone, setPhone] = useState(me?.phone ?? "");
+  const [zipCode, setZipCode] = useState(me?.zip_code ?? "");
+  const [addressStreet, setAddressStreet] = useState(me?.address_street ?? "");
+  const [addressNumber, setAddressNumber] = useState(me?.address_number ?? "");
+  const [addressComplement, setAddressComplement] = useState(me?.address_complement ?? "");
+  const [addressCity, setAddressCity] = useState(me?.address_city ?? "");
+  const [addressState, setAddressState] = useState(me?.address_state ?? "");
 
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -52,6 +69,15 @@ export function Profile() {
         last_name: lastName,
         cpf_cnpj: cpfCnpj || null,
         avatar_url: finalAvatarUrl,
+        company_name: isBusiness ? companyName || null : null,
+        trade_name: isBusiness ? tradeName || null : null,
+        phone: isBusiness ? phone || null : null,
+        zip_code: isBusiness ? zipCode || null : null,
+        address_street: isBusiness ? addressStreet || null : null,
+        address_number: isBusiness ? addressNumber || null : null,
+        address_complement: isBusiness ? addressComplement || null : null,
+        address_city: isBusiness ? addressCity || null : null,
+        address_state: isBusiness ? addressState || null : null,
       });
       setSuccessMsg("Perfil atualizado com sucesso!");
     } catch (err: any) {
@@ -125,37 +151,92 @@ export function Profile() {
             <div className={styles.row}>
               <label>
                 Nome
-                <input
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  placeholder="Nome"
-                  required
-                />
+                <input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="Nome" required />
               </label>
               <label>
                 Sobrenome
-                <input
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  placeholder="Sobrenome"
-                  required
-                />
+                <input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Sobrenome" required />
               </label>
             </div>
             <label className={styles.fullWidth}>
               E-mail (não editável)
               <input value={me?.email ?? ""} disabled />
             </label>
-            <label className={styles.fullWidth}>
-              CPF / CNPJ
-              <input
-                value={cpfCnpj}
-                onChange={(e) => setCpfCnpj(e.target.value)}
-                placeholder="000.000.000-00 ou 00.000.000/0001-00"
-                maxLength={18}
-              />
-            </label>
+            {!isBusiness && (
+              <label className={styles.fullWidth}>
+                CPF
+                <input
+                  value={cpfCnpj}
+                  onChange={(e) => setCpfCnpj(e.target.value)}
+                  placeholder="000.000.000-00"
+                  maxLength={14}
+                />
+              </label>
+            )}
           </section>
+
+          {/* Business Info */}
+          {isBusiness && (
+            <section className={styles.section}>
+              <h2>
+                <span className={styles.businessBadge}>Empresa</span>
+                Dados da Empresa
+              </h2>
+              <div className={styles.row}>
+                <label>
+                  Razão Social
+                  <input value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="Empresa LTDA" />
+                </label>
+                <label>
+                  Nome Fantasia
+                  <input value={tradeName} onChange={(e) => setTradeName(e.target.value)} placeholder="Nome Fantasia" />
+                </label>
+              </div>
+              <div className={styles.row}>
+                <label>
+                  CNPJ
+                  <input value={cpfCnpj} onChange={(e) => setCpfCnpj(e.target.value)} placeholder="00.000.000/0001-00" maxLength={18} />
+                </label>
+                <label>
+                  Telefone
+                  <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="(11) 91234-5678" maxLength={16} />
+                </label>
+              </div>
+              <div className={styles.row}>
+                <label className={styles.zipField}>
+                  CEP
+                  <input value={zipCode} onChange={(e) => setZipCode(e.target.value)} placeholder="00000-000" maxLength={9} />
+                </label>
+                <label>
+                  Estado
+                  <select className={styles.select} value={addressState} onChange={(e) => setAddressState(e.target.value)}>
+                    <option value="">Selecione</option>
+                    {BR_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </label>
+              </div>
+              <div className={styles.row}>
+                <label>
+                  Rua / Avenida
+                  <input value={addressStreet} onChange={(e) => setAddressStreet(e.target.value)} placeholder="Av. Paulista" />
+                </label>
+                <label className={styles.numberField}>
+                  Número
+                  <input value={addressNumber} onChange={(e) => setAddressNumber(e.target.value)} placeholder="1000" />
+                </label>
+              </div>
+              <div className={styles.row}>
+                <label>
+                  Cidade
+                  <input value={addressCity} onChange={(e) => setAddressCity(e.target.value)} placeholder="São Paulo" />
+                </label>
+                <label>
+                  Complemento
+                  <input value={addressComplement} onChange={(e) => setAddressComplement(e.target.value)} placeholder="Sala 10" />
+                </label>
+              </div>
+            </section>
+          )}
 
           {/* Plan Info */}
           <section className={styles.section}>
@@ -172,12 +253,7 @@ export function Profile() {
                 <div className={styles.limitItem}>
                   <span>Sites</span>
                   <div className={styles.bar}>
-                    <div
-                      className={styles.barFill}
-                      style={{
-                        width: `${Math.min(100, (1 / maxSites) * 100)}%`,
-                      }}
-                    />
+                    <div className={styles.barFill} style={{ width: `${Math.min(100, (1 / maxSites) * 100)}%` }} />
                   </div>
                   <span>? / {maxSites}</span>
                 </div>
@@ -189,23 +265,13 @@ export function Profile() {
                   <span>máx. {maxRoutes}</span>
                 </div>
               </div>
-              <a href="/plans" className={styles.upgradeLink}>
-                Ver planos →
-              </a>
+              <a href="/plans" className={styles.upgradeLink}>Ver planos →</a>
             </div>
           </section>
 
           <div className={styles.actions}>
-            <button
-              type="submit"
-              className={styles.saveBtn}
-              disabled={saving || uploading || loading}
-            >
-              {uploading
-                ? "Enviando imagem..."
-                : saving
-                ? "Salvando..."
-                : "Salvar alterações"}
+            <button type="submit" className={styles.saveBtn} disabled={saving || uploading || loading}>
+              {uploading ? "Enviando imagem..." : saving ? "Salvando..." : "Salvar alterações"}
             </button>
           </div>
         </form>
@@ -215,17 +281,13 @@ export function Profile() {
           <section className={`${styles.section} ${styles.danger}`}>
             <h2>Zona de Perigo</h2>
             <p>Cancelar sua assinatura remove o acesso aos recursos do plano.</p>
-            <button
-              className={styles.cancelBtn}
-              onClick={() => setShowCancelModal(true)}
-            >
+            <button className={styles.cancelBtn} onClick={() => setShowCancelModal(true)}>
               Cancelar assinatura
             </button>
           </section>
         )}
       </div>
 
-      {/* Cancel Confirmation Modal */}
       {showCancelModal && (
         <div className={styles.modalOverlay}>
           <div className={styles.modal}>
@@ -235,18 +297,10 @@ export function Profile() {
               acesso aos recursos do plano ao final do período vigente.
             </p>
             <div className={styles.modalActions}>
-              <button
-                className={styles.cancelBtn}
-                onClick={handleCancelPlan}
-                disabled={canceling}
-              >
+              <button className={styles.cancelBtn} onClick={handleCancelPlan} disabled={canceling}>
                 {canceling ? "Cancelando..." : "Sim, cancelar"}
               </button>
-              <button
-                className={styles.secondaryBtn}
-                onClick={() => setShowCancelModal(false)}
-                disabled={canceling}
-              >
+              <button className={styles.secondaryBtn} onClick={() => setShowCancelModal(false)} disabled={canceling}>
                 Voltar
               </button>
             </div>
