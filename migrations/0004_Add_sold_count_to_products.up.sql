@@ -1,0 +1,2 @@
+ALTER TABLE products
+    ADD COLUMN IF NOT EXISTS sold_count INTEGER NOT NULL DEFAULT 0 CHECK (sold_count >= 0);

@@ -9,6 +9,7 @@ import (
 	"github.com/ViitoJooj/Jesterx/internal/domain"
 	middleware "github.com/ViitoJooj/Jesterx/internal/http/middlewares"
 	"github.com/ViitoJooj/Jesterx/internal/service"
+	"github.com/ViitoJooj/Jesterx/pkg/validate"
 )
 
 type ProductHandler struct {
@@ -96,9 +97,6 @@ func productErrStatus(err error) int {
 	return http.StatusBadRequest
 }
 
-// ── Private (owner/admin) ──────────────────────────────────────────────────
-
-// POST /api/v1/sites/{siteID}/products
 func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	userID, ok := middleware.UserID(r.Context())
 	if !ok {
@@ -110,6 +108,16 @@ func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	var req CreateProductRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if err := validate.New().
+		Required("name", req.Name).
+		MaxLen("name", req.Name, 200).
+		MinFloat("price", req.Price, 0.01).
+		MinInt("stock", req.Stock, 0).
+		Err(); err != nil {
+		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
 		return
 	}
 
@@ -134,7 +142,6 @@ func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(ProductResponse{Success: true, Message: "produto criado", Data: productToData(p)})
 }
 
-// GET /api/v1/sites/{siteID}/products
 func (h *ProductHandler) ListProducts(w http.ResponseWriter, r *http.Request) {
 	userID, ok := middleware.UserID(r.Context())
 	if !ok {
@@ -158,7 +165,6 @@ func (h *ProductHandler) ListProducts(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(ProductsResponse{Success: true, Message: "success", Data: data})
 }
 
-// PATCH /api/v1/sites/{siteID}/products/{productID}
 func (h *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	userID, ok := middleware.UserID(r.Context())
 	if !ok {
@@ -171,6 +177,16 @@ func (h *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	var req UpdateProductRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if err := validate.New().
+		Required("name", req.Name).
+		MaxLen("name", req.Name, 200).
+		MinFloat("price", req.Price, 0.01).
+		MinInt("stock", req.Stock, 0).
+		Err(); err != nil {
+		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
 		return
 	}
 
@@ -195,7 +211,6 @@ func (h *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(ProductResponse{Success: true, Message: "produto atualizado", Data: productToData(p)})
 }
 
-// DELETE /api/v1/sites/{siteID}/products/{productID}
 func (h *ProductHandler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	userID, ok := middleware.UserID(r.Context())
 	if !ok {
@@ -212,9 +227,6 @@ func (h *ProductHandler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// ── Public (store API) ─────────────────────────────────────────────────────
-
-// GET /api/store/{siteID}/products
 func (h *ProductHandler) PublicListProducts(w http.ResponseWriter, r *http.Request) {
 	siteID := strings.TrimSpace(r.PathValue("siteID"))
 
@@ -233,7 +245,6 @@ func (h *ProductHandler) PublicListProducts(w http.ResponseWriter, r *http.Reque
 	json.NewEncoder(w).Encode(ProductsResponse{Success: true, Message: "success", Data: data})
 }
 
-// GET /api/store/{siteID}/products/{productID}
 func (h *ProductHandler) PublicGetProduct(w http.ResponseWriter, r *http.Request) {
 	siteID := strings.TrimSpace(r.PathValue("siteID"))
 	productID := strings.TrimSpace(r.PathValue("productID"))

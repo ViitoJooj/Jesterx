@@ -1,9 +1,26 @@
 package middleware
 
-import "net/http"
+import (
+	"net/http"
+	"strings"
+
+	"github.com/ViitoJooj/Jesterx/internal/config"
+)
 
 func allowedOrigin(origin string) bool {
-	return origin == "http://localhost:5173" || origin == "http://127.0.0.1:5173"
+	if origin == "http://localhost:5173" || origin == "http://127.0.0.1:5173" {
+		return true
+	}
+	frontendURL := config.FrontendURL
+	if frontendURL == "" {
+		return false
+	}
+	for _, allowed := range strings.Split(frontendURL, ",") {
+		if strings.TrimSpace(allowed) == origin {
+			return true
+		}
+	}
+	return false
 }
 
 func CORS(next http.Handler) http.Handler {

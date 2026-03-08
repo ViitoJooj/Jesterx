@@ -30,7 +30,6 @@ func NewAuthService(userRepo repository.UserRepository, webSiteRepo repository.W
 	}
 }
 
-// function used for delete not verifieds users in 10 minutes
 func (s *AuthService) DeleteExpiredUnverifiedUsers() error {
 	return s.userRepo.DeleteExpiredUnverifiedUsers()
 }
@@ -254,13 +253,12 @@ func (s *AuthService) Me(userID string) (*domain.User, error) {
 	return user, nil
 }
 
-// MeWithPlan returns the user and [maxSites, maxRoutes] from their active plan.
 func (s *AuthService) MeWithPlan(userID string) (*domain.User, [2]int, error) {
 	user, err := s.Me(userID)
 	if err != nil {
 		return nil, [2]int{}, err
 	}
-	limits := [2]int{1, 5} // conservative defaults
+	limits := [2]int{1, 5}
 	if user.Plan != nil && *user.Plan != "" {
 		plan, err := s.paymentRepo.FindPlanByName(*user.Plan)
 		if err == nil && plan != nil {
@@ -272,7 +270,7 @@ func (s *AuthService) MeWithPlan(userID string) (*domain.User, [2]int, error) {
 
 func (s *AuthService) UpdateProfile(userID string, data domain.UpdateProfileData) error {
 	data.FirstName = strings.TrimSpace(data.FirstName)
-	data.LastName  = strings.TrimSpace(data.LastName)
+	data.LastName = strings.TrimSpace(data.LastName)
 	if len(data.FirstName) < 1 || len(data.FirstName) > 50 {
 		return errors.New("invalid first name")
 	}

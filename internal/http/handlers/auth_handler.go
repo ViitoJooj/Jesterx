@@ -12,6 +12,7 @@ import (
 	middleware "github.com/ViitoJooj/Jesterx/internal/http/middlewares"
 	"github.com/ViitoJooj/Jesterx/internal/security"
 	"github.com/ViitoJooj/Jesterx/internal/service"
+	"github.com/ViitoJooj/Jesterx/pkg/validate"
 )
 
 type RegisterRequest struct {
@@ -116,6 +117,20 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		log.Println(err)
 		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if err := validate.New().
+		Required("email", req.Email).
+		Email("email", req.Email).
+		Required("password", req.Password).
+		MinLen("password", req.Password, 8).
+		Required("first_name", req.First_name).
+		MaxLen("first_name", req.First_name, 50).
+		Required("last_name", req.Last_name).
+		MaxLen("last_name", req.Last_name, 50).
+		Err(); err != nil {
+		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
 		return
 	}
 
@@ -276,28 +291,35 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	claims := security.RefreshTokenClaims{
+	refreshClaims := security.RefreshTokenClaims{
 		Iss:       "https://jesterx.com.br",
 		Sub:       user.Id,
 		WebsiteId: user.WebsiteId,
 		Exp:       time.Now().Add(30 * 24 * time.Hour).Unix(),
 	}
 
-	refreshToken, err := security.RefreshToken(claims)
+	refreshToken, err := security.RefreshToken(refreshClaims)
 	if err != nil {
 		http.Error(w, "Internal error", http.StatusBadGateway)
 		return
 	}
 
-	cookie := http.Cookie{
-		Name:     security.RefreshCookieName(user.WebsiteId),
-		Value:    refreshToken,
-		Path:     "/",
-		MaxAge:   60 * 60 * 24 * 30,
-		HttpOnly: true,
-		Secure:   !config.IsDev,
-		SameSite: http.SameSiteLaxMode,
+	accessClaims := security.AccessTokenClaims{
+		Iss:       "https://jesterx.com.br",
+		Sub:       user.Id,
+		Aud:       "https://api.jesterx.com.br",
+		WebsiteId: user.WebsiteId,
+		Role:      user.Role,
+		Exp:       time.Now().Add(15 * time.Minute).Unix(),
 	}
+
+	accessToken, err := security.AccessToken(accessClaims)
+	if err != nil {
+		http.Error(w, "Internal error", http.StatusInternalServerError)
+		return
+	}
+
+	secure := !config.IsDev
 
 	var plan string
 	if user.Plan != nil {
@@ -317,7 +339,24 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	http.SetCookie(w, &cookie)
+	http.SetCookie(w, &http.Cookie{
+		Name:     security.RefreshCookieName(user.WebsiteId),
+		Value:    refreshToken,
+		Path:     "/",
+		MaxAge:   60 * 60 * 24 * 30,
+		HttpOnly: true,
+		Secure:   secure,
+		SameSite: http.SameSiteLaxMode,
+	})
+	http.SetCookie(w, &http.Cookie{
+		Name:     security.AccessCookieName(user.WebsiteId),
+		Value:    accessToken,
+		Path:     "/",
+		MaxAge:   60 * 15,
+		HttpOnly: true,
+		Secure:   secure,
+		SameSite: http.SameSiteLaxMode,
+	})
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusAccepted)
 	json.NewEncoder(w).Encode(resp)

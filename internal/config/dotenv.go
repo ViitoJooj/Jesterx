@@ -27,6 +27,8 @@ var StripeWebhookSecret string
 var FrontendURL string
 var SupabaseURL string
 var SupabaseAnonKey string
+var SupabaseServiceKey string
+var RedisURL string
 
 func LoadEnv() {
 	_ = godotenv.Load(".env")
@@ -54,6 +56,8 @@ func LoadEnv() {
 	FrontendURL = getEnvOrDefault("FRONTEND_URL", "http://localhost:5173")
 	SupabaseURL = getEnvOrDefault("SUPABASE_PROJECT_URL", "")
 	SupabaseAnonKey = getEnvOrDefault("SUPABASE_ANON_KEY", "")
+	SupabaseServiceKey = getEnvOrDefault("SUPABASE_SERVICE_KEY", "")
+	RedisURL = getEnvOrDefault("REDIS_URL", "redis://localhost:6379")
 }
 
 func mustGetenv(key string) string {

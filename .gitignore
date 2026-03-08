@@ -19,3 +19,7 @@ main.exe
 *.exe
 */main.exe
 */*.exe
+
+#PROJECT
+logs.txt
+*/logs.txt

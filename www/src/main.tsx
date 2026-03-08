@@ -26,6 +26,7 @@ import { About } from "./pages/about/About";
 import { Status } from "./pages/status/Status";
 
 import { Profile } from "./pages/profile/Profile";
+import { AdminDashboard } from "./pages/admin/AdminDashboard";
 
 const websiteId = (import.meta.env.VITE_WEBSITE_ID as string | undefined) ?? DEFAULT_WEBSITE_ID;
 
@@ -51,6 +52,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           <Route path="/docs" element={<Docs />} />
           <Route path="/about" element={<About />} />
           <Route path="/status" element={<Status />} />
+          <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
         </Routes>
         <Footer />
       </AuthProvider>

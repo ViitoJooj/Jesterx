@@ -39,15 +39,35 @@ func RegisterWebsiteRoutes(mux *http.ServeMux, h *handlers.WebSiteHandler, authS
 }
 
 func RegisterProductRoutes(mux *http.ServeMux, h *handlers.ProductHandler, authService *service.AuthService) {
-	// Rotas privadas (dono da loja / admin)
 	mux.Handle("POST /api/v1/sites/{siteID}/products", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.CreateProduct))))
 	mux.Handle("GET /api/v1/sites/{siteID}/products", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.ListProducts))))
 	mux.Handle("PATCH /api/v1/sites/{siteID}/products/{productID}", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.UpdateProduct))))
 	mux.Handle("DELETE /api/v1/sites/{siteID}/products/{productID}", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.DeleteProduct))))
-
-	// Rotas públicas da loja (sem autenticação — cada loja acessa apenas a sua)
 	mux.HandleFunc("GET /api/store/{siteID}/products", h.PublicListProducts)
 	mux.HandleFunc("GET /api/store/{siteID}/products/{productID}", h.PublicGetProduct)
+}
+
+func RegisterOrderRoutes(mux *http.ServeMux, h *handlers.OrderHandler, auth *service.AuthService) {
+	mux.HandleFunc("POST /api/store/{siteID}/orders", h.CreateOrder)
+	mux.Handle("GET /api/v1/sites/{siteID}/orders",
+		middleware.IdentityMiddleware(auth)(middleware.RequireAuth(http.HandlerFunc(h.ListSiteOrders))))
+}
+
+func RegisterStorageRoutes(mux *http.ServeMux, h *handlers.StorageHandler, authService *service.AuthService) {
+	mux.Handle("POST /api/v1/upload",
+		middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.Upload))))
+}
+
+func RegisterThemeRoutes(mux *http.ServeMux, h *handlers.ThemeHandler) {
+	mux.HandleFunc("GET /api/v1/themes", h.ListThemes)
+}
+
+func RegisterAdminRoutes(mux *http.ServeMux, h *handlers.AdminHandler, authService *service.AuthService) {
+	mux.Handle("GET /api/v1/admin/stats", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.Stats))))
+	mux.Handle("GET /api/v1/admin/users", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.ListUsers))))
+	mux.Handle("GET /api/v1/admin/sites", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.ListSites))))
+	mux.Handle("GET /api/v1/admin/orders", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.ListOrders))))
+	mux.Handle("GET /api/v1/admin/revenue", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.Revenue))))
 }
 
 func RegisterPaymentRoutes(mux *http.ServeMux, h *handlers.PaymentHandler, authService *service.AuthService) {

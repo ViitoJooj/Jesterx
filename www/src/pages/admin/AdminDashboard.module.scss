@@ -1,0 +1,208 @@
+.root {
+  min-height: 100vh;
+  background: #f5f7fa;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+.header {
+  background: #1a2740;
+  color: #fff;
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.backBtn {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  padding: 0.4rem 0.9rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.tabs {
+  background: #fff;
+  border-bottom: 1px solid #e5eaf3;
+  display: flex;
+  padding: 0 2rem;
+  gap: 0.5rem;
+}
+
+.tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #6b7a99;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 0.75rem 1rem;
+  transition: all 0.15s;
+
+  &:hover {
+    color: #1a2740;
+  }
+}
+
+.tabActive {
+  color: #ff5d1f;
+  border-bottom-color: #ff5d1f;
+}
+
+.content {
+  padding: 2rem;
+}
+
+.loading,
+.error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-size: 16px;
+  color: #5a6379;
+}
+
+.error {
+  color: #e53e3e;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.statCard {
+  background: #fff;
+  border-radius: 12px;
+  border-top: 3px solid #dde3f0;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.statValue {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 0.35rem;
+}
+
+.statLabel {
+  font-size: 12px;
+  color: #9aa5bc;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tableWrap {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  th {
+    background: #f5f7fa;
+    color: #9aa5bc;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e5eaf3;
+  }
+
+  td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #f0f4fa;
+    color: #1a2740;
+    vertical-align: middle;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  tr:hover td {
+    background: #fafbfd;
+  }
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #f0f4ff;
+  color: #3b5bdb;
+  border: 1px solid #c5d0ff;
+}
+
+.badgeAdmin {
+  background: #fff3e0;
+  color: #e65100;
+  border-color: #ffcc80;
+}
+
+.badgeUser {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-color: #a5d6a7;
+}
+
+.subtext {
+  font-size: 11px;
+  color: #9aa5bc;
+  margin-top: 2px;
+}
+
+.money {
+  font-weight: 700;
+  color: #1a2740;
+}
+
+.fee {
+  font-weight: 700;
+  color: #ff5d1f;
+}
+
+.revenueHeader {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e5eaf3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  h3 {
+    margin: 0;
+    font-size: 15px;
+    color: #1a2740;
+  }
+}
+
+.revenueSummary {
+  font-size: 13px;
+  color: #5a6379;
+}

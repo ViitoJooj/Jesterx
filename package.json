@@ -1,0 +1,10 @@
+{
+  "name": "jesterx",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix www run dev",
+    "build": "npm --prefix www run build",
+    "lint": "npm --prefix www run lint",
+    "preview": "npm --prefix www run preview"
+  }
+}
