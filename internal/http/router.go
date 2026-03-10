@@ -2,7 +2,9 @@ package http
 
 import (
 	"net/http"
+	"os"
 
+	"github.com/ViitoJooj/Jesterx/internal/config"
 	"github.com/ViitoJooj/Jesterx/internal/http/handlers"
 	middleware "github.com/ViitoJooj/Jesterx/internal/http/middlewares"
 	"github.com/ViitoJooj/Jesterx/internal/service"
@@ -68,6 +70,8 @@ func RegisterStoreSocialRoutes(mux *http.ServeMux, h *handlers.StoreSocialHandle
 		middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.ListMembers))))
 	mux.Handle("POST /api/v1/sites/{siteID}/members",
 		middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.AddMember))))
+	mux.Handle("PATCH /api/v1/sites/{siteID}/members/{memberUserID}",
+		middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.UpdateMemberRole))))
 	mux.Handle("DELETE /api/v1/sites/{siteID}/members/{memberUserID}",
 		middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.RemoveMember))))
 
@@ -106,6 +110,11 @@ func RegisterOrderRoutes(mux *http.ServeMux, h *handlers.OrderHandler, auth *ser
 func RegisterStorageRoutes(mux *http.ServeMux, h *handlers.StorageHandler, authService *service.AuthService) {
 	mux.Handle("POST /api/v1/upload",
 		middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.Upload))))
+
+	// Serve uploaded files from the data directory.
+	_ = os.MkdirAll(config.StoragePath, 0755)
+	fileServer := http.FileServer(http.Dir(config.StoragePath))
+	mux.Handle("GET /files/", http.StripPrefix("/files/", fileServer))
 }
 
 func RegisterThemeRoutes(mux *http.ServeMux, h *handlers.ThemeHandler) {

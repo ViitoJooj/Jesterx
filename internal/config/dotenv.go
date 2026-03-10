@@ -26,9 +26,7 @@ var StripeSecret string
 var StripeWebhookSecret string
 var FrontendURL string
 var BackendURL string
-var SupabaseURL string
-var SupabaseAnonKey string
-var SupabaseServiceKey string
+var StoragePath string
 var RedisURL string
 
 func LoadEnv() {
@@ -56,9 +54,7 @@ func LoadEnv() {
 	StripeWebhookSecret = getEnvOrDefault("STRIPE_WEBHOOK_SECRET", "")
 	FrontendURL = getEnvOrDefault("FRONTEND_URL", "http://localhost:5173")
 	BackendURL  = getEnvOrDefault("BACKEND_URL",  "http://localhost:8080")
-	SupabaseURL = getEnvOrDefault("SUPABASE_PROJECT_URL", "")
-	SupabaseAnonKey = getEnvOrDefault("SUPABASE_ANON_KEY", "")
-	SupabaseServiceKey = getEnvOrDefault("SUPABASE_SERVICE_KEY", "")
+	StoragePath = getEnvOrDefault("STORAGE_PATH", "./data")
 	RedisURL = getEnvOrDefault("REDIS_URL", "redis://localhost:6379")
 }
 

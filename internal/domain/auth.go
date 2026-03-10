@@ -47,6 +47,7 @@ type UpdateProfileData struct {
 	AddressComplement  *string
 	AddressCity        *string
 	AddressState       *string
+	AddressCountry     *string
 }
 
 func NewUser(WebsiteId string, first_name string, last_name string, email string, password_hash string, accountType string) *User {

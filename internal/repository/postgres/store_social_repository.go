@@ -400,6 +400,18 @@ func (r *storeSocialRepo) AddMember(member domain.StoreMember) (*domain.StoreMem
 	return r.FindMember(member.WebsiteID, member.UserID)
 }
 
+func (r *storeSocialRepo) UpdateMemberRole(websiteID, userID, role string) (*domain.StoreMember, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	_, err := r.db.ExecContext(ctx,
+		`UPDATE store_members SET role=$1 WHERE website_id=$2 AND user_id=$3`,
+		role, websiteID, userID)
+	if err != nil {
+		return nil, err
+	}
+	return r.FindMember(websiteID, userID)
+}
+
 func (r *storeSocialRepo) RemoveMember(websiteID, userID string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

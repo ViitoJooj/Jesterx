@@ -143,6 +143,13 @@ export function StoreInfo() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Members management (owner/manager/admin)
+  const [members, setMembers] = useState<StoreMember[]>([]);
+  const [addMemberId, setAddMemberId] = useState("");
+  const [addMemberRole, setAddMemberRole] = useState("support");
+  const [addingMember, setAddingMember] = useState(false);
+  const [memberError, setMemberError] = useState("");
+
   // New comment form
   const [commentText, setCommentText] = useState("");
   const [commentStars, setCommentStars] = useState(0);
@@ -164,6 +171,7 @@ export function StoreInfo() {
   const isOwner = user && store && user.id === store.creator.id;
   const canReply = myRole === "owner" || myRole === "admin" || myRole === "manager" || myRole === "support";
   const canEdit = myRole === "owner" || myRole === "admin" || myRole === "manager";
+  const canManageMembers = myRole === "owner" || myRole === "admin" || myRole === "manager";
 
   // ── Load data ──────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -194,6 +202,63 @@ export function StoreInfo() {
       `/api/store/${siteId}/my-role`, { websiteId, accessToken }
     ).then((d) => { if (d.success && d.data) setMyRole(d.data.role); }).catch(() => {});
   }, [siteId, user, accessToken]);
+
+  // ── Load members (owner/manager/admin) ────────────────────────────────────
+  useEffect(() => {
+    if (!siteId || !accessToken || !canManageMembers) return;
+    apiFetch<{ success: boolean; data?: StoreMember[] }>(
+      `/api/v1/sites/${siteId}/members`, { websiteId, accessToken }
+    ).then((d) => { if (d.success) setMembers(d.data ?? []); }).catch(() => {});
+  }, [siteId, accessToken, canManageMembers]);
+
+  // ── Member handlers ────────────────────────────────────────────────────────
+  async function handleAddMember(e: React.FormEvent) {
+    e.preventDefault();
+    if (!siteId || !accessToken || !addMemberId.trim()) return;
+    setAddingMember(true);
+    setMemberError("");
+    try {
+      const d = await apiFetch<{ success: boolean; data?: StoreMember }>(
+        `/api/v1/sites/${siteId}/members`,
+        { websiteId, accessToken, method: "POST", body: JSON.stringify({ user_id: addMemberId.trim(), role: addMemberRole }) }
+      );
+      if (d.success && d.data) {
+        setMembers((prev) => [...prev.filter((m) => m.user_id !== d.data!.user_id), d.data!]);
+        setAddMemberId("");
+      }
+    } catch (err: any) {
+      setMemberError(err.message ?? "Erro ao adicionar membro");
+    } finally {
+      setAddingMember(false);
+    }
+  }
+
+  async function handleUpdateRole(memberUserId: string, newRole: string) {
+    if (!siteId || !accessToken) return;
+    try {
+      const d = await apiFetch<{ success: boolean; data?: StoreMember }>(
+        `/api/v1/sites/${siteId}/members/${memberUserId}`,
+        { websiteId, accessToken, method: "PATCH", body: JSON.stringify({ role: newRole }) }
+      );
+      if (d.success && d.data) {
+        setMembers((prev) => prev.map((m) => m.user_id === memberUserId ? d.data! : m));
+      }
+    } catch (err: any) {
+      setMemberError(err.message ?? "Erro ao atualizar role");
+    }
+  }
+
+  async function handleRemoveMember(memberUserId: string) {
+    if (!siteId || !accessToken) return;
+    try {
+      await apiFetch(`/api/v1/sites/${siteId}/members/${memberUserId}`, {
+        websiteId, accessToken, method: "DELETE",
+      });
+      setMembers((prev) => prev.filter((m) => m.user_id !== memberUserId));
+    } catch (err: any) {
+      setMemberError(err.message ?? "Erro ao remover membro");
+    }
+  }
 
   // ── Handlers ──────────────────────────────────────────────────────────────
   async function handleRate(stars: number) {
@@ -453,6 +518,88 @@ export function StoreInfo() {
               <p className={styles.emptyMsg}>Nenhum acesso registrado ainda.</p>
             )}
           </section>
+
+          {/* Members Management (owner/manager/admin only) */}
+          {canManageMembers && (
+            <section className={styles.section}>
+              <h2>👥 Membros da Equipe</h2>
+
+              {memberError && <p className={styles.errorMsg}>{memberError}</p>}
+
+              {members.length === 0 ? (
+                <p className={styles.emptyMsg}>Nenhum membro adicionado ainda.</p>
+              ) : (
+                <table className={styles.membersTable}>
+                  <thead>
+                    <tr>
+                      <th>Usuário</th>
+                      <th>Role</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {members.map((m) => (
+                      <tr key={m.user_id}>
+                        <td className={styles.memberName}>
+                          {m.avatar_url
+                            ? <img src={m.avatar_url} alt="" className={styles.commentAvatar} />
+                            : <div className={styles.commentAvatarPlaceholder}>{m.user_name.charAt(0)}</div>
+                          }
+                          {m.user_name}
+                        </td>
+                        <td>
+                          <select
+                            className={styles.roleSelect}
+                            value={m.role}
+                            onChange={(e) => handleUpdateRole(m.user_id, e.target.value)}
+                          >
+                            <option value="manager">Gerente</option>
+                            <option value="catalog_manager">Gestor de Catálogo</option>
+                            <option value="support">Suporte</option>
+                            <option value="logistics">Logística</option>
+                          </select>
+                        </td>
+                        <td>
+                          <button
+                            type="button"
+                            className={styles.deleteCommentBtn}
+                            onClick={() => handleRemoveMember(m.user_id)}
+                            title="Remover membro"
+                          >✕</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+
+              <form onSubmit={handleAddMember} className={styles.addMemberForm}>
+                <h3>Adicionar membro</h3>
+                <div className={styles.addMemberRow}>
+                  <input
+                    value={addMemberId}
+                    onChange={(e) => setAddMemberId(e.target.value)}
+                    placeholder="ID do usuário"
+                    className={styles.editInput}
+                    required
+                  />
+                  <select
+                    className={styles.roleSelect}
+                    value={addMemberRole}
+                    onChange={(e) => setAddMemberRole(e.target.value)}
+                  >
+                    <option value="manager">Gerente</option>
+                    <option value="catalog_manager">Gestor de Catálogo</option>
+                    <option value="support">Suporte</option>
+                    <option value="logistics">Logística</option>
+                  </select>
+                  <button type="submit" className={styles.saveBtn} disabled={addingMember}>
+                    {addingMember ? "Adicionando…" : "Adicionar"}
+                  </button>
+                </div>
+              </form>
+            </section>
+          )}
 
           {/* Comments */}
           <section className={styles.section}>

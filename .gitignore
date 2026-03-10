@@ -23,3 +23,6 @@ main.exe
 #PROJECT
 logs.txt
 */logs.txt
+
+# Storage — arquivos enviados são criados dinamicamente pelo servidor
+data/

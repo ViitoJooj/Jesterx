@@ -228,12 +228,13 @@ func (r *connection) UpdateUserProfile(id string, data domain.UpdateProfileData)
 			company_name=$5, trade_name=$6, phone=$7,
 			zip_code=$8, address_street=$9, address_number=$10,
 			address_complement=$11, address_city=$12, address_state=$13,
-			updated_at=NOW()
-		WHERE id=$14`,
+			address_country=$14, updated_at=NOW()
+		WHERE id=$15`,
 		data.FirstName, data.LastName, data.CpfCnpj, data.AvatarUrl,
 		data.CompanyName, data.TradeName, data.Phone,
 		data.ZipCode, data.AddressStreet, data.AddressNumber,
 		data.AddressComplement, data.AddressCity, data.AddressState,
+		data.AddressCountry,
 		id,
 	)
 	return err

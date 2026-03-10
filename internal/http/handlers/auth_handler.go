@@ -98,6 +98,7 @@ type UpdateProfileRequest struct {
 	AddressComplement  *string `json:"address_complement"`
 	AddressCity        *string `json:"address_city"`
 	AddressState       *string `json:"address_state"`
+	AddressCountry     *string `json:"address_country"`
 }
 
 type AuthHandler struct {
@@ -509,6 +510,7 @@ func (h *AuthHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 		AddressComplement:  req.AddressComplement,
 		AddressCity:        req.AddressCity,
 		AddressState:       req.AddressState,
+		AddressCountry:     req.AddressCountry,
 	}); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

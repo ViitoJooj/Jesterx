@@ -3,6 +3,7 @@ import { NavLink, Link, useNavigate } from "react-router-dom";
 import styles from "./Header.module.scss";
 import Button from "../button/Button";
 import { useAuthContext } from "../../hooks/AuthContext";
+import { resolveMediaUrl } from "../../lib/storage";
 
 export function Header() {
   const [open, setOpen] = useState(false);
@@ -12,7 +13,7 @@ export function Header() {
 
   const { me, logout, isAuthenticated, loading } = useAuthContext();
   const firstName = me?.first_name?.trim() || "Perfil";
-  const avatarUrl = me?.avatar_url;
+  const avatarUrl = resolveMediaUrl(me?.avatar_url);
   const avatarFallback = firstName.slice(0, 1).toUpperCase();
 
   useEffect(() => {

@@ -634,3 +634,60 @@
   letter-spacing: .3px;
   margin-right: .25rem;
 }
+
+// ── Members Management ──────────────────────────────────────────────────────
+.membersTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.25rem;
+  font-size: .9rem;
+
+  th {
+    text-align: left;
+    padding: .4rem .5rem;
+    color: $font-color-secondary;
+    font-weight: 600;
+    border-bottom: 1px solid $border-color;
+  }
+  td {
+    padding: .5rem;
+    border-bottom: 1px solid rgba($border-color, .5);
+    vertical-align: middle;
+  }
+}
+
+.memberName {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+.roleSelect {
+  background: $background-color-secondary;
+  border: 1px solid $border-color;
+  color: $font-color-primary;
+  border-radius: 6px;
+  padding: .3rem .5rem;
+  font-size: .85rem;
+  cursor: pointer;
+}
+
+.addMemberForm {
+  margin-top: .75rem;
+
+  h3 {
+    font-size: .9rem;
+    font-weight: 600;
+    color: $font-color-secondary;
+    margin-bottom: .5rem;
+  }
+}
+
+.addMemberRow {
+  display: flex;
+  gap: .5rem;
+  flex-wrap: wrap;
+  align-items: center;
+
+  input { flex: 1; min-width: 150px; }
+}

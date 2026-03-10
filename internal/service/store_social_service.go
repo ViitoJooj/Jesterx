@@ -198,6 +198,38 @@ func (s *StoreSocialService) ListMembers(websiteID, requesterID string) ([]domai
 	return s.repo.ListMembers(websiteID)
 }
 
+// UpdateMemberRole changes the role of an existing member.
+// Permission rules mirror AddMember: managers cannot set/change to the "manager" role.
+func (s *StoreSocialService) UpdateMemberRole(websiteID, requesterID, targetUserID, newRole string) (*domain.StoreMember, error) {
+	switch newRole {
+	case domain.MemberRoleManager, domain.MemberRoleCatalogManager,
+		domain.MemberRoleSupport, domain.MemberRoleLogistics:
+	default:
+		return nil, errors.New("role inválida")
+	}
+	requesterRole, err := s.repo.GetUserRoleInStore(requesterID, websiteID)
+	if err != nil {
+		return nil, err
+	}
+	if requesterRole != "owner" && requesterRole != "admin" {
+		if requesterRole != "manager" {
+			return nil, errors.New("sem permissão para gerenciar membros")
+		}
+		if newRole == domain.MemberRoleManager {
+			return nil, errors.New("apenas o dono pode definir gerentes")
+		}
+		// Managers cannot change other managers' roles
+		target, err := s.repo.FindMember(websiteID, targetUserID)
+		if err != nil {
+			return nil, err
+		}
+		if target != nil && target.Role == domain.MemberRoleManager {
+			return nil, errors.New("gerentes não podem alterar outros gerentes")
+		}
+	}
+	return s.repo.UpdateMemberRole(websiteID, targetUserID, newRole)
+}
+
 // ─── Comment Replies ──────────────────────────────────────────────────────────
 
 // ReplyComment allows store team (owner/manager/support/admin) to reply to a comment.

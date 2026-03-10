@@ -387,6 +387,35 @@ func (h *StoreSocialHandler) RemoveMember(w http.ResponseWriter, r *http.Request
 	json.NewEncoder(w).Encode(map[string]any{"success": true, "message": "membro removido"})
 }
 
+// PATCH /api/v1/sites/{siteID}/members/{memberUserID}  (auth + owner/manager/admin)
+func (h *StoreSocialHandler) UpdateMemberRole(w http.ResponseWriter, r *http.Request) {
+	siteID := strings.TrimSpace(r.PathValue("siteID"))
+	targetUserID := strings.TrimSpace(r.PathValue("memberUserID"))
+	userID, ok := middleware.UserID(r.Context())
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var req struct {
+		Role string `json:"role"`
+	}
+	defer r.Body.Close()
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil || strings.TrimSpace(req.Role) == "" {
+		http.Error(w, "role é obrigatória", http.StatusBadRequest)
+		return
+	}
+
+	member, err := h.svc.UpdateMemberRole(siteID, userID, targetUserID, strings.TrimSpace(req.Role))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusForbidden)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]any{"success": true, "data": member})
+}
+
 // ─── My Role ──────────────────────────────────────────────────────────────────
 
 // GET /api/store/{siteID}/my-role  (auth required)

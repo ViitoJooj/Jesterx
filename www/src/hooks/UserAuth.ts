@@ -163,6 +163,7 @@ export function useAuth(websiteId: WebsiteId) {
       address_complement?: string | null;
       address_city?: string | null;
       address_state?: string | null;
+      address_country?: string | null;
     }) => {
       await apiFetch<void>("/api/v1/auth/me", {
         method: "PATCH",

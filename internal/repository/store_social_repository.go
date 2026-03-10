@@ -28,6 +28,7 @@ type StoreSocialRepository interface {
 
 	// Team members
 	AddMember(member domain.StoreMember) (*domain.StoreMember, error)
+	UpdateMemberRole(websiteID, userID, role string) (*domain.StoreMember, error)
 	RemoveMember(websiteID, userID string) error
 	ListMembers(websiteID string) ([]domain.StoreMember, error)
 	FindMember(websiteID, userID string) (*domain.StoreMember, error)

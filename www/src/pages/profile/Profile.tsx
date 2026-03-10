@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useAuthContext } from "../../hooks/AuthContext";
-import { uploadImage } from "../../lib/supabase";
+import { uploadImage, resolveMediaUrl } from "../../lib/storage";
 import styles from "./Profile.module.scss";
 
 const BR_STATES = [
@@ -10,7 +10,7 @@ const BR_STATES = [
 ];
 
 export function Profile() {
-  const { me, updateProfile, cancelPlan, loading } = useAuthContext();
+  const { me, updateProfile, cancelPlan, loading, websiteId } = useAuthContext();
 
   const isBusiness = me?.account_type === "business";
 
@@ -19,7 +19,7 @@ export function Profile() {
   const [cpfCnpj, setCpfCnpj] = useState(me?.cpf_cnpj ?? "");
   const [avatarUrl, setAvatarUrl] = useState(me?.avatar_url ?? "");
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(me?.avatar_url ?? null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(resolveMediaUrl(me?.avatar_url) ?? null);
 
   // business fields
   const [companyName, setCompanyName] = useState(me?.company_name ?? "");
@@ -31,6 +31,7 @@ export function Profile() {
   const [addressComplement, setAddressComplement] = useState(me?.address_complement ?? "");
   const [addressCity, setAddressCity] = useState(me?.address_city ?? "");
   const [addressState, setAddressState] = useState(me?.address_state ?? "");
+  const [addressCountry, setAddressCountry] = useState(me?.address_country ?? "");
 
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -58,8 +59,7 @@ export function Profile() {
 
       if (avatarFile) {
         setUploading(true);
-        const path = `avatars/${me?.id ?? "user"}-${Date.now()}.${avatarFile.name.split(".").pop()}`;
-        finalAvatarUrl = await uploadImage(avatarFile, path);
+        finalAvatarUrl = await uploadImage(avatarFile, websiteId);
         setAvatarUrl(finalAvatarUrl);
         setUploading(false);
       }
@@ -69,15 +69,16 @@ export function Profile() {
         last_name: lastName,
         cpf_cnpj: cpfCnpj || null,
         avatar_url: finalAvatarUrl,
+        phone: phone || null,
         company_name: isBusiness ? companyName || null : null,
         trade_name: isBusiness ? tradeName || null : null,
-        phone: isBusiness ? phone || null : null,
-        zip_code: isBusiness ? zipCode || null : null,
-        address_street: isBusiness ? addressStreet || null : null,
-        address_number: isBusiness ? addressNumber || null : null,
-        address_complement: isBusiness ? addressComplement || null : null,
-        address_city: isBusiness ? addressCity || null : null,
-        address_state: isBusiness ? addressState || null : null,
+        zip_code: zipCode || null,
+        address_street: addressStreet || null,
+        address_number: addressNumber || null,
+        address_complement: addressComplement || null,
+        address_city: addressCity || null,
+        address_state: addressState || null,
+        address_country: addressCountry || null,
       });
       setSuccessMsg("Perfil atualizado com sucesso!");
     } catch (err: any) {
@@ -173,6 +174,17 @@ export function Profile() {
                 />
               </label>
             )}
+            {!isBusiness && (
+              <label className={styles.fullWidth}>
+                Telefone
+                <input
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="(11) 91234-5678"
+                  maxLength={16}
+                />
+              </label>
+            )}
           </section>
 
           {/* Business Info */}
@@ -202,41 +214,52 @@ export function Profile() {
                   <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="(11) 91234-5678" maxLength={16} />
                 </label>
               </div>
-              <div className={styles.row}>
-                <label className={styles.zipField}>
-                  CEP
-                  <input value={zipCode} onChange={(e) => setZipCode(e.target.value)} placeholder="00000-000" maxLength={9} />
-                </label>
-                <label>
-                  Estado
-                  <select className={styles.select} value={addressState} onChange={(e) => setAddressState(e.target.value)}>
-                    <option value="">Selecione</option>
-                    {BR_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
-                  </select>
-                </label>
-              </div>
-              <div className={styles.row}>
-                <label>
-                  Rua / Avenida
-                  <input value={addressStreet} onChange={(e) => setAddressStreet(e.target.value)} placeholder="Av. Paulista" />
-                </label>
-                <label className={styles.numberField}>
-                  Número
-                  <input value={addressNumber} onChange={(e) => setAddressNumber(e.target.value)} placeholder="1000" />
-                </label>
-              </div>
-              <div className={styles.row}>
-                <label>
-                  Cidade
-                  <input value={addressCity} onChange={(e) => setAddressCity(e.target.value)} placeholder="São Paulo" />
-                </label>
-                <label>
-                  Complemento
-                  <input value={addressComplement} onChange={(e) => setAddressComplement(e.target.value)} placeholder="Sala 10" />
-                </label>
-              </div>
             </section>
           )}
+
+          {/* Address — shown for all account types */}
+          <section className={styles.section}>
+            <h2>Endereço</h2>
+            <div className={styles.row}>
+              <label className={styles.zipField}>
+                CEP
+                <input value={zipCode} onChange={(e) => setZipCode(e.target.value)} placeholder="00000-000" maxLength={9} />
+              </label>
+              <label>
+                Estado
+                <select className={styles.select} value={addressState} onChange={(e) => setAddressState(e.target.value)}>
+                  <option value="">Selecione</option>
+                  {BR_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </label>
+            </div>
+            <div className={styles.row}>
+              <label>
+                Rua / Avenida
+                <input value={addressStreet} onChange={(e) => setAddressStreet(e.target.value)} placeholder="Av. Paulista" />
+              </label>
+              <label className={styles.numberField}>
+                Número
+                <input value={addressNumber} onChange={(e) => setAddressNumber(e.target.value)} placeholder="1000" />
+              </label>
+            </div>
+            <div className={styles.row}>
+              <label>
+                Cidade
+                <input value={addressCity} onChange={(e) => setAddressCity(e.target.value)} placeholder="São Paulo" />
+              </label>
+              <label>
+                Complemento
+                <input value={addressComplement} onChange={(e) => setAddressComplement(e.target.value)} placeholder="Sala 10" />
+              </label>
+            </div>
+            <div className={styles.row}>
+              <label className={styles.fullWidth}>
+                País
+                <input value={addressCountry} onChange={(e) => setAddressCountry(e.target.value)} placeholder="Brasil" />
+              </label>
+            </div>
+          </section>
 
           {/* Plan Info */}
           <section className={styles.section}>
