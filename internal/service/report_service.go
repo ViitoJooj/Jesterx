@@ -18,11 +18,13 @@ func NewReportService(reportRepo repository.ReportRepository, websiteRepo reposi
 }
 
 type CreateReportInput struct {
-	WebsiteID     string
-	ReporterName  string
-	ReporterEmail string
-	Reason        string
-	Description   string
+	WebsiteID      string
+	ReporterUserID *string
+	ReporterName   string
+	ReporterEmail  string
+	Reason         string
+	Description    string
+	EvidenceURLs   []string
 }
 
 type UpdateReportInput struct {
@@ -48,17 +50,34 @@ func (s *ReportService) CreateReport(input CreateReportInput) (*domain.Report, e
 		return nil, errors.New("motivo inválido")
 	}
 
+	// Validate evidence (max 5, each base64 item max ~1.3MB)
+	if len(input.EvidenceURLs) > 5 {
+		return nil, errors.New("máximo de 5 imagens de evidência permitidas")
+	}
+	for _, ev := range input.EvidenceURLs {
+		if len(ev) > 1_400_000 {
+			return nil, errors.New("cada imagem deve ter no máximo 1MB")
+		}
+	}
+
 	_, err := s.websiteRepo.FindWebSiteByID(input.WebsiteID)
 	if err != nil {
 		return nil, errors.New("loja não encontrada")
 	}
 
+	evidenceURLs := input.EvidenceURLs
+	if evidenceURLs == nil {
+		evidenceURLs = []string{}
+	}
+
 	report := domain.Report{
-		WebsiteID:     input.WebsiteID,
-		ReporterName:  input.ReporterName,
-		ReporterEmail: input.ReporterEmail,
-		Reason:        domain.ReportReason(input.Reason),
-		Description:   input.Description,
+		WebsiteID:      input.WebsiteID,
+		ReporterUserID: input.ReporterUserID,
+		ReporterName:   input.ReporterName,
+		ReporterEmail:  input.ReporterEmail,
+		Reason:         domain.ReportReason(input.Reason),
+		Description:    input.Description,
+		EvidenceURLs:   evidenceURLs,
 	}
 
 	return s.reportRepo.SaveReport(report)

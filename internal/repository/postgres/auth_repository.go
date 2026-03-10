@@ -54,17 +54,14 @@ func (r *connection) FindUserByID(id string) (*domain.User, error) {
 		p.name AS plan_name
 	FROM users u
 	LEFT JOIN LATERAL (
-		SELECT *
+		SELECT plan_id
 		FROM payments pay
 		WHERE pay.user_id = u.id
-		  AND pay.website_id = u.website_id
 		  AND pay.status = 'completed'
 		ORDER BY pay.purchased_in DESC
 		LIMIT 1
 	) pay ON TRUE
-	LEFT JOIN plans p
-		ON p.price = pay.amount
-	   AND p.active = true
+	LEFT JOIN plans p ON p.id = pay.plan_id
 	WHERE u.id = $1
 	`
 
@@ -124,11 +121,11 @@ func (r *connection) FindUserByEmail(email string) (*domain.User, error) {
 		p.name AS plan_name
 	FROM users u
 	LEFT JOIN LATERAL (
-		SELECT * FROM payments pay
-		WHERE pay.user_id = u.id AND pay.website_id = u.website_id AND pay.status = 'completed'
+		SELECT plan_id FROM payments pay
+		WHERE pay.user_id = u.id AND pay.status = 'completed'
 		ORDER BY pay.purchased_in DESC LIMIT 1
 	) pay ON TRUE
-	LEFT JOIN plans p ON p.price = pay.amount AND p.active = true
+	LEFT JOIN plans p ON p.id = pay.plan_id
 	WHERE u.email = $1
 	`
 
@@ -180,11 +177,11 @@ func (r *connection) FindUserByEmailAndWebsite(email string, websiteId string) (
 		p.name AS plan_name
 	FROM users u
 	LEFT JOIN LATERAL (
-		SELECT * FROM payments pay
-		WHERE pay.user_id = u.id AND pay.website_id = u.website_id AND pay.status = 'completed'
+		SELECT plan_id FROM payments pay
+		WHERE pay.user_id = u.id AND pay.status = 'completed'
 		ORDER BY pay.purchased_in DESC LIMIT 1
 	) pay ON TRUE
-	LEFT JOIN plans p ON p.price = pay.amount AND p.active = true
+	LEFT JOIN plans p ON p.id = pay.plan_id
 	WHERE u.email = $1 AND u.website_id = $2
 	`
 
@@ -243,11 +240,24 @@ func (r *connection) UpdateUserProfile(id string, data domain.UpdateProfileData)
 }
 
 func (r *connection) DeleteUserByID(id string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	query := `DELETE FROM users WHERE id = $1`
-	_, err := r.db.ExecContext(ctx, query, id)
-	return err
+
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	if _, err := tx.ExecContext(ctx, `DELETE FROM websites WHERE creator_id = $1`, id); err != nil {
+		return err
+	}
+
+	if _, err := tx.ExecContext(ctx, `DELETE FROM users WHERE id = $1`, id); err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
 func (r *connection) DeleteExpiredUnverifiedUsers() error {

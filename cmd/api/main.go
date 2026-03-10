@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/ViitoJooj/Jesterx/internal/config"
 	httpRouter "github.com/ViitoJooj/Jesterx/internal/http"
@@ -15,6 +16,15 @@ import (
 	"github.com/ViitoJooj/Jesterx/pkg/logger"
 	"github.com/ViitoJooj/Jesterx/pkg/migrate"
 	"github.com/ViitoJooj/Jesterx/pkg/ratelimit"
+	"github.com/ViitoJooj/Jesterx/pkg/safeguard"
+)
+
+const (
+	maxBodyBytes    = 10 * 1024 * 1024
+	maxUploadBytes  = 50 * 1024 * 1024
+	maxPaginationN  = 100
+	banStrikes      = 20
+	banDuration     = 30 * time.Minute
 )
 
 func main() {
@@ -22,7 +32,6 @@ func main() {
 	mux := httpRouter.NewRouter()
 	db := postgres.NewPostgres(postgres.PostgresConfig(*config.PGCNN))
 
-	// Auto-run migrations
 	if err := migrate.Run(db, "migrations"); err != nil {
 		log.Fatalf("migration failed: %v", err)
 	}
@@ -53,7 +62,7 @@ func main() {
 	storageHandler := handlers.NewStorageHandler(storageService)
 	themeHandler := handlers.NewThemeHandler(db)
 	adminHandler := handlers.NewAdminHandler(db)
-	reportHandler := handlers.NewReportHandler(reportService)
+	reportHandler := handlers.NewReportHandler(reportService, authService)
 	storeSocialHandler := handlers.NewStoreSocialHandler(storeSocialService, db)
 
 	httpRouter.RegisterAuthRoutes(mux, authHandler, authService)
@@ -70,22 +79,56 @@ func main() {
 	globalLimiter := ratelimit.NewLimiter(200)
 	authLimiter := ratelimit.NewLimiter(15)
 
-	handler := logger.Middleware(func(ctx context.Context) string {
-		id, ok := middleware.UserID(ctx)
-		if !ok {
-			return ""
-		}
-		return id
-	})(middleware.CORS(
-		globalLimiter.Middleware(
-			ratelimit.AuthRateLimit(authLimiter,
-				middleware.IdentityMiddleware(authService)(mux),
+	routeLimiter := ratelimit.NewRouteRateLimiter().
+		Add("/api/v1/payments/", 10).
+		Add("/api/v1/upload", 20).
+		Add("/api/store/", 120)
+
+	ipBanner := safeguard.NewIPBanner(banStrikes, banDuration)
+
+	handler := safeguard.Recovery(
+		logger.Middleware(func(ctx context.Context) string {
+			id, ok := middleware.UserID(ctx)
+			if !ok {
+				return ""
+			}
+			return id
+		})(
+			middleware.CORS(
+				safeguard.PathTraversalGuard(
+					safeguard.PaginationGuard(maxPaginationN)(
+						safeguard.BodyLimit(maxBodyBytes)(
+							ipBanner.Middleware(
+								globalLimiter.Middleware(
+									routeLimiter.Middleware(
+										ratelimit.AuthRateLimit(authLimiter,
+											middleware.IdentityMiddleware(authService)(mux),
+										),
+									),
+								),
+							),
+						),
+					),
+				),
 			),
 		),
-	))
+	)
 
 	go jobs.StartCleanupUserWorker(authService)
 	go jobs.StartSalesDigestWorker(orderService, authRepo, websiteRepo)
 
-	http.ListenAndServe(":8080", handler)
+	srv := &http.Server{
+		Addr:              ":8080",
+		Handler:           handler,
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       15 * time.Second,
+		WriteTimeout:      30 * time.Second,
+		IdleTimeout:       120 * time.Second,
+		MaxHeaderBytes:    1 << 20,
+	}
+
+	log.Println("Server starting on :8080")
+	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		log.Fatalf("server error: %v", err)
+	}
 }

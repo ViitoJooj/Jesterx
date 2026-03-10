@@ -67,7 +67,6 @@ func (l *Limiter) Allow(ip string) bool {
 	return true
 }
 
-// Middleware returns an HTTP middleware that rate limits by IP.
 func (l *Limiter) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ip := realIP(r)
@@ -79,7 +78,6 @@ func (l *Limiter) Middleware(next http.Handler) http.Handler {
 	})
 }
 
-// AuthRateLimit applies the given limiter only to auth login and register routes.
 func AuthRateLimit(authLimiter *Limiter, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path
@@ -88,6 +86,44 @@ func AuthRateLimit(authLimiter *Limiter, next http.Handler) http.Handler {
 			if !authLimiter.Allow(ip + ":" + path) {
 				http.Error(w, `{"success":false,"message":"muitas tentativas, aguarde"}`, http.StatusTooManyRequests)
 				return
+			}
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+type routeEntry struct {
+	prefix  string
+	limiter *Limiter
+}
+
+type RouteRateLimiter struct {
+	routes []routeEntry
+}
+
+func NewRouteRateLimiter() *RouteRateLimiter {
+	return &RouteRateLimiter{}
+}
+
+func (rrl *RouteRateLimiter) Add(prefix string, requestsPerMinute int) *RouteRateLimiter {
+	rrl.routes = append(rrl.routes, routeEntry{
+		prefix:  prefix,
+		limiter: NewLimiter(requestsPerMinute),
+	})
+	return rrl
+}
+
+func (rrl *RouteRateLimiter) Middleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ip := realIP(r)
+		for _, entry := range rrl.routes {
+			if strings.HasPrefix(r.URL.Path, entry.prefix) {
+				if !entry.limiter.Allow(ip + ":" + r.URL.Path) {
+					w.Header().Set("Retry-After", "60")
+					http.Error(w, `{"success":false,"message":"rate limit exceeded for this endpoint"}`, http.StatusTooManyRequests)
+					return
+				}
+				break
 			}
 		}
 		next.ServeHTTP(w, r)

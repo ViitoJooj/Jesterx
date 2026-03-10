@@ -19,6 +19,7 @@ func RegisterAuthRoutes(mux *http.ServeMux, h *handlers.AuthHandler, authService
 	mux.HandleFunc("GET /api/v1/auth/refresh", h.Refresh)
 	mux.Handle("GET /api/v1/auth/me", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.Me))))
 	mux.Handle("PATCH /api/v1/auth/me", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.UpdateProfile))))
+	mux.Handle("DELETE /api/v1/auth/me", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.DeleteAccount))))
 	mux.HandleFunc("GET /api/v1/auth/logout", h.Logout)
 }
 
@@ -60,7 +61,7 @@ func RegisterStoreSocialRoutes(mux *http.ServeMux, h *handlers.StoreSocialHandle
 
 	// Admin
 	mux.Handle("PATCH /api/v1/admin/sites/{siteID}/mature",
-		middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.AdminSetMature))))
+		middleware.IdentityMiddleware(authService)(middleware.RequireRole(authService, "admin")(http.HandlerFunc(h.AdminSetMature))))
 
 	// Team members (owner/manager/admin)
 	mux.Handle("GET /api/v1/sites/{siteID}/members",
@@ -80,10 +81,11 @@ func RegisterStoreSocialRoutes(mux *http.ServeMux, h *handlers.StoreSocialHandle
 }
 
 func RegisterReportRoutes(mux *http.ServeMux, h *handlers.ReportHandler, authService *service.AuthService) {
+	requireAdmin := middleware.RequireRole(authService, "admin")
 	mux.HandleFunc("POST /api/v1/reports", h.PublicCreateReport)
-	mux.Handle("GET /api/v1/admin/reports", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.AdminListReports))))
-	mux.Handle("GET /api/v1/admin/reports/{reportID}", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.AdminGetReport))))
-	mux.Handle("PATCH /api/v1/admin/reports/{reportID}", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.AdminUpdateReport))))
+	mux.Handle("GET /api/v1/admin/reports", middleware.IdentityMiddleware(authService)(requireAdmin(http.HandlerFunc(h.AdminListReports))))
+	mux.Handle("GET /api/v1/admin/reports/{reportID}", middleware.IdentityMiddleware(authService)(requireAdmin(http.HandlerFunc(h.AdminGetReport))))
+	mux.Handle("PATCH /api/v1/admin/reports/{reportID}", middleware.IdentityMiddleware(authService)(requireAdmin(http.HandlerFunc(h.AdminUpdateReport))))
 }
 
 func RegisterProductRoutes(mux *http.ServeMux, h *handlers.ProductHandler, authService *service.AuthService) {
@@ -111,11 +113,12 @@ func RegisterThemeRoutes(mux *http.ServeMux, h *handlers.ThemeHandler) {
 }
 
 func RegisterAdminRoutes(mux *http.ServeMux, h *handlers.AdminHandler, authService *service.AuthService) {
-	mux.Handle("GET /api/v1/admin/stats", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.Stats))))
-	mux.Handle("GET /api/v1/admin/users", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.ListUsers))))
-	mux.Handle("GET /api/v1/admin/sites", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.ListSites))))
-	mux.Handle("GET /api/v1/admin/orders", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.ListOrders))))
-	mux.Handle("GET /api/v1/admin/revenue", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.Revenue))))
+	requireAdmin := middleware.RequireRole(authService, "admin")
+	mux.Handle("GET /api/v1/admin/stats", middleware.IdentityMiddleware(authService)(requireAdmin(http.HandlerFunc(h.Stats))))
+	mux.Handle("GET /api/v1/admin/users", middleware.IdentityMiddleware(authService)(requireAdmin(http.HandlerFunc(h.ListUsers))))
+	mux.Handle("GET /api/v1/admin/sites", middleware.IdentityMiddleware(authService)(requireAdmin(http.HandlerFunc(h.ListSites))))
+	mux.Handle("GET /api/v1/admin/orders", middleware.IdentityMiddleware(authService)(requireAdmin(http.HandlerFunc(h.ListOrders))))
+	mux.Handle("GET /api/v1/admin/revenue", middleware.IdentityMiddleware(authService)(requireAdmin(http.HandlerFunc(h.Revenue))))
 }
 
 func RegisterPaymentRoutes(mux *http.ServeMux, h *handlers.PaymentHandler, authService *service.AuthService) {

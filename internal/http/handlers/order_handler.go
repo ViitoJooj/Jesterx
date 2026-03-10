@@ -25,11 +25,11 @@ type CreateOrderRequest struct {
 	Items      []OrderItemReq `json:"items"`
 }
 
+// OrderItemReq only accepts product_id and qty — prices are always
+// resolved server-side from the database to prevent price manipulation.
 type OrderItemReq struct {
-	ProductID   string  `json:"product_id"`
-	ProductName string  `json:"product_name"`
-	UnitPrice   float64 `json:"unit_price"`
-	Qty         int     `json:"qty"`
+	ProductID string `json:"product_id"`
+	Qty       int    `json:"qty"`
 }
 
 func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
@@ -37,17 +37,15 @@ func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	var req CreateOrderRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "invalid request body", http.StatusBadRequest)
+		http.Error(w, `{"success":false,"message":"invalid request body"}`, http.StatusBadRequest)
 		return
 	}
 
 	items := make([]service.OrderItemInput, 0, len(req.Items))
 	for _, it := range req.Items {
 		items = append(items, service.OrderItemInput{
-			ProductID:   it.ProductID,
-			ProductName: it.ProductName,
-			UnitPrice:   it.UnitPrice,
-			Qty:         it.Qty,
+			ProductID: it.ProductID,
+			Qty:       it.Qty,
 		})
 	}
 
@@ -59,7 +57,9 @@ func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 		Items:      items,
 	})
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]any{"success": false, "message": err.Error()})
 		return
 	}
 
@@ -69,16 +69,24 @@ func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *OrderHandler) ListSiteOrders(w http.ResponseWriter, r *http.Request) {
-	_, ok := middleware.UserID(r.Context())
+	userID, ok := middleware.UserID(r.Context())
 	if !ok {
-		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		http.Error(w, `{"success":false,"message":"unauthorized"}`, http.StatusUnauthorized)
 		return
 	}
 	siteID := strings.TrimSpace(r.PathValue("siteID"))
 
-	orders, err := h.orderService.ListSiteOrders(siteID)
+	orders, err := h.orderService.ListSiteOrders(userID, siteID)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		status := http.StatusInternalServerError
+		if err.Error() == "acesso negado" {
+			status = http.StatusForbidden
+		} else if err.Error() == "site não encontrado" {
+			status = http.StatusNotFound
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(status)
+		json.NewEncoder(w).Encode(map[string]any{"success": false, "message": err.Error()})
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")

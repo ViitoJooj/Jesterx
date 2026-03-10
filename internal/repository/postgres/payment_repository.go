@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/ViitoJooj/Jesterx/internal/domain"
+	"github.com/google/uuid"
 )
 
 func NewPaymentRepository(db *sql.DB) *connection {
@@ -49,7 +50,7 @@ func (r *connection) ListActivePlans() ([]domain.Plan, error) {
 	return plans, rows.Err()
 }
 
-func (r *connection) FindPlanByID(id int64) (*domain.Plan, error) {
+func (r *connection) FindPlanByID(id string) (*domain.Plan, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -110,13 +111,14 @@ func (r *connection) FindLatestCompletedPaymentByUserID(userID string) (*domain.
 	defer cancel()
 
 	var p domain.Payment
+	var planID sql.NullString
 	err := r.db.QueryRowContext(ctx, `
-		SELECT id, user_id, website_id, reference_id, type, quantity, amount, currency, status, purchased_in
+		SELECT id, user_id, website_id, COALESCE(plan_id,''), reference_id, type, quantity, amount, currency, status, purchased_in
 		FROM payments
 		WHERE user_id = $1 AND status = 'completed'
 		ORDER BY purchased_in DESC LIMIT 1
 	`, userID).Scan(
-		&p.ID, &p.UserID, &p.WebsiteID, &p.ReferenceID, &p.Type,
+		&p.ID, &p.UserID, &p.WebsiteID, &planID, &p.ReferenceID, &p.Type,
 		&p.Quantity, &p.Amount, &p.Currency, &p.Status, &p.PurchasedIn,
 	)
 	if errors.Is(err, sql.ErrNoRows) {
@@ -125,6 +127,9 @@ func (r *connection) FindLatestCompletedPaymentByUserID(userID string) (*domain.
 	if err != nil {
 		return nil, err
 	}
+	if planID.Valid {
+		p.PlanID = planID.String
+	}
 	return &p, nil
 }
 
@@ -132,18 +137,22 @@ func (r *connection) CreatePayment(payment domain.Payment) (*domain.Payment, err
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
+	id, _ := uuid.NewV7()
 	query := `
-		INSERT INTO payments (user_id, website_id, reference_id, type, quantity, amount, currency, status, purchased_in)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
+		INSERT INTO payments (id, user_id, website_id, plan_id, reference_id, type, quantity, amount, currency, status, purchased_in)
+		VALUES ($1, $2, $3, NULLIF($4,''), $5, $6, $7, $8, $9, $10, NOW())
 		RETURNING id, purchased_in
 	`
 
 	created := payment
+	created.ID = id.String()
 	err := r.db.QueryRowContext(
 		ctx,
 		query,
+		created.ID,
 		payment.UserID,
 		payment.WebsiteID,
+		payment.PlanID,
 		payment.ReferenceID,
 		payment.Type,
 		payment.Quantity,

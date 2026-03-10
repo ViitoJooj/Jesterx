@@ -448,6 +448,32 @@ func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(resp)
 }
 
+func (h *AuthHandler) DeleteAccount(w http.ResponseWriter, r *http.Request) {
+	userID, ok := middleware.UserID(r.Context())
+	if !ok {
+		http.Error(w, `{"success":false,"message":"unauthorized"}`, http.StatusUnauthorized)
+		return
+	}
+
+	websiteId := r.Header.Get("X-Website-Id")
+
+	if err := h.authService.DeleteAccount(userID); err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]any{"success": false, "message": err.Error()})
+		return
+	}
+
+	if websiteId != "" {
+		http.SetCookie(w, &http.Cookie{Name: security.RefreshCookieName(websiteId), Value: "", Path: "/", MaxAge: -1})
+		http.SetCookie(w, &http.Cookie{Name: security.AccessCookieName(websiteId), Value: "", Path: "/", MaxAge: -1})
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]any{"success": true, "message": "conta excluída"})
+}
+
 func derefString(s *string) string {
 	if s == nil {
 		return ""

@@ -371,7 +371,12 @@ export const ReactEditor: React.FC = () => {
       setActive({ kind: "route", path: firstPath });
       setPreviewPath(firstPath);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao carregar");
+      const msg = err instanceof Error ? err.message : "Erro ao carregar";
+      if (msg.includes("403") || msg.toLowerCase().includes("forbidden") || msg.toLowerCase().includes("unauthorized")) {
+        navigate("/pages", { replace: true });
+        return;
+      }
+      setError(msg);
     }
   }
 

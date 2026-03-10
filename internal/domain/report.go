@@ -22,16 +22,18 @@ const (
 )
 
 type Report struct {
-	ID            string
-	TicketNumber  int
-	WebsiteID     string
-	ReporterName  string
-	ReporterEmail string
-	Reason        ReportReason
-	Description   string
-	Status        ReportStatus
-	AdminResponse *string
-	ResolvedAt    *time.Time
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
+	ID             string
+	TicketNumber   int
+	WebsiteID      string
+	ReporterUserID *string
+	ReporterName   string
+	ReporterEmail  string
+	Reason         ReportReason
+	Description    string
+	EvidenceURLs   []string
+	Status         ReportStatus
+	AdminResponse  *string
+	ResolvedAt     *time.Time
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
 }

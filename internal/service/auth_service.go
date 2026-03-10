@@ -30,6 +30,17 @@ func NewAuthService(userRepo repository.UserRepository, webSiteRepo repository.W
 	}
 }
 
+func (s *AuthService) DeleteAccount(userID string) error {
+	user, err := s.userRepo.FindUserByID(userID)
+	if err != nil {
+		return errors.New("erro interno")
+	}
+	if user == nil {
+		return errors.New("usuário não encontrado")
+	}
+	return s.userRepo.DeleteUserByID(userID)
+}
+
 func (s *AuthService) DeleteExpiredUnverifiedUsers() error {
 	return s.userRepo.DeleteExpiredUnverifiedUsers()
 }

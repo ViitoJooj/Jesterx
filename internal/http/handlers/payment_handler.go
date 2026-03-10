@@ -18,7 +18,7 @@ func NewPaymentHandler(paymentService *service.PaymentService) *PaymentHandler {
 }
 
 type PlanResponse struct {
-	ID           int64   `json:"id"`
+	ID           string  `json:"id"`
 	Name         string  `json:"name"`
 	Description  string  `json:"description"`
 	DescriptionM string  `json:"description_md"`
@@ -33,8 +33,8 @@ type ListPlansResponse struct {
 }
 
 type CreateCheckoutRequest struct {
-	PlanID   int64 `json:"plan_id"`
-	Quantity int   `json:"quantity"`
+	PlanID   string `json:"plan_id"`
+	Quantity int    `json:"quantity"`
 }
 
 type CheckoutData struct {

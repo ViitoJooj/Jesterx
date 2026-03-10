@@ -8,38 +8,43 @@ import (
 	"time"
 
 	"github.com/ViitoJooj/Jesterx/internal/domain"
+	middleware "github.com/ViitoJooj/Jesterx/internal/http/middlewares"
 	"github.com/ViitoJooj/Jesterx/internal/service"
 )
 
 type ReportHandler struct {
 	reportService *service.ReportService
+	authService   *service.AuthService
 }
 
-func NewReportHandler(reportService *service.ReportService) *ReportHandler {
-	return &ReportHandler{reportService: reportService}
+func NewReportHandler(reportService *service.ReportService, authService *service.AuthService) *ReportHandler {
+	return &ReportHandler{reportService: reportService, authService: authService}
 }
 
 type CreateReportRequest struct {
-	WebsiteID     string `json:"website_id"`
-	ReporterName  string `json:"reporter_name"`
-	ReporterEmail string `json:"reporter_email"`
-	Reason        string `json:"reason"`
-	Description   string `json:"description"`
+	WebsiteID     string   `json:"website_id"`
+	ReporterName  string   `json:"reporter_name"`
+	ReporterEmail string   `json:"reporter_email"`
+	Reason        string   `json:"reason"`
+	Description   string   `json:"description"`
+	EvidenceURLs  []string `json:"evidence_urls"`
 }
 
 type ReportData struct {
-	ID            string     `json:"id"`
-	TicketNumber  int        `json:"ticket_number"`
-	WebsiteID     string     `json:"website_id"`
-	ReporterName  string     `json:"reporter_name"`
-	ReporterEmail string     `json:"reporter_email"`
-	Reason        string     `json:"reason"`
-	Description   string     `json:"description"`
-	Status        string     `json:"status"`
-	AdminResponse *string    `json:"admin_response,omitempty"`
-	ResolvedAt    *time.Time `json:"resolved_at,omitempty"`
-	CreatedAt     time.Time  `json:"created_at"`
-	UpdatedAt     time.Time  `json:"updated_at"`
+	ID             string     `json:"id"`
+	TicketNumber   int        `json:"ticket_number"`
+	WebsiteID      string     `json:"website_id"`
+	ReporterUserID *string    `json:"reporter_user_id,omitempty"`
+	ReporterName   string     `json:"reporter_name"`
+	ReporterEmail  string     `json:"reporter_email"`
+	Reason         string     `json:"reason"`
+	Description    string     `json:"description"`
+	EvidenceURLs   []string   `json:"evidence_urls"`
+	Status         string     `json:"status"`
+	AdminResponse  *string    `json:"admin_response,omitempty"`
+	ResolvedAt     *time.Time `json:"resolved_at,omitempty"`
+	CreatedAt      time.Time  `json:"created_at"`
+	UpdatedAt      time.Time  `json:"updated_at"`
 }
 
 type ReportResponse struct {
@@ -63,23 +68,30 @@ type UpdateReportRequest struct {
 }
 
 func reportToData(r *domain.Report) ReportData {
+	evidenceURLs := r.EvidenceURLs
+	if evidenceURLs == nil {
+		evidenceURLs = []string{}
+	}
 	return ReportData{
-		ID:            r.ID,
-		TicketNumber:  r.TicketNumber,
-		WebsiteID:     r.WebsiteID,
-		ReporterName:  r.ReporterName,
-		ReporterEmail: r.ReporterEmail,
-		Reason:        string(r.Reason),
-		Description:   r.Description,
-		Status:        string(r.Status),
-		AdminResponse: r.AdminResponse,
-		ResolvedAt:    r.ResolvedAt,
-		CreatedAt:     r.CreatedAt,
-		UpdatedAt:     r.UpdatedAt,
+		ID:             r.ID,
+		TicketNumber:   r.TicketNumber,
+		WebsiteID:      r.WebsiteID,
+		ReporterUserID: r.ReporterUserID,
+		ReporterName:   r.ReporterName,
+		ReporterEmail:  r.ReporterEmail,
+		Reason:         string(r.Reason),
+		Description:    r.Description,
+		EvidenceURLs:   evidenceURLs,
+		Status:         string(r.Status),
+		AdminResponse:  r.AdminResponse,
+		ResolvedAt:     r.ResolvedAt,
+		CreatedAt:      r.CreatedAt,
+		UpdatedAt:      r.UpdatedAt,
 	}
 }
 
 // PublicCreateReport handles POST /api/v1/reports – anyone can submit a report.
+// If the user is authenticated, reporter_name and reporter_email are auto-filled from their profile.
 func (h *ReportHandler) PublicCreateReport(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
@@ -89,12 +101,29 @@ func (h *ReportHandler) PublicCreateReport(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	// Auto-fill reporter info from authenticated user if missing
+	var reporterUserID *string
+	if userID, ok := middleware.UserID(r.Context()); ok {
+		user, err := h.authService.GetUserByID(userID)
+		if err == nil {
+			reporterUserID = &userID
+			if strings.TrimSpace(req.ReporterName) == "" {
+				req.ReporterName = strings.TrimSpace(user.First_name + " " + user.Last_name)
+			}
+			if strings.TrimSpace(req.ReporterEmail) == "" {
+				req.ReporterEmail = user.Email
+			}
+		}
+	}
+
 	report, err := h.reportService.CreateReport(service.CreateReportInput{
-		WebsiteID:     strings.TrimSpace(req.WebsiteID),
-		ReporterName:  strings.TrimSpace(req.ReporterName),
-		ReporterEmail: strings.TrimSpace(req.ReporterEmail),
-		Reason:        strings.TrimSpace(req.Reason),
-		Description:   strings.TrimSpace(req.Description),
+		WebsiteID:      strings.TrimSpace(req.WebsiteID),
+		ReporterUserID: reporterUserID,
+		ReporterName:   strings.TrimSpace(req.ReporterName),
+		ReporterEmail:  strings.TrimSpace(req.ReporterEmail),
+		Reason:         strings.TrimSpace(req.Reason),
+		Description:    strings.TrimSpace(req.Description),
+		EvidenceURLs:   req.EvidenceURLs,
 	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)

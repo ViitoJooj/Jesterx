@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"time"
 
 	"github.com/ViitoJooj/Jesterx/internal/domain"
@@ -28,13 +29,18 @@ func (r *reportRepository) SaveReport(report domain.Report) (*domain.Report, err
 	report.UpdatedAt = now
 	report.Status = domain.ReportStatusOpen
 
+	evidenceJSON, err := json.Marshal(report.EvidenceURLs)
+	if err != nil {
+		evidenceJSON = []byte("[]")
+	}
+
 	row := r.db.QueryRowContext(ctx, `
-		INSERT INTO reports (id, website_id, reporter_name, reporter_email, reason, description, status, created_at, updated_at)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
-		RETURNING id, ticket_number, website_id, reporter_name, reporter_email, reason, description, status,
+		INSERT INTO reports (id, website_id, reporter_user_id, reporter_name, reporter_email, reason, description, evidence_urls, status, created_at, updated_at)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+		RETURNING id, ticket_number, website_id, reporter_user_id, reporter_name, reporter_email, reason, description, evidence_urls, status,
 		          admin_response, resolved_at, created_at, updated_at`,
-		report.ID, report.WebsiteID, report.ReporterName, report.ReporterEmail,
-		string(report.Reason), report.Description, string(report.Status),
+		report.ID, report.WebsiteID, report.ReporterUserID, report.ReporterName, report.ReporterEmail,
+		string(report.Reason), report.Description, evidenceJSON, string(report.Status),
 		report.CreatedAt, report.UpdatedAt,
 	)
 
@@ -46,7 +52,7 @@ func (r *reportRepository) FindReportByID(id string) (*domain.Report, error) {
 	defer cancel()
 
 	row := r.db.QueryRowContext(ctx, `
-		SELECT id, ticket_number, website_id, reporter_name, reporter_email, reason, description, status,
+		SELECT id, ticket_number, website_id, reporter_user_id, reporter_name, reporter_email, reason, description, evidence_urls, status,
 		       admin_response, resolved_at, created_at, updated_at
 		FROM reports WHERE id = $1`, id)
 
@@ -86,13 +92,13 @@ func (r *reportRepository) ListReports(status string, page, perPage int) ([]doma
 
 	if status != "" {
 		dataRows, err = r.db.QueryContext(ctx, `
-			SELECT id, ticket_number, website_id, reporter_name, reporter_email, reason, description, status,
+			SELECT id, ticket_number, website_id, reporter_user_id, reporter_name, reporter_email, reason, description, evidence_urls, status,
 			       admin_response, resolved_at, created_at, updated_at
 			FROM reports WHERE status = $1
 			ORDER BY created_at DESC LIMIT $2 OFFSET $3`, status, perPage, offset)
 	} else {
 		dataRows, err = r.db.QueryContext(ctx, `
-			SELECT id, ticket_number, website_id, reporter_name, reporter_email, reason, description, status,
+			SELECT id, ticket_number, website_id, reporter_user_id, reporter_name, reporter_email, reason, description, evidence_urls, status,
 			       admin_response, resolved_at, created_at, updated_at
 			FROM reports
 			ORDER BY created_at DESC LIMIT $1 OFFSET $2`, perPage, offset)
@@ -119,7 +125,7 @@ func (r *reportRepository) ListReportsByWebsiteID(websiteID string) ([]domain.Re
 	defer cancel()
 
 	rows, err := r.db.QueryContext(ctx, `
-		SELECT id, ticket_number, website_id, reporter_name, reporter_email, reason, description, status,
+		SELECT id, ticket_number, website_id, reporter_user_id, reporter_name, reporter_email, reason, description, evidence_urls, status,
 		       admin_response, resolved_at, created_at, updated_at
 		FROM reports WHERE website_id = $1
 		ORDER BY created_at DESC`, websiteID)
@@ -153,7 +159,7 @@ func (r *reportRepository) UpdateReport(id string, status domain.ReportStatus, a
 		UPDATE reports
 		SET status = $2, admin_response = $3, resolved_at = $4, updated_at = $5
 		WHERE id = $1
-		RETURNING id, ticket_number, website_id, reporter_name, reporter_email, reason, description, status,
+		RETURNING id, ticket_number, website_id, reporter_user_id, reporter_name, reporter_email, reason, description, evidence_urls, status,
 		          admin_response, resolved_at, created_at, updated_at`,
 		id, string(status), adminResponse, resolvedAt, now,
 	)
@@ -163,13 +169,15 @@ func (r *reportRepository) UpdateReport(id string, status domain.ReportStatus, a
 
 func scanReport(row *sql.Row) (*domain.Report, error) {
 	var rep domain.Report
+	var reporterUserID sql.NullString
 	var adminResponse sql.NullString
 	var resolvedAt sql.NullTime
+	var evidenceJSON []byte
 
 	err := row.Scan(
 		&rep.ID, &rep.TicketNumber, &rep.WebsiteID,
-		&rep.ReporterName, &rep.ReporterEmail,
-		&rep.Reason, &rep.Description, &rep.Status,
+		&reporterUserID, &rep.ReporterName, &rep.ReporterEmail,
+		&rep.Reason, &rep.Description, &evidenceJSON, &rep.Status,
 		&adminResponse, &resolvedAt,
 		&rep.CreatedAt, &rep.UpdatedAt,
 	)
@@ -177,11 +185,20 @@ func scanReport(row *sql.Row) (*domain.Report, error) {
 		return nil, err
 	}
 
+	if reporterUserID.Valid {
+		rep.ReporterUserID = &reporterUserID.String
+	}
 	if adminResponse.Valid {
 		rep.AdminResponse = &adminResponse.String
 	}
 	if resolvedAt.Valid {
 		rep.ResolvedAt = &resolvedAt.Time
+	}
+	if len(evidenceJSON) > 0 {
+		_ = json.Unmarshal(evidenceJSON, &rep.EvidenceURLs)
+	}
+	if rep.EvidenceURLs == nil {
+		rep.EvidenceURLs = []string{}
 	}
 
 	return &rep, nil
@@ -189,13 +206,15 @@ func scanReport(row *sql.Row) (*domain.Report, error) {
 
 func scanReportRow(rows *sql.Rows) (*domain.Report, error) {
 	var rep domain.Report
+	var reporterUserID sql.NullString
 	var adminResponse sql.NullString
 	var resolvedAt sql.NullTime
+	var evidenceJSON []byte
 
 	err := rows.Scan(
 		&rep.ID, &rep.TicketNumber, &rep.WebsiteID,
-		&rep.ReporterName, &rep.ReporterEmail,
-		&rep.Reason, &rep.Description, &rep.Status,
+		&reporterUserID, &rep.ReporterName, &rep.ReporterEmail,
+		&rep.Reason, &rep.Description, &evidenceJSON, &rep.Status,
 		&adminResponse, &resolvedAt,
 		&rep.CreatedAt, &rep.UpdatedAt,
 	)
@@ -203,11 +222,20 @@ func scanReportRow(rows *sql.Rows) (*domain.Report, error) {
 		return nil, err
 	}
 
+	if reporterUserID.Valid {
+		rep.ReporterUserID = &reporterUserID.String
+	}
 	if adminResponse.Valid {
 		rep.AdminResponse = &adminResponse.String
 	}
 	if resolvedAt.Valid {
 		rep.ResolvedAt = &resolvedAt.Time
+	}
+	if len(evidenceJSON) > 0 {
+		_ = json.Unmarshal(evidenceJSON, &rep.EvidenceURLs)
+	}
+	if rep.EvidenceURLs == nil {
+		rep.EvidenceURLs = []string{}
 	}
 
 	return &rep, nil

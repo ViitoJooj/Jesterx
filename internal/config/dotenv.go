@@ -25,6 +25,7 @@ var StripePublic string
 var StripeSecret string
 var StripeWebhookSecret string
 var FrontendURL string
+var BackendURL string
 var SupabaseURL string
 var SupabaseAnonKey string
 var SupabaseServiceKey string
@@ -54,6 +55,7 @@ func LoadEnv() {
 	StripeSecret = mustGetenv("STRIPE_SECRET_KEY")
 	StripeWebhookSecret = getEnvOrDefault("STRIPE_WEBHOOK_SECRET", "")
 	FrontendURL = getEnvOrDefault("FRONTEND_URL", "http://localhost:5173")
+	BackendURL  = getEnvOrDefault("BACKEND_URL",  "http://localhost:8080")
 	SupabaseURL = getEnvOrDefault("SUPABASE_PROJECT_URL", "")
 	SupabaseAnonKey = getEnvOrDefault("SUPABASE_ANON_KEY", "")
 	SupabaseServiceKey = getEnvOrDefault("SUPABASE_SERVICE_KEY", "")

@@ -69,11 +69,11 @@ func (s *PaymentService) ListActivePlans() ([]domain.Plan, error) {
 	return s.paymentRepo.ListActivePlans()
 }
 
-func (s *PaymentService) CreateCheckoutSession(userID string, planID int64, quantity int) (*CheckoutSessionResult, error) {
+func (s *PaymentService) CreateCheckoutSession(userID string, planID string, quantity int) (*CheckoutSessionResult, error) {
 	if userID == "" {
 		return nil, errors.New("invalid user")
 	}
-	if planID <= 0 {
+	if planID == "" {
 		return nil, errors.New("invalid plan")
 	}
 	if quantity <= 0 {
@@ -117,6 +117,7 @@ func (s *PaymentService) CreateCheckoutSession(userID string, planID int64, quan
 	payment := domain.Payment{
 		UserID:      user.Id,
 		WebsiteID:   user.WebsiteId,
+		PlanID:      plan.ID,
 		ReferenceID: session.ID,
 		Type:        paymentType,
 		Quantity:    quantity,
@@ -238,8 +239,8 @@ func createStripeCheckoutSession(user domain.User, plan domain.Plan, customerID 
 		return nil, errors.New("invalid plan price")
 	}
 
-	successURL := strings.TrimRight(config.FrontendURL, "/") + "/payment-success?session_id={CHECKOUT_SESSION_ID}&plan_id=" + strconv.FormatInt(plan.ID, 10)
-	cancelURL := strings.TrimRight(config.FrontendURL, "/") + "/payment-cancel?plan_id=" + strconv.FormatInt(plan.ID, 10)
+	successURL := strings.TrimRight(config.FrontendURL, "/") + "/payment-success?session_id={CHECKOUT_SESSION_ID}&plan_id=" + plan.ID
+	cancelURL := strings.TrimRight(config.FrontendURL, "/") + "/payment-cancel?plan_id=" + plan.ID
 
 	form := url.Values{}
 	form.Set("success_url", successURL)
@@ -253,7 +254,7 @@ func createStripeCheckoutSession(user domain.User, plan domain.Plan, customerID 
 	if interval := stripeIntervalByBillingCycle(plan.BillingCycle); interval != "" {
 		form.Set("mode", "subscription")
 		form.Set("line_items[0][price_data][recurring][interval]", interval)
-		form.Set("subscription_data[metadata][plan_id]", strconv.FormatInt(plan.ID, 10))
+		form.Set("subscription_data[metadata][plan_id]", plan.ID)
 		form.Set("subscription_data[metadata][website_id]", user.WebsiteId)
 		form.Set("subscription_data[metadata][user_id]", user.Id)
 	} else {
@@ -265,7 +266,7 @@ func createStripeCheckoutSession(user domain.User, plan domain.Plan, customerID 
 	}
 	form.Set("metadata[user_id]", user.Id)
 	form.Set("metadata[website_id]", user.WebsiteId)
-	form.Set("metadata[plan_id]", strconv.FormatInt(plan.ID, 10))
+	form.Set("metadata[plan_id]", plan.ID)
 
 	req, err := http.NewRequest(http.MethodPost, "https://api.stripe.com/v1/checkout/sessions", bytes.NewBufferString(form.Encode()))
 	if err != nil {

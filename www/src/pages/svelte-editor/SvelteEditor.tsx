@@ -434,7 +434,14 @@ export const SvelteEditor: React.FC = () => {
       const firstPath = routePaths[0] ?? "/";
       setActive({ kind: "route", path: firstPath });
       setPreviewPath(firstPath);
-    } catch (err) { setError(err instanceof Error ? err.message : "Erro ao carregar"); }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Erro ao carregar";
+      if (msg.includes("403") || msg.toLowerCase().includes("forbidden") || msg.toLowerCase().includes("unauthorized")) {
+        navigate("/pages", { replace: true });
+        return;
+      }
+      setError(msg);
+    }
   }
 
   useEffect(() => { loadData(); }, [siteId]); // eslint-disable-line react-hooks/exhaustive-deps

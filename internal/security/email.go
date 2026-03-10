@@ -93,7 +93,20 @@ func SendSalesDigestEmail(to, subject, htmlBody string) error {
 }
 
 func SendVerifyEmail(email string, token string) error {
-	verifyURL := "http://localhost:8080/api/v1/auth/verify/" + token
+	verifyURL := config.BackendURL + "/api/v1/auth/verify/" + token
+
+	// In dev mode always log the URL so it can be used directly from the console
+	// without needing real email delivery (Resend test-mode restrictions apply).
+	if config.IsDev {
+		log.Printf("[DEV] Verify email URL for %s → %s", email, verifyURL)
+	}
+
+	if config.ResendKey == "" {
+		if config.IsDev {
+			return nil // skip sending in dev when no key is set
+		}
+		return errors.New("email service not configured")
+	}
 
 	html := `<!DOCTYPE html>
 		<html lang="pt-BR">

@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { API_URL } from "../../hooks/api";
+import { useAuthContext } from "../../hooks/AuthContext";
 import styles from "./Report.module.scss";
 
 const REASONS = [
@@ -12,9 +13,22 @@ const REASONS = [
   { value: "OTHER", label: "Outro" },
 ];
 
+const MAX_IMAGES = 5;
+const MAX_IMAGE_BYTES = 1_000_000; // 1MB raw (≈ 1.33MB base64)
+
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 export function Report() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
+  const { me } = useAuthContext();
 
   const [websiteId, setWebsiteId] = useState(params.get("website_id") ?? "");
   const [websiteName] = useState(params.get("website_name") ?? "");
@@ -22,15 +36,60 @@ export function Report() {
   const [reporterEmail, setReporterEmail] = useState("");
   const [reason, setReason] = useState("FRAUD");
   const [description, setDescription] = useState("");
+  const [evidencePreviews, setEvidencePreviews] = useState<string[]>([]);
+  const [evidenceB64, setEvidenceB64] = useState<string[]>([]);
+  const [imageError, setImageError] = useState<string | null>(null);
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ticket, setTicket] = useState<{ id: string; ticketNumber: number } | null>(null);
+
+  // Auto-fill from authenticated user
+  useEffect(() => {
+    if (me) {
+      setReporterName(`${me.first_name ?? ""} ${me.last_name ?? ""}`.trim());
+      setReporterEmail(me.email ?? "");
+    }
+  }, [me]);
 
   useEffect(() => {
     const id = params.get("website_id");
     if (id) setWebsiteId(id);
   }, [params]);
+
+  async function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setImageError(null);
+    const files = Array.from(e.target.files ?? []);
+    if (evidenceB64.length + files.length > MAX_IMAGES) {
+      setImageError(`Máximo de ${MAX_IMAGES} imagens permitidas.`);
+      return;
+    }
+    const newB64: string[] = [];
+    const newPreviews: string[] = [];
+    for (const file of files) {
+      if (file.size > MAX_IMAGE_BYTES) {
+        setImageError(`"${file.name}" excede o limite de 1MB.`);
+        return;
+      }
+      if (!file.type.startsWith("image/")) {
+        setImageError("Apenas imagens são permitidas (PNG, JPG, GIF, etc.).");
+        return;
+      }
+      const b64 = await fileToBase64(file);
+      newB64.push(b64);
+      newPreviews.push(b64);
+    }
+    setEvidenceB64((prev) => [...prev, ...newB64]);
+    setEvidencePreviews((prev) => [...prev, ...newPreviews]);
+    // Reset input so same file can be re-added after removal
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
+  function removeImage(index: number) {
+    setEvidenceB64((prev) => prev.filter((_, i) => i !== index));
+    setEvidencePreviews((prev) => prev.filter((_, i) => i !== index));
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -40,6 +99,7 @@ export function Report() {
     try {
       const res = await fetch(`${API_URL}/api/v1/reports`, {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           website_id: websiteId,
@@ -47,6 +107,7 @@ export function Report() {
           reporter_email: reporterEmail,
           reason,
           description,
+          evidence_urls: evidenceB64,
         }),
       });
 
@@ -114,27 +175,33 @@ export function Report() {
           )}
 
           <div className={styles.field}>
-            <label htmlFor="reporterName">Seu nome *</label>
+            <label htmlFor="reporterName">
+              Seu nome *{me && <span className={styles.autoFilled}> (preenchido automaticamente)</span>}
+            </label>
             <input
               id="reporterName"
               value={reporterName}
-              onChange={(e) => setReporterName(e.target.value)}
+              onChange={(e) => !me && setReporterName(e.target.value)}
+              readOnly={!!me}
               placeholder="Nome completo"
               required
-              className={styles.input}
+              className={`${styles.input} ${me ? styles.readOnly : ""}`}
             />
           </div>
 
           <div className={styles.field}>
-            <label htmlFor="reporterEmail">Seu email *</label>
+            <label htmlFor="reporterEmail">
+              Seu email *{me && <span className={styles.autoFilled}> (preenchido automaticamente)</span>}
+            </label>
             <input
               id="reporterEmail"
               type="email"
               value={reporterEmail}
-              onChange={(e) => setReporterEmail(e.target.value)}
+              onChange={(e) => !me && setReporterEmail(e.target.value)}
+              readOnly={!!me}
               placeholder="email@exemplo.com"
               required
-              className={styles.input}
+              className={`${styles.input} ${me ? styles.readOnly : ""}`}
             />
           </div>
 
@@ -167,6 +234,47 @@ export function Report() {
             />
           </div>
 
+          {/* Evidence images */}
+          <div className={styles.field}>
+            <label>
+              Evidências (opcional) — até {MAX_IMAGES} imagens, 1MB cada
+            </label>
+            {imageError && <p className={styles.error}>{imageError}</p>}
+            {evidencePreviews.length > 0 && (
+              <div className={styles.evidenceGrid}>
+                {evidencePreviews.map((src, i) => (
+                  <div key={i} className={styles.evidenceThumb}>
+                    <img src={src} alt={`Evidência ${i + 1}`} />
+                    <button
+                      type="button"
+                      className={styles.removeImg}
+                      onClick={() => removeImage(i)}
+                      title="Remover imagem"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            {evidenceB64.length < MAX_IMAGES && (
+              <>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleImageChange}
+                  className={styles.fileInput}
+                  id="evidenceInput"
+                />
+                <label htmlFor="evidenceInput" className={styles.uploadBtn}>
+                  📎 Adicionar imagens
+                </label>
+              </>
+            )}
+          </div>
+
           <div className={styles.formActions}>
             <button
               type="button"
@@ -188,3 +296,4 @@ export function Report() {
     </main>
   );
 }
+

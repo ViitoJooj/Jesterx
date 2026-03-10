@@ -3,7 +3,7 @@ package domain
 import "time"
 
 type Plan struct {
-	ID           int64
+	ID           string
 	Name         string
 	Description  string
 	DescriptionM string
@@ -17,9 +17,10 @@ type Plan struct {
 }
 
 type Payment struct {
-	ID          int64
+	ID          string
 	UserID      string
 	WebsiteID   string
+	PlanID      string
 	ReferenceID string
 	Type        string
 	Quantity    int

@@ -551,10 +551,17 @@ export const ElementorEditor = () => {
         } else { setDoc(parsed); }
         setActiveRoute(ensurePath(availableRoutes[0]?.path || "/"));
         setApis(apiResp.data);
-      } catch (err) { setError(err instanceof Error ? err.message : "Erro ao carregar editor"); }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "Erro ao carregar editor";
+        if (msg.includes("403") || msg.toLowerCase().includes("forbidden") || msg.toLowerCase().includes("unauthorized")) {
+          navigate("/pages", { replace: true });
+          return;
+        }
+        setError(msg);
+      }
     }
     load();
-  }, [siteId, websiteId]);
+  }, [siteId, websiteId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const closeMenu = useCallback(() => setMenu(null), []);
   useEffect(() => { window.addEventListener("click", closeMenu); return () => window.removeEventListener("click", closeMenu); }, [closeMenu]);
