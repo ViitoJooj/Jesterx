@@ -65,9 +65,6 @@ export function useAuth(websiteId: WebsiteId) {
 
   const isAuthenticated = useMemo(() => !!me, [me]);
 
-  /**
-   * LOGIN
-   */
   const login = useCallback(
     async (req: LoginRequest) => {
       setLoading(true);
@@ -95,9 +92,6 @@ export function useAuth(websiteId: WebsiteId) {
     [websiteId]
   );
 
-  /**
-   * REGISTER
-   */
   const register = useCallback(
     async (req: RegisterRequest) => {
       setLoading(true);
@@ -121,9 +115,6 @@ export function useAuth(websiteId: WebsiteId) {
     [websiteId]
   );
 
-  /**
-   * REFRESH
-   */
   const refresh = useCallback(async () => {
     if (refreshPromiseRef.current) return refreshPromiseRef.current;
 
@@ -144,9 +135,6 @@ export function useAuth(websiteId: WebsiteId) {
     }
   }, [websiteId]);
 
-  /**
-   * LOAD ME
-   */
   const loadMe = useCallback(
     async () => {
       const resp = await apiFetch<MeData>("/api/v1/auth/me", {
@@ -160,9 +148,6 @@ export function useAuth(websiteId: WebsiteId) {
     [websiteId]
   );
 
-  /**
-   * UPDATE PROFILE
-   */
   const updateProfile = useCallback(
     async (data: {
       first_name: string;
@@ -189,9 +174,6 @@ export function useAuth(websiteId: WebsiteId) {
     [websiteId, loadMe]
   );
 
-  /**
-   * CANCEL PLAN
-   */
   const cancelPlan = useCallback(async () => {
     await apiFetch<void>("/api/v1/payments/cancel", {
       method: "POST",
@@ -200,9 +182,6 @@ export function useAuth(websiteId: WebsiteId) {
     await loadMe();
   }, [websiteId, loadMe]);
 
-  /**
-   * LOGOUT
-   */
   const logout = useCallback(async () => {
     await apiFetch<void>("/api/v1/auth/logout", {
       method: "GET",
@@ -213,9 +192,7 @@ export function useAuth(websiteId: WebsiteId) {
     setMe(null);
   }, [websiteId]);
 
-  /**
-   * AUTO REFRESH ON MOUNT
-   */
+  // refresh token and load user data on mount
   useEffect(() => {
     let cancelled = false;
 
@@ -225,7 +202,7 @@ export function useAuth(websiteId: WebsiteId) {
         if (cancelled) return;
         await loadMe();
       } catch {
-        // silencioso
+        // silently ignore — user is just not logged in
       }
     })();
 

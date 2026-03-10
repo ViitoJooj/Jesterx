@@ -27,14 +27,12 @@ func main() {
 		log.Fatalf("migration failed: %v", err)
 	}
 
-	// Repositorys
 	authRepo := postgres.NewAuthRepository(db)
 	websiteRepo := postgres.NewWebSiteRepository(db)
 	paymentRepo := postgres.NewPaymentRepository(db)
 	productRepo := postgres.NewProductRepository(db)
 	orderRepo := postgres.NewOrderRepository(db)
 
-	// Services
 	authService := service.NewAuthService(authRepo, websiteRepo, paymentRepo)
 	websiteService := service.NewWebSiteService(websiteRepo, authRepo, paymentRepo)
 	paymentService := service.NewPaymentService(paymentRepo, authRepo)
@@ -43,7 +41,6 @@ func main() {
 
 	storageService := service.NewStorageService()
 
-	// Handlers
 	authHandler := handlers.NewAuthHandler(authService)
 	websiteHandler := handlers.NewWebSiteHandler(websiteService)
 	paymentHandler := handlers.NewPaymentHandler(paymentService)
@@ -53,7 +50,6 @@ func main() {
 	themeHandler := handlers.NewThemeHandler(db)
 	adminHandler := handlers.NewAdminHandler(db)
 
-	// Routers
 	httpRouter.RegisterAuthRoutes(mux, authHandler, authService)
 	httpRouter.RegisterWebsiteRoutes(mux, websiteHandler, authService)
 	httpRouter.RegisterPaymentRoutes(mux, paymentHandler, authService)
@@ -63,7 +59,6 @@ func main() {
 	httpRouter.RegisterThemeRoutes(mux, themeHandler)
 	httpRouter.RegisterAdminRoutes(mux, adminHandler, authService)
 
-	// Middlewares
 	globalLimiter := ratelimit.NewLimiter(200)
 	authLimiter := ratelimit.NewLimiter(15)
 

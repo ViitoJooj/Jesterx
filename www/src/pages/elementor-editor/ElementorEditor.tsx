@@ -442,6 +442,7 @@ export const ElementorEditor = () => {
     const newRoute: RouteItem = { id: nextId("rt"), path: newPath, title: `Pagina ${routes.length + 1}`, requires_auth: false, position: routes.length };
     setRoutes(prev => [...prev, newRoute]);
     setDoc(prev => ({ ...prev, pages: { ...prev.pages, [newPath]: { title: newRoute.title, blocks: [] } } }));
+    setActiveRoute(newPath);
   }
 
   function removePage(path: string) {
@@ -782,7 +783,11 @@ export const ElementorEditor = () => {
                   {routes.map(r => <option key={r.id} value={ensurePath(r.path)}>{r.title} ({ensurePath(r.path)})</option>)}
                 </select>
                 <label>Titulo</label>
-                <input value={doc.pages[activeRoute]?.title || ""} onChange={e => setDoc(prev => ({ ...prev, pages: { ...prev.pages, [activeRoute]: { ...prev.pages[activeRoute], title: e.target.value } } }))} />
+                <input value={doc.pages[activeRoute]?.title || ""} onChange={e => {
+                  const newTitle = e.target.value;
+                  setDoc(prev => ({ ...prev, pages: { ...prev.pages, [activeRoute]: { ...prev.pages[activeRoute], title: newTitle } } }));
+                  setRoutes(prev => prev.map(r => ensurePath(r.path) === activeRoute ? { ...r, title: newTitle } : r));
+                }} />
               </div>
               <div className={styles.settingsGroup}>
                 <div className={styles.settingsGroupTitle}>Canvas</div>

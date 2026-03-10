@@ -31,7 +31,6 @@ func NewStorageService() *StorageService {
 	return &StorageService{}
 }
 
-// bucketForMime returns the Supabase bucket name based on MIME type.
 func bucketForMime(mimeType string) string {
 	switch {
 	case strings.HasPrefix(mimeType, "image/"):
@@ -43,7 +42,6 @@ func bucketForMime(mimeType string) string {
 	}
 }
 
-// allowedMime checks if the MIME type is allowed.
 func allowedMime(mimeType string) bool {
 	allowed := map[string]bool{
 		"image/jpeg": true, "image/png": true, "image/gif": true,

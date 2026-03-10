@@ -46,7 +46,7 @@ type UpdateProductInput struct {
 	Active       bool
 }
 
-// ensureCanManage verifica que o website existe, é ECOMMERCE e que o usuário é dono ou admin.
+// ensures the website exists, is an ECOMMERCE store, and that the user owns it or is an admin
 func (s *ProductService) ensureCanManage(userID, websiteID string) (*domain.WebSite, error) {
 	website, err := s.websiteRepo.FindWebSiteByID(websiteID)
 	if err != nil || website == nil {

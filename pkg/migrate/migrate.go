@@ -17,7 +17,6 @@ import (
 func Run(db *sql.DB, migrationsDir string) error {
 	ctx := context.Background()
 
-	// Ensure schema_migrations table exists
 	_, err := db.ExecContext(ctx, `
 		CREATE TABLE IF NOT EXISTS schema_migrations (
 			version TEXT PRIMARY KEY,
@@ -28,7 +27,6 @@ func Run(db *sql.DB, migrationsDir string) error {
 		return fmt.Errorf("create schema_migrations: %w", err)
 	}
 
-	// Get already-applied migrations
 	rows, err := db.QueryContext(ctx, `SELECT version FROM schema_migrations`)
 	if err != nil {
 		return fmt.Errorf("query schema_migrations: %w", err)
@@ -47,7 +45,6 @@ func Run(db *sql.DB, migrationsDir string) error {
 		return fmt.Errorf("iterate schema_migrations: %w", err)
 	}
 
-	// Read all .up.sql files
 	entries, err := os.ReadDir(migrationsDir)
 	if err != nil {
 		return fmt.Errorf("read migrations dir: %w", err)
@@ -61,7 +58,6 @@ func Run(db *sql.DB, migrationsDir string) error {
 	}
 	sort.Strings(files)
 
-	// Apply pending migrations
 	for _, fname := range files {
 		version := strings.TrimSuffix(fname, ".up.sql")
 		if applied[version] {
