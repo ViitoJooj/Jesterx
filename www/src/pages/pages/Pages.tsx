@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Button from "../../components/button/Button";
 import { useAuthContext } from "../../hooks/AuthContext";
 import { apiFetch, API_URL } from "../../hooks/api";
@@ -399,7 +399,7 @@ export const Pages: React.FC = () => {
                 <article key={site.id} className={styles.siteCard}>
                   <div className={styles.siteCardTop} style={{ borderColor: meta.color }}>
                     <div className={styles.siteInfo}>
-                      <strong>{site.name}</strong>
+                      <Link to={`/store/${site.id}`} className={styles.siteName}>{site.name}</Link>
                       {site.short_description && <span>{site.short_description}</span>}
                     </div>
                     <button

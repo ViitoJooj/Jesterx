@@ -1,0 +1,158 @@
+@use "../../styles/variables" as *;
+
+.main {
+  min-height: calc(100vh - 72px);
+  background: $background-color;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 3rem 1rem;
+}
+
+.card {
+  background: $background-color-primary;
+  border-radius: 20px;
+  padding: 2.5rem 2rem;
+  max-width: 540px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  h1 { margin: 0; font-size: 1.4rem; }
+}
+
+.flagIcon {
+  font-size: 2.2rem;
+  flex-shrink: 0;
+}
+
+.storeName {
+  margin: .25rem 0 0;
+  color: $font-color-secondary;
+  font-size: .9rem;
+}
+
+.error {
+  background: rgba(209,58,47,.1);
+  border: 1px solid rgba(209,58,47,.25);
+  color: #f87171;
+  border-radius: 10px;
+  padding: .75rem 1rem;
+  font-size: .875rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+
+  label { font-size: .875rem; font-weight: 500; }
+}
+
+.input,
+.select,
+.textarea {
+  background: $background-color-secondary;
+  border: 1px solid $border-color;
+  border-radius: 10px;
+  padding: .65rem .9rem;
+  font-size: .9rem;
+  color: $font-color-primary;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color .2s;
+
+  &:focus { border-color: #ff8a00; }
+}
+
+.select {
+  cursor: pointer;
+}
+
+.textarea {
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+.formActions {
+  display: flex;
+  gap: .75rem;
+  justify-content: flex-end;
+  padding-top: .5rem;
+}
+
+.cancelBtn {
+  padding: .65rem 1.2rem;
+  border-radius: 10px;
+  background: transparent;
+  border: 1px solid $border-color;
+  color: $font-color-secondary;
+  font-size: .9rem;
+  cursor: pointer;
+  &:hover { border-color: $font-color-primary; color: $font-color-primary; }
+}
+
+.submitBtn {
+  padding: .65rem 1.4rem;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #ff3e00, #ff8a00);
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  font-size: .9rem;
+  cursor: pointer;
+  &:hover:not(:disabled) { opacity: .9; }
+  &:disabled { opacity: .6; cursor: not-allowed; }
+}
+
+// Success state
+.successIcon {
+  font-size: 3rem;
+  text-align: center;
+}
+
+h2 { margin: 0; text-align: center; }
+
+.ticketBox {
+  background: $background-color-secondary;
+  border: 1px solid $border-color;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  text-align: center;
+
+  span { display: block; font-size: .8rem; color: $font-color-secondary; margin-bottom: .35rem; }
+  strong { font-size: 1.6rem; color: #ff8a00; }
+}
+
+.hint {
+  margin: 0;
+  text-align: center;
+  font-size: .85rem;
+  color: $font-color-secondary;
+}
+
+.backBtn {
+  align-self: center;
+  background: none;
+  border: none;
+  color: $font-color-secondary;
+  font-size: .9rem;
+  cursor: pointer;
+  padding: .5rem;
+  &:hover { color: $font-color-primary; }
+}

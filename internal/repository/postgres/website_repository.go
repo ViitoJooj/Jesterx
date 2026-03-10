@@ -24,10 +24,10 @@ func (r *connection) SaveWebSite(website domain.WebSite) error {
 func (r *connection) FindWebSiteByID(id string) (*domain.WebSite, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	query := `SELECT * FROM websites WHERE id = $1`
+	query := `SELECT id, website_type, image, name, short_description, description, creator_id, banned, updated_at, created_at, mature_content, rating_avg, rating_count FROM websites WHERE id = $1`
 	var website domain.WebSite
 	err := r.db.QueryRowContext(ctx, query, id).
-		Scan(&website.Id, &website.Type, &website.Image, &website.Name, &website.Short_description, &website.Description, &website.Creator_id, &website.Banned, &website.Updated_at, &website.Created_at)
+		Scan(&website.Id, &website.Type, &website.Image, &website.Name, &website.Short_description, &website.Description, &website.Creator_id, &website.Banned, &website.Updated_at, &website.Created_at, &website.MatureContent, &website.RatingAvg, &website.RatingCount)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
@@ -81,11 +81,11 @@ func (r *connection) FindWebSiteByName(name string) (*domain.WebSite, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	query := `SELECT * FROM websites WHERE name = $1`
+	query := `SELECT id, website_type, image, name, short_description, description, creator_id, banned, updated_at, created_at, mature_content, rating_avg, rating_count FROM websites WHERE name = $1`
 
 	var website domain.WebSite
 	err := r.db.QueryRowContext(ctx, query, name).
-		Scan(&website.Id, &website.Type, &website.Image, &website.Name, &website.Short_description, &website.Description, &website.Creator_id, &website.Banned, &website.Updated_at, &website.Created_at)
+		Scan(&website.Id, &website.Type, &website.Image, &website.Name, &website.Short_description, &website.Description, &website.Creator_id, &website.Banned, &website.Updated_at, &website.Created_at, &website.MatureContent, &website.RatingAvg, &website.RatingCount)
 
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil

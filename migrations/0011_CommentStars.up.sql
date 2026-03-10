@@ -1,0 +1,2 @@
+ALTER TABLE store_comments
+    ADD COLUMN IF NOT EXISTS stars INT CHECK (stars IS NULL OR stars BETWEEN 1 AND 5);

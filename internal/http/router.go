@@ -38,6 +38,54 @@ func RegisterWebsiteRoutes(mux *http.ServeMux, h *handlers.WebSiteHandler, authS
 	mux.Handle("GET /api/v1/sites/{siteID}/scan-reports/{version}", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.GetScanReport))))
 }
 
+func RegisterStoreSocialRoutes(mux *http.ServeMux, h *handlers.StoreSocialHandler, authService *service.AuthService) {
+	// Public
+	mux.HandleFunc("GET /api/store/{siteID}/info", h.GetStoreFullInfo)
+	mux.HandleFunc("GET /api/store/{siteID}/visits", h.GetVisitStats)
+	mux.HandleFunc("GET /api/store/{siteID}/comments", h.ListComments)
+
+	// Auth required
+	mux.Handle("POST /api/store/{siteID}/comments",
+		middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.PostComment))))
+	mux.Handle("DELETE /api/store/{siteID}/comments/{commentID}",
+		middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.DeleteComment))))
+	mux.Handle("POST /api/store/{siteID}/ratings",
+		middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.RateStore))))
+	mux.Handle("GET /api/store/{siteID}/my-rating",
+		middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.GetMyRating))))
+
+	// Owner
+	mux.Handle("PATCH /api/v1/sites/{siteID}/profile",
+		middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.UpdateStoreProfile))))
+
+	// Admin
+	mux.Handle("PATCH /api/v1/admin/sites/{siteID}/mature",
+		middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.AdminSetMature))))
+
+	// Team members (owner/manager/admin)
+	mux.Handle("GET /api/v1/sites/{siteID}/members",
+		middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.ListMembers))))
+	mux.Handle("POST /api/v1/sites/{siteID}/members",
+		middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.AddMember))))
+	mux.Handle("DELETE /api/v1/sites/{siteID}/members/{memberUserID}",
+		middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.RemoveMember))))
+
+	// Comment replies (owner/manager/support/admin)
+	mux.Handle("POST /api/store/{siteID}/comments/{commentID}/replies",
+		middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.ReplyComment))))
+
+	// My role in store (authenticated)
+	mux.Handle("GET /api/store/{siteID}/my-role",
+		middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.GetMyRole))))
+}
+
+func RegisterReportRoutes(mux *http.ServeMux, h *handlers.ReportHandler, authService *service.AuthService) {
+	mux.HandleFunc("POST /api/v1/reports", h.PublicCreateReport)
+	mux.Handle("GET /api/v1/admin/reports", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.AdminListReports))))
+	mux.Handle("GET /api/v1/admin/reports/{reportID}", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.AdminGetReport))))
+	mux.Handle("PATCH /api/v1/admin/reports/{reportID}", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.AdminUpdateReport))))
+}
+
 func RegisterProductRoutes(mux *http.ServeMux, h *handlers.ProductHandler, authService *service.AuthService) {
 	mux.Handle("POST /api/v1/sites/{siteID}/products", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.CreateProduct))))
 	mux.Handle("GET /api/v1/sites/{siteID}/products", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.ListProducts))))

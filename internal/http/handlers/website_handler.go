@@ -514,6 +514,12 @@ func (h *WebSiteHandler) ListVersions(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(resp)
 }
 
+// PublicStoreInfo is now handled by StoreSocialHandler.GetStoreFullInfo.
+// This stub remains for legacy redirect compatibility.
+func (h *WebSiteHandler) PublicStoreInfo(w http.ResponseWriter, r *http.Request) {
+	http.NotFound(w, r)
+}
+
 func (h *WebSiteHandler) PublicRender(w http.ResponseWriter, r *http.Request) {
 	siteID := strings.TrimSpace(r.PathValue("siteID"))
 	if siteID == "" {

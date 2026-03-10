@@ -2,11 +2,78 @@ package security
 
 import (
 	"errors"
+	"fmt"
 	"log"
 
 	"github.com/ViitoJooj/Jesterx/internal/config"
 	"github.com/resend/resend-go/v3"
 )
+
+func SendTicketResponseEmail(to, reporterName string, ticketNumber int, adminResponse, status string) error {
+	statusLabel := map[string]string{
+		"OPEN":        "Aberto",
+		"IN_PROGRESS": "Em Análise",
+		"RESOLVED":    "Resolvido",
+		"DISMISSED":   "Encerrado",
+	}
+	statusText := statusLabel[status]
+	if statusText == "" {
+		statusText = status
+	}
+
+	html := `<!DOCTYPE html>
+	<html lang="pt-BR">
+	<head>
+	<meta charset="UTF-8" />
+	<title>Atualização da sua denúncia</title>
+	<style>
+	body { margin:0; background:#1a1a1a; font-family:'Segoe UI',sans-serif; color:#f1f1f1; }
+	.wrap { max-width:520px; margin:40px auto; background:#242424; border-radius:16px; overflow:hidden; }
+	.header { background:linear-gradient(90deg,#ff3e00,#ff8a00); padding:28px 32px; }
+	.header h1 { margin:0; font-size:22px; color:#fff; }
+	.body { padding:28px 32px; }
+	.ticket { background:#2e2e2e; border-radius:10px; padding:16px 20px; margin-bottom:20px; }
+	.ticket span { font-size:13px; opacity:.7; }
+	.ticket strong { display:block; font-size:18px; margin-top:4px; color:#ff8a00; }
+	.status-badge { display:inline-block; padding:4px 14px; border-radius:20px; font-size:13px; font-weight:600; background:#ff3e00; color:#fff; margin-bottom:20px; }
+	.response-box { background:#2e2e2e; border-left:3px solid #ff8a00; border-radius:8px; padding:16px 20px; font-size:14px; line-height:1.6; }
+	.footer { padding:16px 32px; font-size:12px; opacity:.5; }
+	</style>
+	</head>
+	<body>
+	<div class="wrap">
+	  <div class="header"><h1>JesterX · Atualização de Denúncia</h1></div>
+	  <div class="body">
+	    <p>Olá, <strong>` + reporterName + `</strong>!</p>
+	    <p>Sua denúncia recebeu uma atualização da nossa equipe.</p>
+	    <div class="ticket">
+	      <span>Número do ticket</span>
+	      <strong>#` + fmt.Sprintf("%05d", ticketNumber) + `</strong>
+	    </div>
+	    <div class="status-badge">` + statusText + `</div>
+	    <p style="margin-bottom:10px;font-size:14px;opacity:.8;">Resposta da equipe JesterX:</p>
+	    <div class="response-box">` + adminResponse + `</div>
+	  </div>
+	  <div class="footer">JesterX · Plataforma de lojas online</div>
+	</div>
+	</body>
+	</html>`
+
+	client := resend.NewClient(config.ResendKey)
+	params := &resend.SendEmailRequest{
+		From:    "JesterX <jesterx@resend.dev>",
+		To:      []string{to},
+		Subject: fmt.Sprintf("Atualização do ticket #%05d – JesterX", ticketNumber),
+		Html:    html,
+	}
+	sent, err := client.Emails.Send(params)
+	if err != nil {
+		log.Println("error sending ticket response email:", err)
+		return errors.New("Internal error")
+	}
+	log.Println("Ticket response email sent! ID:", sent.Id)
+	return nil
+}
 
 func SendSalesDigestEmail(to, subject, htmlBody string) error {
 	client := resend.NewClient(config.ResendKey)

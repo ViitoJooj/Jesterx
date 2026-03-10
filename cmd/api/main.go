@@ -32,12 +32,16 @@ func main() {
 	paymentRepo := postgres.NewPaymentRepository(db)
 	productRepo := postgres.NewProductRepository(db)
 	orderRepo := postgres.NewOrderRepository(db)
+	reportRepo := postgres.NewReportRepository(db)
+	storeSocialRepo := postgres.NewStoreSocialRepository(db)
 
 	authService := service.NewAuthService(authRepo, websiteRepo, paymentRepo)
 	websiteService := service.NewWebSiteService(websiteRepo, authRepo, paymentRepo)
 	paymentService := service.NewPaymentService(paymentRepo, authRepo)
 	productService := service.NewProductService(productRepo, websiteRepo, authRepo)
 	orderService := service.NewOrderService(orderRepo, websiteRepo, productRepo)
+	reportService := service.NewReportService(reportRepo, websiteRepo)
+	storeSocialService := service.NewStoreSocialService(storeSocialRepo, websiteRepo)
 
 	storageService := service.NewStorageService()
 
@@ -49,6 +53,8 @@ func main() {
 	storageHandler := handlers.NewStorageHandler(storageService)
 	themeHandler := handlers.NewThemeHandler(db)
 	adminHandler := handlers.NewAdminHandler(db)
+	reportHandler := handlers.NewReportHandler(reportService)
+	storeSocialHandler := handlers.NewStoreSocialHandler(storeSocialService, db)
 
 	httpRouter.RegisterAuthRoutes(mux, authHandler, authService)
 	httpRouter.RegisterWebsiteRoutes(mux, websiteHandler, authService)
@@ -58,6 +64,8 @@ func main() {
 	httpRouter.RegisterStorageRoutes(mux, storageHandler, authService)
 	httpRouter.RegisterThemeRoutes(mux, themeHandler)
 	httpRouter.RegisterAdminRoutes(mux, adminHandler, authService)
+	httpRouter.RegisterReportRoutes(mux, reportHandler, authService)
+	httpRouter.RegisterStoreSocialRoutes(mux, storeSocialHandler, authService)
 
 	globalLimiter := ratelimit.NewLimiter(200)
 	authLimiter := ratelimit.NewLimiter(15)

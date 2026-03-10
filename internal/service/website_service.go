@@ -184,6 +184,34 @@ func (s *WebSiteService) CreateWebSite(Type string, Image []byte, Name string, S
 		return nil, err
 	}
 
+	// Auto-register the creator as admin of the new store so they can log in immediately.
+	if creator, err := s.userRepo.FindUserByID(Creator_id); err == nil && creator != nil {
+		// Only create if no user with this email exists in this website yet
+		if existing, _ := s.userRepo.FindUserByEmailAndWebsite(creator.Email, website.Id); existing == nil {
+			adminUser := domain.NewUser(
+				website.Id,
+				creator.First_name, creator.Last_name,
+				creator.Email, creator.Password,
+				creator.AccountType,
+			)
+			adminUser.Role = "admin"
+			adminUser.Verified_email = true
+			adminUser.CpfCnpj = creator.CpfCnpj
+			adminUser.AvatarUrl = creator.AvatarUrl
+			adminUser.CompanyName = creator.CompanyName
+			adminUser.TradeName = creator.TradeName
+			adminUser.Phone = creator.Phone
+			adminUser.ZipCode = creator.ZipCode
+			adminUser.AddressStreet = creator.AddressStreet
+			adminUser.AddressNumber = creator.AddressNumber
+			adminUser.AddressComplement = creator.AddressComplement
+			adminUser.AddressCity = creator.AddressCity
+			adminUser.AddressState = creator.AddressState
+			adminUser.AddressCountry = creator.AddressCountry
+			_ = s.userRepo.UserRegister(*adminUser)
+		}
+	}
+
 	return website, nil
 }
 
@@ -376,4 +404,8 @@ func (s *WebSiteService) DeleteWebSite(userID string, websiteID string) error {
 		return err
 	}
 	return s.webSiteRepo.DeleteWebSiteByID(websiteID)
+}
+
+func (s *WebSiteService) GetWebSiteByID(websiteID string) (*domain.WebSite, error) {
+	return s.webSiteRepo.FindWebSiteByID(websiteID)
 }

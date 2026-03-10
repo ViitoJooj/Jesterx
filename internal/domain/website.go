@@ -15,6 +15,9 @@ type WebSite struct {
 	Description       string
 	Creator_id        string
 	Banned            bool
+	MatureContent     bool
+	RatingAvg         float64
+	RatingCount       int
 	Updated_at        time.Time
 	Created_at        time.Time
 }
