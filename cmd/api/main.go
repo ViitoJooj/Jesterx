@@ -80,7 +80,17 @@ func main() {
 	httpRouter.RegisterReportRoutes(mux, reportHandler, authService)
 	httpRouter.RegisterStoreSocialRoutes(mux, storeSocialHandler, authService)
 	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
+		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		defer cancel()
+
 		w.Header().Set("Content-Type", "application/json")
+		if err := db.PingContext(ctx); err != nil {
+			w.WriteHeader(http.StatusServiceUnavailable)
+			if encErr := json.NewEncoder(w).Encode(map[string]string{"status": "unhealthy", "reason": "database unreachable"}); encErr != nil {
+				log.Printf("health encode error: %v", encErr)
+			}
+			return
+		}
 		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode(map[string]string{"status": "ok"}); err != nil {
 			log.Printf("health encode error: %v", err)
