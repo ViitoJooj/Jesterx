@@ -113,7 +113,7 @@ function JxParagraph({ text, fontSize, color, textAlign, style: s }) {
 }
 
 function JxButton({ label, href, onClick, bgColor, textColor, borderRadius, fontSize, style: s }) {
-  var st = { background: bgColor||'#ff5d1f', color: textColor||'#fff', border: 0, borderRadius: (borderRadius||8)+'px', padding: '10px 22px', fontSize: (fontSize||15)+'px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', display:'inline-block', ...(s||{}) };
+  var st = { background: bgColor||'var(--jx-color-primary)', color: textColor||'#fff', border: 0, borderRadius: (borderRadius||8)+'px', padding: '10px 22px', fontSize: (fontSize||15)+'px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', display:'inline-block', ...(s||{}) };
   return <button style={st} onClick={onClick||(href?()=>window.open(href,'_self'):undefined)}>{label||'Botão'}</button>;
 }
 
@@ -177,7 +177,7 @@ function JxCarousel({ images, height, objectFit, style: s }) {
       <img src={imgs[idx]} alt="" style={{width:'100%',height:(height||220)+'px',objectFit:objectFit||'cover',borderRadius:8,display:'block'}} />
       {imgs.length>1 && (
         <div style={{position:'absolute',bottom:10,left:0,right:0,display:'flex',justifyContent:'center',gap:6}}>
-          {imgs.map((_,i)=><button key={i} onClick={()=>setIdx(i)} style={{width:8,height:8,borderRadius:'50%',border:0,background:i===idx?'#ff5d1f':'rgba(255,255,255,.6)',padding:0,cursor:'pointer'}} />)}
+          {imgs.map((_,i)=><button key={i} onClick={()=>setIdx(i)} style={{width:8,height:8,borderRadius:'50%',border:0,background:i===idx?'var(--jx-color-primary)':'rgba(255,255,255,.6)',padding:0,cursor:'pointer'}} />)}
         </div>
       )}
       {imgs.length>1 && <button onClick={()=>setIdx(i=>Math.max(0,i-1))} style={{position:'absolute',top:'50%',left:8,transform:'translateY(-50%)',background:'rgba(0,0,0,.35)',color:'#fff',border:0,borderRadius:6,width:28,height:28,cursor:'pointer',fontSize:14}}>‹</button>}
@@ -201,7 +201,7 @@ function JxProductCard({ productId, siteId, style: s }) {
       {prod.images&&prod.images[0]&&<img src={prod.images[0]} alt={prod.name} style={{width:'100%',height:180,objectFit:'cover'}}/>}
       <div style={{padding:'12px 16px',flex:1,display:'flex',flexDirection:'column',gap:6}}>
         <div style={{fontWeight:700,fontSize:15,color:'#1a2740'}}>{prod.name}</div>
-        <div style={{fontSize:16,fontWeight:700,color:'#ff5d1f'}}>{'R$ '+Number(prod.price||0).toFixed(2)}</div>
+        <div style={{fontSize:16,fontWeight:700,color:'var(--jx-color-primary)'}}>{'R$ '+Number(prod.price||0).toFixed(2)}</div>
         {prod.description&&<div style={{fontSize:12,color:'#6b7a99',lineHeight:1.5}}>{prod.description}</div>}
       </div>
     </div>
@@ -229,7 +229,7 @@ function JxProductList({ siteId, pageSize, style: s }) {
             {p.images&&p.images[0]&&<img src={p.images[0]} alt={p.name} style={{width:'100%',height:120,objectFit:'cover'}}/>}
             <div style={{padding:'8px 10px'}}>
               <div style={{fontWeight:600,fontSize:13,color:'#1a2740'}}>{p.name}</div>
-              <div style={{fontSize:13,fontWeight:700,color:'#ff5d1f'}}>{'R$ '+Number(p.price||0).toFixed(2)}</div>
+              <div style={{fontSize:13,fontWeight:700,color:'var(--jx-color-primary)'}}>{'R$ '+Number(p.price||0).toFixed(2)}</div>
             </div>
           </div>
         );})}
@@ -265,7 +265,7 @@ function JxCartItems({ storageKey, style: s }) {
             <span style={{minWidth:22,textAlign:'center',fontWeight:700,fontSize:13}}>{it.qty||1}</span>
             <button onClick={function(){save(items.map(function(x){return x.id===it.id?{...x,qty:(x.qty||1)+1}:x;}));}} style={{width:26,height:26,border:'1px solid #ccd5e8',background:'#f4f6fb',borderRadius:6,cursor:'pointer',fontWeight:700,fontFamily:'inherit',fontSize:15}}>+</button>
           </div>
-          <div style={{fontWeight:700,color:'#ff5d1f',fontSize:13,minWidth:64,textAlign:'right',flexShrink:0}}>{'R$ '+(Number(it.price||0)*(it.qty||1)).toFixed(2)}</div>
+          <div style={{fontWeight:700,color:'var(--jx-color-primary)',fontSize:13,minWidth:64,textAlign:'right',flexShrink:0}}>{'R$ '+(Number(it.price||0)*(it.qty||1)).toFixed(2)}</div>
           <button onClick={function(){save(items.filter(function(x){return x.id!==it.id;}));}} style={{background:'none',border:0,color:'#9aa5bc',cursor:'pointer',fontSize:18,lineHeight:1,padding:'0 4px',flexShrink:0}}>×</button>
         </div>
       );})}
@@ -310,7 +310,7 @@ type ActiveTab = { kind: "shared"; tab: SharedTab } | { kind: "route"; path: str
 const JX_REACT_COMPONENTS: { name: string; snippet: string }[] = [
   { name: "JxHeading",      snippet: '<JxHeading text="Título" fontSize={32} color="#20283a" />' },
   { name: "JxParagraph",    snippet: '<JxParagraph text="Seu texto aqui." fontSize={16} />' },
-  { name: "JxButton",       snippet: '<JxButton label="Clique aqui" href="/pagina" bgColor="#ff5d1f" />' },
+  { name: "JxButton",       snippet: '<JxButton label="Clique aqui" href="/pagina" bgColor="var(--jx-color-primary)" />' },
   { name: "JxImage",        snippet: '<JxImage src="https://..." objectFit="cover" borderRadius={8} />' },
   { name: "JxCarousel",     snippet: '<JxCarousel images={["url1","url2","url3"]} height={240} />' },
   { name: "JxDivider",      snippet: '<JxDivider color="#dde3f0" thickness={1} />' },
@@ -561,3 +561,4 @@ export const ReactEditor: React.FC = () => {
     </div>
   );
 };
+

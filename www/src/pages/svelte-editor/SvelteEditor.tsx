@@ -106,7 +106,7 @@ const JX_SVELTE_COMPONENTS: [string, string][] = [
 <script>
   export let label = 'Botão';
   export let href = '';
-  export let bgcolor = '#ff5d1f';
+  export let bgcolor = 'var(--jx-color-primary)';
   export let textcolor = '#fff';
   export let borderradius = '8';
   export let fontsize = '15';
@@ -215,7 +215,7 @@ const JX_SVELTE_COMPONENTS: [string, string][] = [
     {#if prod.images?.[0]}<img src={prod.images[0]} alt={prod.name} style="width:100%;height:180px;object-fit:cover" />{/if}
     <div style="padding:12px 16px;display:flex;flex-direction:column;gap:6px">
       <div style="font-weight:700;font-size:15px;color:#1a2740">{prod.name}</div>
-      <div style="font-size:16px;font-weight:700;color:#ff5d1f">R$ {Number(prod.price||0).toFixed(2)}</div>
+      <div style="font-size:16px;font-weight:700;color:var(--jx-color-primary)">R$ {Number(prod.price||0).toFixed(2)}</div>
     </div>
   {:else}
     <div style="padding:24px;text-align:center;color:#9aa5bc;font-size:13px">🛍 product-card</div>
@@ -248,7 +248,7 @@ const JX_SVELTE_COMPONENTS: [string, string][] = [
           {#if p.images?.[0]}<img src={p.images[0]} alt={p.name} style="width:100%;height:120px;object-fit:cover" />{/if}
           <div style="padding:8px 10px">
             <div style="font-weight:600;font-size:13px;color:#1a2740">{p.name}</div>
-            <div style="font-size:13px;font-weight:700;color:#ff5d1f">R$ {Number(p.price||0).toFixed(2)}</div>
+            <div style="font-size:13px;font-weight:700;color:var(--jx-color-primary)">R$ {Number(p.price||0).toFixed(2)}</div>
           </div>
         </div>
       {/each}
@@ -287,7 +287,7 @@ const JX_SVELTE_COMPONENTS: [string, string][] = [
           <span style="min-width:22px;text-align:center;font-weight:700;font-size:13px">{it.qty||1}</span>
           <button on:click={()=>inc(it.id)} style="width:26px;height:26px;border:1px solid #ccd5e8;background:#f4f6fb;border-radius:6px;cursor:pointer;font-weight:700;font-family:inherit">+</button>
         </div>
-        <div style="font-weight:700;color:#ff5d1f;font-size:13px;min-width:64px;text-align:right">R$ {(Number(it.price||0)*(it.qty||1)).toFixed(2)}</div>
+        <div style="font-weight:700;color:var(--jx-color-primary);font-size:13px;min-width:64px;text-align:right">R$ {(Number(it.price||0)*(it.qty||1)).toFixed(2)}</div>
         <button on:click={()=>rm(it.id)} style="background:none;border:0;color:#9aa5bc;cursor:pointer;font-size:18px;line-height:1;padding:0 4px">×</button>
       </div>
     {/each}
@@ -378,7 +378,7 @@ type ActiveTab = { kind: "shared"; tab: SharedTab } | { kind: "route"; path: str
 const JX_SVELTE_SNIPPETS: { name: string; snippet: string }[] = [
   { name: "jx-heading",       snippet: '<jx-heading text="Título" fontsize="32"></jx-heading>' },
   { name: "jx-paragraph",     snippet: '<jx-paragraph text="Seu texto." fontsize="16"></jx-paragraph>' },
-  { name: "jx-button",        snippet: '<jx-button label="Clique" href="/pagina" bgcolor="#ff5d1f"></jx-button>' },
+  { name: "jx-button",        snippet: '<jx-button label="Clique" href="/pagina" bgcolor="var(--jx-color-primary)"></jx-button>' },
   { name: "jx-image",         snippet: '<jx-image src="https://..." objectfit="cover"></jx-image>' },
   { name: "jx-carousel",      snippet: '<!-- jx-carousel não disponível em Svelte (use store nativo) -->' },
   { name: "jx-divider",       snippet: '<jx-divider color="#dde3f0" thickness="1"></jx-divider>' },
@@ -601,3 +601,4 @@ export const SvelteEditor: React.FC = () => {
     </div>
   );
 };
+

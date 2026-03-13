@@ -71,7 +71,7 @@
   letter-spacing: .04em;
   text-transform: uppercase;
 }
-.badge_orange { background: #fff3e0; color: #c05a00; }
+.badge_orange { background: #f7ecf1; color: #7a2746; }
 .badge_red    { background: #fce8e8; color: #b91c1c; }
 .badge_blue   { background: #e0f0ff; color: #1753a3; }
 .badge_green  { background: #dcfce7; color: #166534; }
@@ -131,7 +131,7 @@
 }
 
 .navItemActive {
-  border-left-color: #ff3e00;
+  border-left-color: #8b1e3f;
   background: #fff4f0;
   color: #c0300a;
   font-weight: 600;
@@ -352,7 +352,7 @@
   height: 30px;
   min-width: 30px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #ff3e00, #ff7a00);
+  background: linear-gradient(135deg, #8b1e3f, #a72f58);
   color: #fff;
   font-size: .72rem;
   font-weight: 800;
@@ -504,7 +504,7 @@
 
   .navItemActive {
     background: #fff4f0;
-    border-color: #ff3e00;
+    border-color: #8b1e3f;
     color: #c0300a;
   }
 
@@ -514,3 +514,4 @@
 
   .footerNoticeInner { flex-direction: column; }
 }
+

@@ -1,19 +1,33 @@
-// CORES BASE
-$color-primary: #ff3e00;
-$color-primary-light: lighten($color-primary, 10%);
-$color-primary-dark: darken($color-primary, 10%);
+@use "sass:color";
 
-$color-secondary: #242426;
-$color-accent: #ffb199;
+// Base palette (Jesterx vinho)
+$color-primary-raw: #8b1e3f;
+$color-primary-light-raw: color.adjust($color-primary-raw, $lightness: 10%);
+$color-primary-dark-raw: color.adjust($color-primary-raw, $lightness: -10%);
+$color-secondary-raw: #22131a;
+$color-accent-raw: #d489a5;
+$border-color-raw: #cfc5cc;
+$font-color-inverse-raw: #ffffff;
 
-// GRAYS E BACKGROUNDS
-$background-color: #f5f5f7;
-$background-color-primary: #ffffff;
-$background-color-secondary: #ebebf0;
-$background-color-tertiary: #dcdcde;
+// CSS variable bindings (runtime theming)
+$color-primary: var(--jx-color-primary);
+$color-primary-light: var(--jx-color-primary-light);
+$color-primary-dark: var(--jx-color-primary-dark);
+$color-secondary: var(--jx-color-secondary);
+$color-accent: var(--jx-color-accent);
 
-// BORDAS E SOMBRAS
-$border-color: #c8c8cc;
+$background-color: var(--jx-bg);
+$background-color-primary: var(--jx-bg-primary);
+$background-color-secondary: var(--jx-bg-secondary);
+$background-color-tertiary: var(--jx-bg-tertiary);
+
+$border-color: var(--jx-border);
+$font-color-primary: var(--jx-font-primary);
+$font-color-secondary: var(--jx-font-secondary);
+$font-color-inverse: var(--jx-font-inverse);
+$font-color-muted: var(--jx-font-muted);
+
+// Layout and shadows
 $border-radius-sm: 6px;
 $border-radius-md: 10px;
 $border-radius-lg: 16px;
@@ -21,29 +35,13 @@ $shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
 $shadow-md: 0 3px 6px rgba(0, 0, 0, 0.1);
 $shadow-lg: 0 6px 12px rgba(0, 0, 0, 0.15);
 
-// TIPOGRAFIA
-$font-color-primary: #1a1a1a;
-$font-color-secondary: #555;
-$font-color-inverse: #ffffff;
-$font-color-muted: #888;
-
-// ESTADOS
+// State colors
 $success-color: #27ae60;
 $warning-color: #f39c12;
 $error-color: #e74c3c;
 $info-color: #3498db;
 
-// TRANSIÇÕES E MOVIMENTO
+// Transitions
 $transition-base: all 0.25s ease;
 $transition-fast: all 0.15s ease-in;
 $transition-slow: all 0.4s ease-out;
-
-// DARK MODE
-[data-theme="dark"] {
-  $background-color: #1b1b1d;
-  $background-color-primary: #242426;
-  $background-color-secondary: #2f2f33;
-  $font-color-primary: #f2f2f2;
-  $font-color-secondary: #bcbcc0;
-  $border-color: #3a3a3d;
-}

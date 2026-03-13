@@ -146,7 +146,7 @@ export const AdminDashboard: React.FC = () => {
               { label: "Produtos", value: stats.total_products, color: "#8b5cf6" },
               { label: "Pedidos", value: stats.total_orders, color: "#f59e0b" },
               { label: "Receita Total", value: fmt(stats.total_revenue), color: "#10b981" },
-              { label: "Taxa Plataforma", value: fmt(stats.platform_fees), color: "#ff5d1f" },
+              { label: "Taxa Plataforma", value: fmt(stats.platform_fees), color: "var(--jx-color-primary)" },
               { label: "Planos Ativos", value: stats.active_plans, color: "#06b6d4" },
               { label: "Novos Hoje", value: stats.new_users_today, color: "#84cc16" },
               { label: "Pedidos Hoje", value: stats.orders_today, color: "#f97316" },
@@ -340,3 +340,4 @@ export const AdminDashboard: React.FC = () => {
     </div>
   );
 };
+

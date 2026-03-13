@@ -38,11 +38,16 @@ func (s *AuthService) DeleteAccount(userID string) error {
 	if user == nil {
 		return errors.New("usuário não encontrado")
 	}
-	return s.userRepo.DeleteUserByID(userID)
+	deleteAfter := time.Now().Add(30 * 24 * time.Hour)
+	return s.userRepo.DeactivateUserByID(userID, deleteAfter)
 }
 
 func (s *AuthService) DeleteExpiredUnverifiedUsers() error {
 	return s.userRepo.DeleteExpiredUnverifiedUsers()
+}
+
+func (s *AuthService) DeleteExpiredDeactivatedUsers() error {
+	return s.userRepo.DeleteExpiredDeactivatedUsers()
 }
 
 type RegisterInput struct {

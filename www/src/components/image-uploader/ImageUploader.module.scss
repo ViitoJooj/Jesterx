@@ -58,8 +58,8 @@
   user-select: none;
 
   &:hover:not(.disabled) {
-    border-color: #ff8a00;
-    color: #ff8a00;
+    border-color: $color-primary;
+    color: $color-primary;
   }
 }
 
@@ -101,6 +101,7 @@
   @extend %spinner-base;
   width: 13px;
   height: 13px;
-  border: 2px solid rgba(255,138,0,.3);
-  border-top-color: #ff8a00;
+  border: 2px solid color-mix(in srgb, $color-primary 30%, transparent);
+  border-top-color: $color-primary;
 }
+

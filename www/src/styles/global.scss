@@ -1,12 +1,53 @@
 @use '../styles/variables' as *;
 
+:root {
+  --jx-color-primary: #{$color-primary-raw};
+  --jx-color-primary-light: #{$color-primary-light-raw};
+  --jx-color-primary-dark: #{$color-primary-dark-raw};
+  --jx-color-secondary: #{$color-secondary-raw};
+  --jx-color-accent: #{$color-accent-raw};
+  --jx-bg: #f8f6f8;
+  --jx-bg-primary: #ffffff;
+  --jx-bg-secondary: #f1ecef;
+  --jx-bg-tertiary: #e6dee4;
+  --jx-border: #{$border-color-raw};
+  --jx-font-primary: #1d1217;
+  --jx-font-secondary: #5f4954;
+  --jx-font-inverse: #{$font-color-inverse-raw};
+  --jx-font-muted: #8d7380;
+}
+
+[data-theme="dark"] {
+  --jx-color-primary: #b23a64;
+  --jx-color-primary-light: #c6537b;
+  --jx-color-primary-dark: #8f274b;
+  --jx-color-secondary: #f4dfe8;
+  --jx-color-accent: #e6a7bf;
+  --jx-bg: #120d11;
+  --jx-bg-primary: #1a1217;
+  --jx-bg-secondary: #241820;
+  --jx-bg-tertiary: #2f1f2a;
+  --jx-border: #4d3340;
+  --jx-font-primary: #f6ebf1;
+  --jx-font-secondary: #cfb8c4;
+  --jx-font-inverse: #ffffff;
+  --jx-font-muted: #a88998;
+}
+
 body {
   margin: 0;
   font-family: Arial, sans-serif;
   border: 0;
   padding: 0;
+  background: $background-color;
+  color: $font-color-primary;
+  transition: background-color .25s ease, color .25s ease;
 }
 
 a {
   color: $color-primary;
+}
+
+* {
+  box-sizing: border-box;
 }

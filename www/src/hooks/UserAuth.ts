@@ -199,6 +199,15 @@ export function useAuth(websiteId: WebsiteId) {
     await loadMe();
   }, [websiteId, loadMe]);
 
+  const deleteAccount = useCallback(async () => {
+    await apiFetch<void>("/api/v1/auth/me", {
+      method: "DELETE",
+      websiteId,
+    });
+    setAccessToken(null);
+    setMe(null);
+  }, [websiteId]);
+
   const logout = useCallback(async () => {
     await apiFetch<void>("/api/v1/auth/logout", {
       method: "GET",
@@ -240,6 +249,7 @@ export function useAuth(websiteId: WebsiteId) {
     logout,
     updateProfile,
     cancelPlan,
+    deleteAccount,
     authHeader: accessToken
       ? { Authorization: `Bearer ${accessToken}` }
       : {},

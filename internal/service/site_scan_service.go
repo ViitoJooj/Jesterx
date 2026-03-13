@@ -302,7 +302,7 @@ func compileElementorJSONToHTML(source string) string {
 		`.blk{position:absolute;overflow:hidden;display:flex;flex-direction:column;justify-content:center;align-items:flex-start}` +
 		`.blk h1,.blk h2,.blk h3,.blk h4,.blk h5,.blk h6{font-size:inherit;font-weight:inherit;margin:0;line-height:1.15;width:100%}` +
 		`.blk p{font-size:inherit;font-weight:inherit;margin:0;line-height:1.45;width:100%}` +
-		`.jx-btn{display:inline-block;padding:10px 18px;border-radius:10px;background:#ff5d1f;color:#fff;text-decoration:none;border:0;cursor:pointer;white-space:nowrap;font-family:inherit}` +
+		`.jx-btn{display:inline-block;padding:10px 18px;border-radius:10px;background:#8b1e3f;color:#fff;text-decoration:none;border:0;cursor:pointer;white-space:nowrap;font-family:inherit}` +
 		`.img-blk{width:100%;height:100%;object-fit:cover;display:block}` +
 		`.profile-wrap{display:flex;flex-direction:column;gap:6px;width:100%}` +
 		`.profile-wrap img{width:56px;height:56px;object-fit:cover;border-radius:999px}` +
@@ -317,7 +317,7 @@ func compileElementorJSONToHTML(source string) string {
 		`.jx-modal-box{background:#fff;border-radius:12px;padding:28px;width:360px;max-width:100%;font-family:Inter,system-ui,sans-serif;position:relative}` +
 		`.jx-modal-title{margin:0 0 16px;font-size:18px;font-weight:700;color:#1a2740}` +
 		`.jx-modal-input{width:100%;padding:10px 12px;border:1.5px solid #ccd5e8;border-radius:8px;font-size:14px;box-sizing:border-box;margin-bottom:10px;font-family:inherit;display:block}` +
-		`.jx-modal-btn{width:100%;padding:12px;background:#ff5d1f;color:#fff;border:0;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}` +
+		`.jx-modal-btn{width:100%;padding:12px;background:#8b1e3f;color:#fff;border:0;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}` +
 		`.jx-modal-btn:disabled{opacity:.6;cursor:not-allowed}` +
 		`.jx-modal-err{color:#e53e3e;font-size:13px;margin:8px 0 0;display:none}` +
 		`.jx-modal-close{position:absolute;top:10px;right:14px;background:none;border:0;font-size:20px;cursor:pointer;color:#4b5774;line-height:1}` +
@@ -328,10 +328,10 @@ func compileElementorJSONToHTML(source string) string {
 		`.pc-info{padding:8px;flex:1;overflow:hidden}` +
 		`.pc-name{font-weight:700;font-size:14px;color:#1a2740;line-height:1.3;margin-bottom:4px;overflow:hidden}` +
 		`.pc-price-row{display:flex;align-items:center;gap:6px;margin-bottom:4px}` +
-		`.pc-price{font-weight:700;color:#ff5d1f;font-size:15px}` +
+		`.pc-price{font-weight:700;color:#8b1e3f;font-size:15px}` +
 		`.pc-compare{text-decoration:line-through;color:#9aa5bc;font-size:12px}` +
 		`.pc-desc{font-size:12px;color:#6a7387;line-height:1.4;overflow:hidden}` +
-		`.pc-cart-btn{margin:0 8px 8px;padding:8px;background:#ff5d1f;color:#fff;border:0;border-radius:6px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;width:calc(100% - 16px);flex-shrink:0}` +
+		`.pc-cart-btn{margin:0 8px 8px;padding:8px;background:#8b1e3f;color:#fff;border:0;border-radius:6px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;width:calc(100% - 16px);flex-shrink:0}` +
 		`.pc-state{display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:#9aa5bc;font-size:13px}` +
 		// product list
 		`.plist-wrap{display:flex;flex-direction:column;width:100%;height:100%;overflow:hidden}` +
@@ -339,7 +339,7 @@ func compileElementorJSONToHTML(source string) string {
 		`.plist-item{background:#fff;border:1px solid #dbe2f3;border-radius:8px;overflow:hidden;display:flex;flex-direction:column}` +
 		`.plist-img{width:100%;height:96px;object-fit:cover;display:block;flex-shrink:0}` +
 		`.plist-name{padding:6px 8px 2px;font-size:13px;font-weight:600;color:#1a2740;flex:1}` +
-		`.plist-price{padding:0 8px 4px;font-size:12px;color:#ff5d1f;font-weight:700}` +
+		`.plist-price{padding:0 8px 4px;font-size:12px;color:#8b1e3f;font-weight:700}` +
 		`.plist-cart-btn{margin:0 8px 8px;padding:6px;background:#1a2740;color:#fff;border:0;border-radius:6px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600}` +
 		`.plist-pag{display:flex;align-items:center;justify-content:center;gap:10px;padding:8px 0;flex-shrink:0;background:inherit}` +
 		`.plist-pag-btn{padding:6px 14px;border:1px solid #ccd5e8;border-radius:6px;background:#fff;cursor:pointer;font-family:inherit;font-size:13px;color:#1a2740}` +
@@ -353,7 +353,7 @@ func compileElementorJSONToHTML(source string) string {
 		`.ci-qty-row{display:flex;align-items:center;gap:4px;flex-shrink:0}` +
 		`.ci-qty-btn{width:26px;height:26px;border:1px solid #ccd5e8;background:#f4f6fb;border-radius:6px;cursor:pointer;font-size:15px;font-weight:700;color:#1a2740;font-family:inherit;display:flex;align-items:center;justify-content:center;padding:0}` +
 		`.ci-qty{min-width:22px;text-align:center;font-size:13px;font-weight:700;color:#1a2740}` +
-		`.ci-total{font-size:13px;font-weight:700;color:#ff5d1f;flex-shrink:0;min-width:64px;text-align:right}` +
+		`.ci-total{font-size:13px;font-weight:700;color:#8b1e3f;flex-shrink:0;min-width:64px;text-align:right}` +
 		`.ci-rm-btn{width:26px;height:26px;border:0;background:none;cursor:pointer;color:#9aa5bc;font-size:18px;line-height:1;flex-shrink:0;padding:0}` +
 		`.ci-rm-btn:hover{color:#e53e3e}` +
 		`.ci-empty{display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:#9aa5bc;font-size:13px}`
@@ -714,7 +714,7 @@ func compileJXMLToHTML(source string) string {
 		}
 	}
 
-	return "<!doctype html><html><head><meta charset=\"utf-8\" /><title>" + html.EscapeString(title) + "</title><style>body{margin:0;background:#f4f5f8;font-family:Inter,system-ui,sans-serif}main{max-width:980px;margin:28px auto;background:#fff;border:1px solid #dadde5;border-radius:16px;padding:22px}.btn{display:inline-block;padding:12px 16px;border-radius:10px;background:#ff5d1f;color:#fff;text-decoration:none}</style></head><body><main>" + strings.Join(body, "\n") + "</main></body></html>"
+	return "<!doctype html><html><head><meta charset=\"utf-8\" /><title>" + html.EscapeString(title) + "</title><style>body{margin:0;background:#f4f5f8;font-family:Inter,system-ui,sans-serif}main{max-width:980px;margin:28px auto;background:#fff;border:1px solid #dadde5;border-radius:16px;padding:22px}.btn{display:inline-block;padding:12px 16px;border-radius:10px;background:#8b1e3f;color:#fff;text-decoration:none}</style></head><body><main>" + strings.Join(body, "\n") + "</main></body></html>"
 }
 
 func extractQuoted(v string) (string, bool) {
@@ -783,3 +783,4 @@ func blockLayoutStyle(block ElementorBlock) string {
 	}
 	return fmt.Sprintf("position:absolute;left:%dpx;top:%dpx;width:%dpx;min-height:%dpx;transform:rotate(%ddeg);box-sizing:border-box;", x, y, w, h, block.Rot)
 }
+

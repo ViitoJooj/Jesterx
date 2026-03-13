@@ -49,7 +49,7 @@ type VersionResponse = {
 };
 
 const TYPE_META: Record<WebsiteType, { label: string; icon: string; color: string; description: string; starterRoutes: string[] }> = {
-  ECOMMERCE:     { label: "E-commerce",       icon: "🛍️", color: "#ff6029", description: "Catálogo, carrinho e checkout.",       starterRoutes: ["/", "/produtos", "/produto/:slug", "/carrinho", "/checkout"] },
+  ECOMMERCE:     { label: "E-commerce",       icon: "🛍️", color: "var(--jx-color-primary)", description: "Catálogo, carrinho e checkout.",       starterRoutes: ["/", "/produtos", "/produto/:slug", "/carrinho", "/checkout"] },
   LANDING_PAGE:  { label: "Landing Page",     icon: "🎯", color: "#2c7ef5", description: "Alta conversão com CTA e formulário.", starterRoutes: ["/", "/obrigado"] },
   SOFTWARE_SELL: { label: "Venda de Software", icon: "💻", color: "#7c3aed", description: "Trial, planos e download seguro.",     starterRoutes: ["/", "/precos", "/download", "/faq"] },
   COURSE:        { label: "Curso",             icon: "🎓", color: "#059669", description: "Vendas, módulos e aulas.",             starterRoutes: ["/", "/inscricao", "/modulos", "/aula/:id"] },

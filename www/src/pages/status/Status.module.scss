@@ -127,8 +127,8 @@
 }
 
 .status_degraded {
-  background: #fff3e0;
-  color: #c05a00;
+  background: #f7ecf1;
+  color: #7a2746;
   .statusDot { background: #f59e0b; animation: pulse 1.2s infinite; }
 }
 
@@ -284,7 +284,7 @@
 }
 
 .sev_critical { background: #fce8e8; color: #b91c1c; }
-.sev_major    { background: #fff3e0; color: #c05a00; }
+.sev_major    { background: #f7ecf1; color: #7a2746; }
 .sev_minor    { background: #e0f0ff; color: #1753a3; }
 
 .incStatus {
@@ -295,7 +295,7 @@
 }
 
 .incResolved { color: #166534; }
-.incActive   { color: #c05a00; }
+.incActive   { color: #7a2746; }
 
 .incDate {
   font-size: .75rem;
@@ -348,3 +348,4 @@
 }
 
 .contactIcon { font-size: 1.6rem; line-height: 1; padding-top: .1rem; }
+

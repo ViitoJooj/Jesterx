@@ -6,6 +6,7 @@ import { useAuthContext } from "../../hooks/AuthContext";
 import { resolveMediaUrl } from "../../lib/storage";
 
 export function Header() {
+  const [theme, setTheme] = useState<"light" | "dark">("light");
   const [open, setOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement | null>(null);
@@ -15,6 +16,18 @@ export function Header() {
   const firstName = me?.first_name?.trim() || "Perfil";
   const avatarUrl = resolveMediaUrl(me?.avatar_url);
   const avatarFallback = firstName.slice(0, 1).toUpperCase();
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem("jx-theme");
+    const initialTheme =
+      saved === "light" || saved === "dark"
+        ? saved
+        : window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light";
+    setTheme(initialTheme);
+    document.documentElement.setAttribute("data-theme", initialTheme);
+  }, []);
 
   useEffect(() => {
     function onPointerDown(event: MouseEvent) {
@@ -38,6 +51,15 @@ export function Header() {
     }
   }
 
+  function toggleTheme() {
+    setTheme((prev) => {
+      const next = prev === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      window.localStorage.setItem("jx-theme", next);
+      return next;
+    });
+  }
+
   return (
     <>
       <header className={styles.header}>
@@ -54,6 +76,15 @@ export function Header() {
           </nav>
 
           <div className={styles.actions}>
+            <button
+              type="button"
+              className={styles.theme_toggle}
+              onClick={toggleTheme}
+              aria-label="Alternar tema"
+              title={theme === "dark" ? "Ativar tema claro" : "Ativar tema escuro"}
+            >
+              {theme === "dark" ? "☀" : "☾"}
+            </button>
             {/* enquanto está “bootando” (tentando refresh/me), você pode mostrar skeleton/spinner */}
             {loading && me === null && !isAuthenticated ? (
               <span>...</span>
@@ -125,6 +156,14 @@ export function Header() {
         </div>
 
         <div className={styles.drawer_ctas_top}>
+          <button
+            type="button"
+            className={styles.theme_toggle}
+            onClick={toggleTheme}
+            aria-label="Alternar tema"
+          >
+            {theme === "dark" ? "Tema claro ☀" : "Tema escuro ☾"}
+          </button>
           {me ? (
             <>
               <p className={styles.drawer_user_label}>{firstName}</p>

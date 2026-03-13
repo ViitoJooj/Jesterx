@@ -14,7 +14,7 @@
   &:focus {
     outline: none;
     border-color: $color-primary;
-    box-shadow: 0 0 0 3px rgba($color-primary, 0.15);
+    box-shadow: 0 0 0 3px color-mix(in srgb, $color-primary 15%, transparent);
   }
 
   &:disabled {

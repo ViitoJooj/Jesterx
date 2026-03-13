@@ -59,7 +59,7 @@ const TYPE_LABELS: Record<string, string> = {
 const EDITOR_LABELS: Record<string, { label: string; color: string }> = {
   ELEMENTOR_JSON: { label: "Elementor", color: "#e44c65" },
   REACT:          { label: "React",     color: "#61dafb" },
-  SVELTE:         { label: "Svelte",    color: "#ff3e00" },
+  SVELTE:         { label: "Svelte",    color: "var(--jx-color-primary)" },
 };
 
 // ─── Star Rating Component ────────────────────────────────────────────────────
@@ -739,3 +739,4 @@ export function StoreInfo() {
     </main>
   );
 }
+

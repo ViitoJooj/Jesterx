@@ -77,8 +77,8 @@ body {
 
       &.active {
         color: $color-primary;
-        background: mix($color-primary, #fff, 12%);
-        box-shadow: inset 0 0 0 1px mix($color-primary, #fff, 26%);
+        background: color-mix(in srgb, $color-primary 12%, white);
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, $color-primary 26%, white);
       }
     }
   }
@@ -89,7 +89,24 @@ body {
 
   @media (min-width: 860px) {
     display: flex;
+    align-items: center;
     gap: 0.5rem;
+  }
+}
+
+.theme_toggle {
+  border: 1px solid $border-color;
+  background: $background-color-primary;
+  color: $font-color-primary;
+  border-radius: 999px;
+  height: 38px;
+  min-width: 38px;
+  padding: 0 0.65rem;
+  cursor: pointer;
+  transition: $transition-fast;
+
+  &:hover {
+    background: $background-color-secondary;
   }
 }
 
@@ -159,7 +176,7 @@ body {
   inset: 0 0 0 auto;
   width: min(92vw, 380px);
   box-sizing: border-box;
-  background: linear-gradient(180deg, mix($background-color-primary, #fff, 2%), $background-color-primary);
+  background: linear-gradient(180deg, color-mix(in srgb, $background-color-primary 98%, white), $background-color-primary);
   border-left: 1px solid $border-color;
   transform: translateX(104%);
   transition: transform 0.26s cubic-bezier(0.2, 0.9, 0.2, 1);
@@ -186,7 +203,7 @@ body {
   position: sticky;
   top: 0;
   z-index: 2;
-  background: linear-gradient(180deg, mix($background-color-primary, #fff, 2%), $background-color-primary);
+  background: linear-gradient(180deg, color-mix(in srgb, $background-color-primary 98%, white), $background-color-primary);
 }
 
 .drawer_close {
@@ -248,7 +265,7 @@ body {
 
   &:hover {
     background: $background-color-secondary;
-    border-color: mix($border-color, $color-primary, 25%);
+    border-color: color-mix(in srgb, $border-color 75%, $color-primary);
   }
 
   &:active {
@@ -258,8 +275,8 @@ body {
 
 .drawer_nav a.active {
   color: $font-color-primary;
-  background: linear-gradient(180deg, mix($color-primary, #fff, 16%), mix($color-primary, #fff, 10%));
-  border-color: mix($color-primary, #fff, 28%);
+  background: linear-gradient(180deg, color-mix(in srgb, $color-primary 16%, white), color-mix(in srgb, $color-primary 10%, white));
+  border-color: color-mix(in srgb, $color-primary 28%, white);
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
 }
 
@@ -303,7 +320,7 @@ body {
 
   &:hover {
     box-shadow: 0 10px 18px rgba(0, 0, 0, 0.12);
-    outline: 2px solid mix($color-primary, #fff, 30%);
+    outline: 2px solid color-mix(in srgb, $color-primary 30%, white);
     outline-offset: 2px;
   }
 
@@ -328,7 +345,7 @@ body {
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: mix($color-primary, #000, 15%);
+  background: color-mix(in srgb, $color-primary 85%, black);
   color: $font-color-inverse;
   font-size: 0.85rem;
   font-weight: 800;

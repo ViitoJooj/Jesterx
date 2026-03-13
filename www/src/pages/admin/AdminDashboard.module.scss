@@ -1,3 +1,5 @@
+@use "../../styles/variables" as *;
+
 .root {
   min-height: 100vh;
   background: #f5f7fa;
@@ -58,8 +60,8 @@
 }
 
 .tabActive {
-  color: #ff5d1f;
-  border-bottom-color: #ff5d1f;
+  color: $color-primary;
+  border-bottom-color: $color-primary;
 }
 
 .content {
@@ -161,9 +163,9 @@
 }
 
 .badgeAdmin {
-  background: #fff3e0;
-  color: #e65100;
-  border-color: #ffcc80;
+  background: #f7ecf1;
+  color: $color-primary-dark;
+  border-color: color-mix(in srgb, $color-primary 25%, white);
 }
 
 .badgeUser {
@@ -185,7 +187,7 @@
 
 .fee {
   font-weight: 700;
-  color: #ff5d1f;
+  color: $color-primary;
 }
 
 .revenueHeader {
@@ -206,3 +208,4 @@
   font-size: 13px;
   color: #5a6379;
 }
+

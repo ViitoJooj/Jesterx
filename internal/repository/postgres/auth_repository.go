@@ -67,6 +67,7 @@ func (r *connection) FindUserByID(id string) (*domain.User, error) {
 	) pay ON TRUE
 	LEFT JOIN plans p ON p.id = pay.plan_id
 	WHERE u.id = $1
+	  AND COALESCE(u.is_active, TRUE) = TRUE
 	`
 
 	var user domain.User
@@ -185,6 +186,7 @@ func (r *connection) FindUserByEmail(email string) (*domain.User, error) {
 	) pay ON TRUE
 	LEFT JOIN plans p ON p.id = pay.plan_id
 	WHERE u.email = $1
+	  AND COALESCE(u.is_active, TRUE) = TRUE
 	`
 
 	var user domain.User
@@ -299,6 +301,7 @@ func (r *connection) FindUserByEmailAndWebsite(email string, websiteId string) (
 	) pay ON TRUE
 	LEFT JOIN plans p ON p.id = pay.plan_id
 	WHERE u.email = $1 AND u.website_id = $2
+	  AND COALESCE(u.is_active, TRUE) = TRUE
 	`
 
 	var user domain.User
@@ -436,6 +439,22 @@ func (r *connection) DeleteUserByID(id string) error {
 	return tx.Commit()
 }
 
+func (r *connection) DeactivateUserByID(id string, deleteAfter time.Time) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_, err := r.db.ExecContext(ctx, `
+		UPDATE users
+		SET is_active = FALSE,
+		    deactivated_at = NOW(),
+		    delete_after = $2,
+		    updated_at = NOW()
+		WHERE id = $1
+		  AND COALESCE(is_active, TRUE) = TRUE
+	`, id, deleteAfter)
+	return err
+}
+
 func (r *connection) DeleteExpiredUnverifiedUsers() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -446,6 +465,41 @@ func (r *connection) DeleteExpiredUnverifiedUsers() error {
 		AND created_at < NOW() - INTERVAL '10 minutes'
 	`)
 	return err
+}
+
+func (r *connection) DeleteExpiredDeactivatedUsers() error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	if _, err := tx.ExecContext(ctx, `
+		DELETE FROM websites
+		WHERE creator_id IN (
+			SELECT id
+			FROM users
+			WHERE COALESCE(is_active, TRUE) = FALSE
+			  AND delete_after IS NOT NULL
+			  AND delete_after <= NOW()
+		)
+	`); err != nil {
+		return err
+	}
+
+	if _, err := tx.ExecContext(ctx, `
+		DELETE FROM users
+		WHERE COALESCE(is_active, TRUE) = FALSE
+		  AND delete_after IS NOT NULL
+		  AND delete_after <= NOW()
+	`); err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
 func (r *connection) UpdateVerifiedEmailToTrue(id string) error {

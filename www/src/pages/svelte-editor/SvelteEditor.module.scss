@@ -1,3 +1,5 @@
+@use "../../styles/variables" as *;
+
 /* Full-screen IDE layout — mirrors ReactEditor */
 
 .root { height: 100vh; display: flex; flex-direction: column; overflow: hidden; background: #0d1420; color: #d6deee; }
@@ -9,7 +11,7 @@
 .editorLabel { font-size: .82rem; font-weight: 600; color: #d6deee; }
 .siteId { font-size: .7rem; color: #4a6080; font-family: "Cascadia Code", monospace; max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .errInline { color: #f87171; font-size: .78rem; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.liveLink { text-decoration: none; border: 1px solid #ff5d1f; color: #ff7c46; border-radius: 8px; padding: .3rem .65rem; font-size: .8rem; white-space: nowrap; &:hover { background: rgba(255,93,31,.1); } }
+.liveLink { text-decoration: none; border: 1px solid $color-primary; color: $color-primary-light; border-radius: 8px; padding: .3rem .65rem; font-size: .8rem; white-space: nowrap; &:hover { background: color-mix(in srgb, $color-primary 10%, transparent); } }
 
 .workspace { display: grid; grid-template-columns: 210px 1fr 1fr; flex: 1; overflow: hidden; }
 
@@ -40,3 +42,4 @@
 .previewTab { background: none; border: 1px solid transparent; border-radius: 5px; color: #556074; font-size: .75rem; font-family: "Cascadia Code", monospace; padding: .18rem .55rem; cursor: pointer; white-space: nowrap; &:hover { background: #e8edf7; color: #222a3d; } }
 .previewTabActive { background: #fff; border-color: #d0d8ef; color: #1a2b55; font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
 .previewFrame { flex: 1; border: 0; width: 100%; background: #fff; }
+

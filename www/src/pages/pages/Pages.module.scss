@@ -99,7 +99,7 @@
 
 .typeCardActive {
   border-color: var(--type-color, $color-primary) !important;
-  box-shadow: 0 0 0 3px rgba(255, 96, 41, .18);
+  box-shadow: 0 0 0 3px color-mix(in srgb, $color-primary 18%, transparent);
 }
 
 .typeIcon {
@@ -175,7 +175,7 @@
 
 .editorChipActive {
   border-color: $color-primary !important;
-  background: rgba(255, 96, 41, .06) !important;
+  background: color-mix(in srgb, $color-primary 6%, transparent) !important;
 }
 
 .routeSection {
@@ -363,7 +363,7 @@
   font-size: .8rem;
   margin-left: auto;
 
-  &:hover { background: rgba(255, 96, 41, .08); }
+  &:hover { background: color-mix(in srgb, $color-primary 8%, transparent); }
 }
 
 .centerBox {

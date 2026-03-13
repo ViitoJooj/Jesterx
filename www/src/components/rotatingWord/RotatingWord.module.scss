@@ -1,3 +1,5 @@
+@use '../../styles/variables' as *;
+
 .rotator {
   display: inline-grid;
   grid-auto-rows: 1fr;
@@ -14,7 +16,11 @@
   white-space: nowrap;
   will-change: transform, opacity;
   backface-visibility: hidden;
-  background: linear-gradient(180deg, rgba(255,72,0,1) 0%, rgba(255,161,161,1) 100%);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, $color-primary 88%, white) 0%,
+    color-mix(in srgb, $color-primary-light 72%, white) 100%
+  );
   color: transparent;
   -webkit-background-clip: text;
   background-clip: text;

@@ -15,5 +15,9 @@ func StartCleanupUserWorker(authService *service.AuthService) {
 		if err != nil {
 			log.Println("cleanup error:", err)
 		}
+		err = authService.DeleteExpiredDeactivatedUsers()
+		if err != nil {
+			log.Println("deactivated cleanup error:", err)
+		}
 	}
 }

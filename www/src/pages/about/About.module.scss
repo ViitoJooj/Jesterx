@@ -42,7 +42,7 @@
 }
 
 .heroAccent {
-  background: linear-gradient(90deg, #ff3e00, #ff9a00);
+  background: linear-gradient(90deg, #8b1e3f, #c04874);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -105,7 +105,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .07em;
-  color: #ff3e00;
+  color: #8b1e3f;
   margin-bottom: .6rem;
 }
 
@@ -237,7 +237,7 @@
   text-align: right;
   font-size: .78rem;
   font-weight: 700;
-  color: #ff3e00;
+  color: #8b1e3f;
   padding-top: .35rem;
   letter-spacing: .03em;
 }
@@ -253,9 +253,9 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #ff3e00;
+  background: #8b1e3f;
   border: 2px solid #fff;
-  outline: 2px solid #ff3e00;
+  outline: 2px solid #8b1e3f;
   flex-shrink: 0;
   margin-top: .28rem;
 }
@@ -308,7 +308,7 @@
   width: 72px;
   height: 72px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #ff3e00, #ff7a00);
+  background: linear-gradient(135deg, #8b1e3f, #a72f58);
   color: #fff;
   display: flex;
   align-items: center;
@@ -325,7 +325,7 @@
 
 .teamRole {
   font-size: .78rem;
-  color: #ff3e00;
+  color: #8b1e3f;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .04em;
@@ -362,7 +362,7 @@
 }
 
 .ctaBtnPrimary {
-  background: #ff3e00;
+  background: #8b1e3f;
   color: #fff;
   padding: .75rem 1.8rem;
   border-radius: 10px;
@@ -387,3 +387,4 @@
 
   &:hover { background: rgba(255,255,255,.18); }
 }
+

@@ -85,7 +85,7 @@ function nextId(prefix: string): string {
 function newBlock(type: BlockType, z: number): Block {
   if (type === "heading") return { id: nextId("blk"), type, text: "Titulo principal", style: { ...DEFAULT_STYLE, "font-size": "48px", "font-weight": "700" }, x: 120, y: 90, w: 620, h: 90, rotation: 0, z };
   if (type === "paragraph") return { id: nextId("blk"), type, text: "Paragrafo com descricao da sua oferta.", style: { ...DEFAULT_STYLE, color: "#4f5f83" }, x: 120, y: 190, w: 580, h: 80, rotation: 0, z };
-  if (type === "button") return { id: nextId("blk"), type, label: "Botao", href: "/", action_type: "navigate", action_target: "/", style: { ...DEFAULT_STYLE, background: "#ff5d1f", color: "#ffffff", padding: "12px 18px", "text-align": "center" }, x: 120, y: 290, w: 190, h: 54, rotation: 0, z };
+  if (type === "button") return { id: nextId("blk"), type, label: "Botao", href: "/", action_type: "navigate", action_target: "/", style: { ...DEFAULT_STYLE, background: "var(--jx-color-primary)", color: "#ffffff", padding: "12px 18px", "text-align": "center" }, x: 120, y: 290, w: 190, h: 54, rotation: 0, z };
   if (type === "image") return { id: nextId("blk"), type, src: "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1000&q=80", style: { ...DEFAULT_STYLE, padding: "0", background: "#e6ebf5" }, x: 780, y: 100, w: 320, h: 240, rotation: 0, z };
   if (type === "carousel") return { id: nextId("blk"), type, images: ["https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=1200&q=80", "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=1200&q=80"], style: { ...DEFAULT_STYLE, padding: "0", background: "#dce4f3" }, x: 120, y: 370, w: 680, h: 250, rotation: 0, z };
   if (type === "input_var") return { id: nextId("blk"), type, var_name: "nome", placeholder: "Digite seu nome", style: { ...DEFAULT_STYLE, border: "1px solid #cad3e7", background: "#ffffff" }, x: 120, y: 650, w: 340, h: 56, rotation: 0, z };
@@ -198,7 +198,7 @@ function makeLandingTemplate(): BuilderDoc {
         { id: nextId("blk"), type: "heading", text: "MyBrand", style: { ...DEFAULT_STYLE, "font-size": "24px", "font-weight": "700", color: "#ffffff", background: "transparent", padding: "8px 0" }, x: 30, y: 20, w: 200, h: 44, rotation: 0, z: 1 },
         { id: nextId("blk"), type: "button", label: "Inicio", action_type: "navigate", action_target: "/", href: "/", style: { ...DEFAULT_STYLE, background: "transparent", color: "#ffffff", padding: "10px 16px", border: "0", "border-radius": "6px", "text-align": "center" }, x: 580, y: 18, w: 100, h: 44, rotation: 0, z: 2 },
         { id: nextId("blk"), type: "button", label: "Sobre", action_type: "navigate", action_target: "/sobre", href: "/sobre", style: { ...DEFAULT_STYLE, background: "transparent", color: "#ffffff", padding: "10px 16px", border: "0", "border-radius": "6px", "text-align": "center" }, x: 690, y: 18, w: 100, h: 44, rotation: 0, z: 3 },
-        { id: nextId("blk"), type: "button", label: "Comecar gratis", action_type: "navigate", action_target: "/", href: "/", style: { ...DEFAULT_STYLE, background: "#ff5d1f", color: "#ffffff", padding: "10px 20px", "border-radius": "8px", border: "0", "font-weight": "600", "text-align": "center" }, x: 1150, y: 18, w: 170, h: 44, rotation: 0, z: 4 },
+        { id: nextId("blk"), type: "button", label: "Comecar gratis", action_type: "navigate", action_target: "/", href: "/", style: { ...DEFAULT_STYLE, background: "var(--jx-color-primary)", color: "#ffffff", padding: "10px 20px", "border-radius": "8px", border: "0", "font-weight": "600", "text-align": "center" }, x: 1150, y: 18, w: 170, h: 44, rotation: 0, z: 4 },
       ],
     },
     footer: {
@@ -214,7 +214,7 @@ function makeLandingTemplate(): BuilderDoc {
         blocks: [
           { id: nextId("blk"), type: "heading", text: "Transforme seu negocio digital", style: { ...DEFAULT_STYLE, "font-size": "58px", "font-weight": "700", color: "#1a2740", background: "transparent", padding: "0" }, x: 80, y: 60, w: 680, h: 120, rotation: 0, z: 1 },
           { id: nextId("blk"), type: "paragraph", text: "Crie paginas incriveis com nosso editor visual. Simples, rapido e poderoso.", style: { ...DEFAULT_STYLE, color: "#4f5f83", "font-size": "18px", background: "transparent", padding: "0" }, x: 80, y: 210, w: 600, h: 80, rotation: 0, z: 2 },
-          { id: nextId("blk"), type: "button", label: "Comecar agora", action_type: "navigate", action_target: "/", href: "/", style: { ...DEFAULT_STYLE, background: "#ff5d1f", color: "#ffffff", padding: "14px 28px", "border-radius": "8px", border: "0", "font-weight": "600", "font-size": "16px", "text-align": "center" }, x: 80, y: 320, w: 200, h: 54, rotation: 0, z: 3 },
+          { id: nextId("blk"), type: "button", label: "Comecar agora", action_type: "navigate", action_target: "/", href: "/", style: { ...DEFAULT_STYLE, background: "var(--jx-color-primary)", color: "#ffffff", padding: "14px 28px", "border-radius": "8px", border: "0", "font-weight": "600", "font-size": "16px", "text-align": "center" }, x: 80, y: 320, w: 200, h: 54, rotation: 0, z: 3 },
           { id: nextId("blk"), type: "button", label: "Ver demonstracao", action_type: "navigate", action_target: "/", href: "/", style: { ...DEFAULT_STYLE, background: "transparent", color: "#1a2740", padding: "12px 28px", "border-radius": "8px", border: "2px solid #1a2740", "font-weight": "600", "font-size": "16px", "text-align": "center" }, x: 300, y: 320, w: 230, h: 54, rotation: 0, z: 4 },
           { id: nextId("blk"), type: "image", src: "https://images.unsplash.com/photo-1537432376769-00f5c2f4c8d2?auto=format&fit=crop&w=1000&q=80", object_fit: "cover", style: { ...DEFAULT_STYLE, padding: "0", background: "#e6ebf5", "border-radius": "16px" }, x: 820, y: 40, w: 500, h: 380, rotation: 0, z: 5 },
           { id: nextId("blk"), type: "divider", style: { ...DEFAULT_STYLE, background: "#e2e8f3", padding: "0" }, x: 0, y: 500, w: 1400, h: 2, rotation: 0, z: 6 },
@@ -1190,3 +1190,4 @@ export const ElementorEditor = () => {
     </main>
   );
 };
+

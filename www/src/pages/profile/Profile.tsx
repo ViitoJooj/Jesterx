@@ -10,7 +10,7 @@ const BR_STATES = [
 ];
 
 export function Profile() {
-  const { me, updateProfile, cancelPlan, loading, websiteId } = useAuthContext();
+  const { me, updateProfile, cancelPlan, deleteAccount, loading, websiteId } = useAuthContext();
 
   const isBusiness = me?.account_type === "business";
 
@@ -47,6 +47,8 @@ export function Profile() {
   const [errorMsg, setErrorMsg] = useState("");
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [canceling, setCanceling] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -115,6 +117,19 @@ export function Profile() {
       setErrorMsg(err.message ?? "Erro ao cancelar plano");
     } finally {
       setCanceling(false);
+    }
+  }
+
+  async function handleDeleteAccount() {
+    setDeletingAccount(true);
+    try {
+      await deleteAccount();
+      window.location.href = "/login";
+    } catch (err: any) {
+      setErrorMsg(err.message ?? "Erro ao desativar conta");
+    } finally {
+      setDeletingAccount(false);
+      setShowDeleteModal(false);
     }
   }
 
@@ -369,15 +384,21 @@ export function Profile() {
         </form>
 
         {/* Danger Zone */}
-        {me?.user_plan && (
-          <section className={`${styles.section} ${styles.danger}`}>
-            <h2>Zona de Perigo</h2>
-            <p>Cancelar sua assinatura remove o acesso aos recursos do plano.</p>
-            <button className={styles.cancelBtn} onClick={() => setShowCancelModal(true)}>
-              Cancelar assinatura
-            </button>
-          </section>
-        )}
+        <section className={`${styles.section} ${styles.danger}`}>
+          <h2>Zona de Perigo</h2>
+          {me?.user_plan && (
+            <>
+              <p>Cancelar sua assinatura remove o acesso aos recursos do plano.</p>
+              <button className={styles.cancelBtn} onClick={() => setShowCancelModal(true)}>
+                Cancelar assinatura
+              </button>
+            </>
+          )}
+          <p>A ação de deletar conta desativa o acesso imediatamente e agenda exclusão definitiva em 30 dias.</p>
+          <button className={styles.deleteBtn} onClick={() => setShowDeleteModal(true)}>
+            Deletar conta
+          </button>
+        </section>
       </div>
 
       {showCancelModal && (
@@ -393,6 +414,26 @@ export function Profile() {
                 {canceling ? "Cancelando..." : "Sim, cancelar"}
               </button>
               <button className={styles.secondaryBtn} onClick={() => setShowCancelModal(false)} disabled={canceling}>
+                Voltar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDeleteModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal}>
+            <h3>Deletar conta</h3>
+            <p>
+              Sua conta será desativada agora e removida permanentemente em 30 dias.
+              Durante esse período você não conseguirá fazer login.
+            </p>
+            <div className={styles.modalActions}>
+              <button className={styles.deleteBtn} onClick={handleDeleteAccount} disabled={deletingAccount}>
+                {deletingAccount ? "Desativando..." : "Sim, deletar conta"}
+              </button>
+              <button className={styles.secondaryBtn} onClick={() => setShowDeleteModal(false)} disabled={deletingAccount}>
                 Voltar
               </button>
             </div>

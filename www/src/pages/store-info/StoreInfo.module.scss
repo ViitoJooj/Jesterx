@@ -81,7 +81,7 @@
 .logoPlaceholder {
   width: 80px; height: 80px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #ff3e00, #ff8a00);
+  background: linear-gradient(135deg, #8b1e3f, #b23a64);
   color: #fff;
   font-size: 2rem;
   font-weight: 700;
@@ -129,8 +129,8 @@
   border-radius: 20px;
   font-size: .72rem;
   font-weight: 600;
-  background: rgba(255,138,0,.15);
-  color: #ff8a00;
+  background: color-mix(in srgb, $color-primary 15%, transparent);
+  color: $color-primary-light;
 }
 
 .editorBadge {
@@ -182,7 +182,7 @@
 .visitBtn {
   padding: .6rem 1rem;
   border-radius: 10px;
-  background: linear-gradient(90deg, #ff3e00, #ff8a00);
+  background: linear-gradient(90deg, #8b1e3f, #b23a64);
   color: #fff;
   font-weight: 600;
   font-size: .875rem;
@@ -233,7 +233,7 @@
   width: 100%;
   box-sizing: border-box;
   outline: none;
-  &:focus { border-color: #ff8a00; }
+  &:focus { border-color: #b23a64; }
 }
 
 .editTextarea { resize: vertical; font-family: inherit; }
@@ -257,7 +257,7 @@
 .saveBtn {
   padding: .45rem .9rem;
   border-radius: 8px;
-  background: linear-gradient(90deg, #ff3e00, #ff8a00);
+  background: linear-gradient(90deg, #8b1e3f, #b23a64);
   border: none;
   color: #fff;
   font-size: .8rem;
@@ -288,7 +288,7 @@
 .creatorAvatarPlaceholder {
   width: 44px; height: 44px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #ff3e00, #ff8a00);
+  background: linear-gradient(135deg, #8b1e3f, #b23a64);
   color: #fff;
   font-weight: 700;
   display: flex;
@@ -394,7 +394,7 @@
 }
 
 .chartBar {
-  fill: #ff8a00;
+  fill: #b23a64;
   opacity: .75;
   transition: opacity .15s;
   &:hover { opacity: 1; }
@@ -443,7 +443,7 @@
 .commentAvatarPlaceholder {
   width: 36px; height: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #ff3e00, #ff8a00);
+  background: linear-gradient(135deg, #8b1e3f, #b23a64);
   color: #fff;
   font-weight: 700;
   font-size: .9rem;
@@ -466,7 +466,7 @@
   outline: none;
   font-family: inherit;
   line-height: 1.5;
-  &:focus { border-color: #ff8a00; }
+  &:focus { border-color: #b23a64; }
 }
 
 .commentFormFooter {
@@ -485,7 +485,7 @@
 .commentSubmitBtn {
   padding: .45rem 1rem;
   border-radius: 8px;
-  background: linear-gradient(90deg, #ff3e00, #ff8a00);
+  background: linear-gradient(90deg, #8b1e3f, #b23a64);
   border: none;
   color: #fff;
   font-size: .85rem;
@@ -600,7 +600,7 @@
   font-family: inherit;
   line-height: 1.5;
   outline: none;
-  &:focus { border-color: #ff8a00; }
+  &:focus { border-color: #b23a64; }
 }
 
 .replyActions {
@@ -618,15 +618,15 @@
 
 .replyItem {
   background: $background-color;
-  border-left: 3px solid #ff8a00;
+  border-left: 3px solid #b23a64;
   border-radius: 0 8px 8px 0;
   padding: .65rem .85rem;
 }
 
 .replyBadge {
   display: inline-block;
-  background: rgba(255,138,0,.15);
-  color: #ff8a00;
+  background: color-mix(in srgb, $color-primary 15%, transparent);
+  color: #b23a64;
   font-size: .7rem;
   font-weight: 700;
   padding: .1rem .4rem;
@@ -651,7 +651,7 @@
   }
   td {
     padding: .5rem;
-    border-bottom: 1px solid rgba($border-color, .5);
+    border-bottom: 1px solid color-mix(in srgb, $border-color 50%, transparent);
     vertical-align: middle;
   }
 }
@@ -691,3 +691,5 @@
 
   input { flex: 1; min-width: 150px; }
 }
+
+

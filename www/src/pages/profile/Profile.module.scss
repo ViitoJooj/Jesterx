@@ -188,7 +188,7 @@ label {
 
     &:focus {
       border-color: $color-primary;
-      box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
+      box-shadow: 0 0 0 3px color-mix(in srgb, $color-primary 10%, transparent);
     }
 
     &:disabled {
@@ -213,7 +213,7 @@ label {
 
   &:focus {
     border-color: $color-primary;
-    box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
+    box-shadow: 0 0 0 3px color-mix(in srgb, $color-primary 10%, transparent);
   }
 }
 
@@ -325,7 +325,8 @@ label {
 }
 
 .danger {
-  border-color: rgba($error-color, 0.3);
+  border-color: rgba($error-color, 0.45);
+  background: rgba($error-color, 0.06);
   margin-top: 0.5rem;
 
   h2 {
@@ -334,7 +335,7 @@ label {
   }
 
   p {
-    color: $font-color-muted;
+    color: $font-color-secondary;
     font-size: 0.9rem;
     margin-bottom: 1rem;
   }
@@ -357,6 +358,27 @@ label {
 
   &:disabled {
     opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.deleteBtn {
+  background: $error-color;
+  color: $font-color-inverse;
+  border: 1px solid $error-color;
+  border-radius: $border-radius-md;
+  padding: 0.65rem 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: $transition-base;
+
+  &:hover:not(:disabled) {
+    filter: brightness(0.95);
+  }
+
+  &:disabled {
+    opacity: 0.55;
     cursor: not-allowed;
   }
 }

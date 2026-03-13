@@ -498,7 +498,7 @@ func (h *AuthHandler) DeleteAccount(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]any{"success": true, "message": "conta excluída"})
+	json.NewEncoder(w).Encode(map[string]any{"success": true, "message": "conta desativada; exclusão definitiva em 30 dias"})
 }
 
 func derefString(s *string) string {
