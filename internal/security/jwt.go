@@ -35,8 +35,8 @@ func AccessCookieName(websiteId string) string {
 	return "access_token_" + websiteId
 }
 
-var jwtAccessTokenKey = []byte(config.Jwt_access_token)
-var jwtRefreshTokenKey = []byte(config.Jwt_refresh_token)
+func jwtAccessTokenKey() []byte { return []byte(config.Jwt_access_token) }
+func jwtRefreshTokenKey() []byte { return []byte(config.Jwt_refresh_token) }
 
 func AccessToken(claims AccessTokenClaims) (string, error) {
 	now := time.Now().Unix()
@@ -50,7 +50,7 @@ func AccessToken(claims AccessTokenClaims) (string, error) {
 		"role": claims.Role,
 	})
 
-	return token.SignedString(jwtAccessTokenKey)
+	return token.SignedString(jwtAccessTokenKey())
 }
 
 func RefreshToken(claims RefreshTokenClaims) (string, error) {
@@ -65,7 +65,7 @@ func RefreshToken(claims RefreshTokenClaims) (string, error) {
 		"type":       "refresh",
 	})
 
-	return token.SignedString(jwtRefreshTokenKey)
+	return token.SignedString(jwtRefreshTokenKey())
 }
 
 func ParseAccessToken(tokenString string) (*AccessTokenClaims, error) {
@@ -73,7 +73,7 @@ func ParseAccessToken(tokenString string) (*AccessTokenClaims, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("Internal error.")
 		}
-		return jwtAccessTokenKey, nil
+		return jwtAccessTokenKey(), nil
 	})
 
 	if err != nil {
@@ -106,7 +106,7 @@ func ParseRefreshToken(tokenString string) (*RefreshTokenClaims, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("Internal Error.")
 		}
-		return jwtRefreshTokenKey, nil
+		return jwtRefreshTokenKey(), nil
 	})
 
 	if err != nil {

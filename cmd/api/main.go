@@ -2,8 +2,12 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/ViitoJooj/Jesterx/internal/config"
@@ -75,6 +79,13 @@ func main() {
 	httpRouter.RegisterAdminRoutes(mux, adminHandler, authService)
 	httpRouter.RegisterReportRoutes(mux, reportHandler, authService)
 	httpRouter.RegisterStoreSocialRoutes(mux, storeSocialHandler, authService)
+	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		if err := json.NewEncoder(w).Encode(map[string]string{"status": "ok"}); err != nil {
+			log.Printf("health encode error: %v", err)
+		}
+	})
 
 	globalLimiter := ratelimit.NewLimiter(200)
 	authLimiter := ratelimit.NewLimiter(15)
@@ -127,8 +138,22 @@ func main() {
 		MaxHeaderBytes:    1 << 20,
 	}
 
-	log.Println("Server starting on :8080")
-	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		log.Fatalf("server error: %v", err)
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		log.Println("Server starting on :8080")
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("server error: %v", err)
+		}
+	}()
+
+	<-quit
+	log.Println("Shutting down server...")
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatalf("server forced to shutdown: %v", err)
 	}
+	log.Println("Server stopped")
 }
