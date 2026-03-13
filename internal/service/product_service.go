@@ -23,27 +23,63 @@ func NewProductService(
 }
 
 type CreateProductInput struct {
-	Name         string
-	Description  string
-	Price        float64
-	ComparePrice *float64
-	Stock        int
-	Sku          *string
-	Category     *string
-	Images       []string
-	Active       bool
+	Name             string
+	Description      string
+	ShortDescription *string
+	Price            float64
+	ComparePrice     *float64
+	Stock            int
+	Sku              *string
+	Category         *string
+	Slug             *string
+	Brand            *string
+	Model            *string
+	Barcode          *string
+	Condition        *string
+	WeightGrams      *int
+	WidthCm          *float64
+	HeightCm         *float64
+	LengthCm         *float64
+	Material         *string
+	Color            *string
+	Size             *string
+	WarrantyMonths   *int
+	OriginCountry    *string
+	Tags             []string
+	Attributes       map[string]string
+	RequiresShipping *bool
+	Images           []string
+	Active           bool
 }
 
 type UpdateProductInput struct {
-	Name         string
-	Description  string
-	Price        float64
-	ComparePrice *float64
-	Stock        int
-	Sku          *string
-	Category     *string
-	Images       []string
-	Active       bool
+	Name             string
+	Description      string
+	ShortDescription *string
+	Price            float64
+	ComparePrice     *float64
+	Stock            int
+	Sku              *string
+	Category         *string
+	Slug             *string
+	Brand            *string
+	Model            *string
+	Barcode          *string
+	Condition        *string
+	WeightGrams      *int
+	WidthCm          *float64
+	HeightCm         *float64
+	LengthCm         *float64
+	Material         *string
+	Color            *string
+	Size             *string
+	WarrantyMonths   *int
+	OriginCountry    *string
+	Tags             []string
+	Attributes       map[string]string
+	RequiresShipping *bool
+	Images           []string
+	Active           bool
 }
 
 // ensures the website exists, is an ECOMMERCE store, and that the user owns it or is an admin
@@ -81,17 +117,34 @@ func (s *ProductService) CreateProduct(userID, websiteID string, input CreatePro
 	if input.Price < 0 {
 		return nil, errors.New("preço não pode ser negativo")
 	}
+	if input.ComparePrice != nil && *input.ComparePrice < 0 {
+		return nil, errors.New("compare_price não pode ser negativo")
+	}
 	if input.Stock < 0 {
 		return nil, errors.New("estoque não pode ser negativo")
 	}
 	if input.Images == nil {
 		input.Images = []string{}
 	}
+	if input.Tags == nil {
+		input.Tags = []string{}
+	}
+	if input.Attributes == nil {
+		input.Attributes = map[string]string{}
+	}
+	if input.RequiresShipping == nil {
+		input.RequiresShipping = boolPtr(true)
+	}
 
 	p := domain.NewProduct(
-		websiteID, name, input.Description,
+		websiteID, name, input.Description, input.ShortDescription,
 		input.Price, input.ComparePrice,
 		input.Stock, input.Sku, input.Category,
+		input.Slug, input.Brand, input.Model, input.Barcode, input.Condition,
+		input.Material, input.Color, input.Size, input.OriginCountry,
+		input.WeightGrams, input.WarrantyMonths,
+		input.WidthCm, input.HeightCm, input.LengthCm,
+		input.Tags, input.Attributes, *input.RequiresShipping,
 		input.Images, input.Active, userID,
 	)
 	return s.productRepo.CreateProduct(*p)
@@ -153,20 +206,50 @@ func (s *ProductService) UpdateProduct(userID, websiteID, productID string, inpu
 	if input.Price < 0 {
 		return nil, errors.New("preço não pode ser negativo")
 	}
+	if input.ComparePrice != nil && *input.ComparePrice < 0 {
+		return nil, errors.New("compare_price não pode ser negativo")
+	}
 	if input.Stock < 0 {
 		return nil, errors.New("estoque não pode ser negativo")
 	}
 	if input.Images == nil {
 		input.Images = existing.Images
 	}
+	if input.Tags == nil {
+		input.Tags = existing.Tags
+	}
+	if input.Attributes == nil {
+		input.Attributes = existing.Attributes
+	}
+	if input.RequiresShipping == nil {
+		input.RequiresShipping = &existing.RequiresShipping
+	}
 
 	existing.Name = name
 	existing.Description = input.Description
+	existing.ShortDescription = input.ShortDescription
 	existing.Price = input.Price
 	existing.ComparePrice = input.ComparePrice
 	existing.Stock = input.Stock
 	existing.Sku = input.Sku
 	existing.Category = input.Category
+	existing.Slug = input.Slug
+	existing.Brand = input.Brand
+	existing.Model = input.Model
+	existing.Barcode = input.Barcode
+	existing.Condition = input.Condition
+	existing.WeightGrams = input.WeightGrams
+	existing.WidthCm = input.WidthCm
+	existing.HeightCm = input.HeightCm
+	existing.LengthCm = input.LengthCm
+	existing.Material = input.Material
+	existing.Color = input.Color
+	existing.Size = input.Size
+	existing.WarrantyMonths = input.WarrantyMonths
+	existing.OriginCountry = input.OriginCountry
+	existing.Tags = input.Tags
+	existing.Attributes = input.Attributes
+	existing.RequiresShipping = *input.RequiresShipping
 	existing.Images = input.Images
 	existing.Active = input.Active
 
@@ -178,4 +261,8 @@ func (s *ProductService) DeleteProduct(userID, websiteID, productID string) erro
 		return err
 	}
 	return s.productRepo.DeleteProduct(productID, websiteID)
+}
+
+func boolPtr(v bool) *bool {
+	return &v
 }

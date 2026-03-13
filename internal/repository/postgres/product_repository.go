@@ -19,16 +19,36 @@ func scanProduct(row interface {
 }) (*domain.Product, error) {
 	var p domain.Product
 	var imagesJSON []byte
+	var tagsJSON []byte
+	var attrsJSON []byte
 	err := row.Scan(
 		&p.Id,
 		&p.WebsiteId,
 		&p.Name,
 		&p.Description,
+		&p.ShortDescription,
 		&p.Price,
 		&p.ComparePrice,
 		&p.Stock,
 		&p.Sku,
 		&p.Category,
+		&p.Slug,
+		&p.Brand,
+		&p.Model,
+		&p.Barcode,
+		&p.Condition,
+		&p.WeightGrams,
+		&p.WidthCm,
+		&p.HeightCm,
+		&p.LengthCm,
+		&p.Material,
+		&p.Color,
+		&p.Size,
+		&p.WarrantyMonths,
+		&p.OriginCountry,
+		&tagsJSON,
+		&attrsJSON,
+		&p.RequiresShipping,
 		&imagesJSON,
 		&p.Active,
 		&p.SoldCount,
@@ -42,22 +62,43 @@ func scanProduct(row interface {
 	if err := json.Unmarshal(imagesJSON, &p.Images); err != nil {
 		p.Images = []string{}
 	}
+	if err := json.Unmarshal(tagsJSON, &p.Tags); err != nil {
+		p.Tags = []string{}
+	}
+	if err := json.Unmarshal(attrsJSON, &p.Attributes); err != nil {
+		p.Attributes = map[string]string{}
+	}
 	return &p, nil
 }
 
-const productCols = `id, website_id, name, description, price, compare_price, stock, sku, category, images, active, sold_count, created_by, updated_at, created_at`
+const productCols = `id, website_id, name, description, short_description, price, compare_price, stock, sku, category, slug, brand, model, barcode, condition, weight_grams, width_cm, height_cm, length_cm, material, color, size, warranty_months, origin_country, tags, attributes, requires_shipping, images, active, sold_count, created_by, updated_at, created_at`
 
 func (r *connection) CreateProduct(p domain.Product) (*domain.Product, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	imagesJSON, _ := json.Marshal(p.Images)
+	tagsJSON, _ := json.Marshal(p.Tags)
+	attrsJSON, _ := json.Marshal(p.Attributes)
 	row := r.db.QueryRowContext(ctx, `
-		INSERT INTO products (id, website_id, name, description, price, compare_price, stock, sku, category, images, active, sold_count, created_by, updated_at, created_at)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
+		INSERT INTO products (
+			id, website_id, name, description, short_description, price, compare_price, stock, sku, category,
+			slug, brand, model, barcode, condition, weight_grams, width_cm, height_cm, length_cm, material,
+			color, size, warranty_months, origin_country, tags, attributes, requires_shipping,
+			images, active, sold_count, created_by, updated_at, created_at
+		)
+		VALUES (
+			$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,
+			$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,
+			$21,$22,$23,$24,$25,$26,$27,
+			$28,$29,$30,$31,$32,$33
+		)
 		RETURNING `+productCols,
-		p.Id, p.WebsiteId, p.Name, p.Description, p.Price, p.ComparePrice,
-		p.Stock, p.Sku, p.Category, imagesJSON, p.Active, p.SoldCount, p.CreatedBy, p.UpdatedAt, p.CreatedAt,
+		p.Id, p.WebsiteId, p.Name, p.Description, p.ShortDescription, p.Price, p.ComparePrice,
+		p.Stock, p.Sku, p.Category, p.Slug, p.Brand, p.Model, p.Barcode, p.Condition,
+		p.WeightGrams, p.WidthCm, p.HeightCm, p.LengthCm, p.Material,
+		p.Color, p.Size, p.WarrantyMonths, p.OriginCountry, tagsJSON, attrsJSON, p.RequiresShipping,
+		imagesJSON, p.Active, p.SoldCount, p.CreatedBy, p.UpdatedAt, p.CreatedAt,
 	)
 	return scanProduct(row)
 }
@@ -112,14 +153,22 @@ func (r *connection) UpdateProduct(p domain.Product) (*domain.Product, error) {
 	defer cancel()
 
 	imagesJSON, _ := json.Marshal(p.Images)
+	tagsJSON, _ := json.Marshal(p.Tags)
+	attrsJSON, _ := json.Marshal(p.Attributes)
 	row := r.db.QueryRowContext(ctx, `
 		UPDATE products SET
-			name=$1, description=$2, price=$3, compare_price=$4,
-			stock=$5, sku=$6, category=$7, images=$8, active=$9, updated_at=NOW()
-		WHERE id=$10 AND website_id=$11
+			name=$1, description=$2, short_description=$3, price=$4, compare_price=$5,
+			stock=$6, sku=$7, category=$8, slug=$9, brand=$10, model=$11, barcode=$12,
+			condition=$13, weight_grams=$14, width_cm=$15, height_cm=$16, length_cm=$17,
+			material=$18, color=$19, size=$20, warranty_months=$21, origin_country=$22,
+			tags=$23, attributes=$24, requires_shipping=$25, images=$26, active=$27, updated_at=NOW()
+		WHERE id=$28 AND website_id=$29
 		RETURNING `+productCols,
-		p.Name, p.Description, p.Price, p.ComparePrice,
-		p.Stock, p.Sku, p.Category, imagesJSON, p.Active,
+		p.Name, p.Description, p.ShortDescription, p.Price, p.ComparePrice,
+		p.Stock, p.Sku, p.Category, p.Slug, p.Brand, p.Model, p.Barcode,
+		p.Condition, p.WeightGrams, p.WidthCm, p.HeightCm, p.LengthCm,
+		p.Material, p.Color, p.Size, p.WarrantyMonths, p.OriginCountry,
+		tagsJSON, attrsJSON, p.RequiresShipping, imagesJSON, p.Active,
 		p.Id, p.WebsiteId,
 	)
 	updated, err := scanProduct(row)

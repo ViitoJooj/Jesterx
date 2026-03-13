@@ -21,34 +21,70 @@ func NewProductHandler(s *service.ProductService) *ProductHandler {
 }
 
 type CreateProductRequest struct {
-	Name         string   `json:"name"`
-	Description  string   `json:"description"`
-	Price        float64  `json:"price"`
-	ComparePrice *float64 `json:"compare_price"`
-	Stock        int      `json:"stock"`
-	Sku          *string  `json:"sku"`
-	Category     *string  `json:"category"`
-	Images       []string `json:"images"`
-	Active       bool     `json:"active"`
+	Name             string            `json:"name"`
+	Description      string            `json:"description"`
+	ShortDescription *string           `json:"short_description"`
+	Price            float64           `json:"price"`
+	ComparePrice     *float64          `json:"compare_price"`
+	Stock            int               `json:"stock"`
+	Sku              *string           `json:"sku"`
+	Category         *string           `json:"category"`
+	Slug             *string           `json:"slug"`
+	Brand            *string           `json:"brand"`
+	Model            *string           `json:"model"`
+	Barcode          *string           `json:"barcode"`
+	Condition        *string           `json:"condition"`
+	WeightGrams      *int              `json:"weight_grams"`
+	WidthCm          *float64          `json:"width_cm"`
+	HeightCm         *float64          `json:"height_cm"`
+	LengthCm         *float64          `json:"length_cm"`
+	Material         *string           `json:"material"`
+	Color            *string           `json:"color"`
+	Size             *string           `json:"size"`
+	WarrantyMonths   *int              `json:"warranty_months"`
+	OriginCountry    *string           `json:"origin_country"`
+	Tags             []string          `json:"tags"`
+	Attributes       map[string]string `json:"attributes"`
+	RequiresShipping *bool             `json:"requires_shipping"`
+	Images           []string          `json:"images"`
+	Active           bool              `json:"active"`
 }
 
 type UpdateProductRequest = CreateProductRequest
 
 type ProductData struct {
-	ID           string   `json:"id"`
-	WebsiteID    string   `json:"website_id"`
-	Name         string   `json:"name"`
-	Description  string   `json:"description"`
-	Price        float64  `json:"price"`
-	ComparePrice *float64 `json:"compare_price"`
-	Stock        int      `json:"stock"`
-	Sku          *string  `json:"sku"`
-	Category     *string  `json:"category"`
-	Images       []string `json:"images"`
-	Active       bool     `json:"active"`
-	CreatedBy    string   `json:"created_by"`
-	UpdatedAt    string   `json:"updated_at"`
-	CreatedAt    string   `json:"created_at"`
+	ID               string            `json:"id"`
+	WebsiteID        string            `json:"website_id"`
+	Name             string            `json:"name"`
+	Description      string            `json:"description"`
+	ShortDescription *string           `json:"short_description,omitempty"`
+	Price            float64           `json:"price"`
+	ComparePrice     *float64          `json:"compare_price,omitempty"`
+	Stock            int               `json:"stock"`
+	Sku              *string           `json:"sku,omitempty"`
+	Category         *string           `json:"category,omitempty"`
+	Slug             *string           `json:"slug,omitempty"`
+	Brand            *string           `json:"brand,omitempty"`
+	Model            *string           `json:"model,omitempty"`
+	Barcode          *string           `json:"barcode,omitempty"`
+	Condition        *string           `json:"condition,omitempty"`
+	WeightGrams      *int              `json:"weight_grams,omitempty"`
+	WidthCm          *float64          `json:"width_cm,omitempty"`
+	HeightCm         *float64          `json:"height_cm,omitempty"`
+	LengthCm         *float64          `json:"length_cm,omitempty"`
+	Material         *string           `json:"material,omitempty"`
+	Color            *string           `json:"color,omitempty"`
+	Size             *string           `json:"size,omitempty"`
+	WarrantyMonths   *int              `json:"warranty_months,omitempty"`
+	OriginCountry    *string           `json:"origin_country,omitempty"`
+	Tags             []string          `json:"tags"`
+	Attributes       map[string]string `json:"attributes"`
+	RequiresShipping bool              `json:"requires_shipping"`
+	Images           []string          `json:"images"`
+	Active           bool              `json:"active"`
+	CreatedBy        string            `json:"created_by"`
+	UpdatedAt        string            `json:"updated_at"`
+	CreatedAt        string            `json:"created_at"`
 }
 
 type ProductResponse struct {
@@ -69,20 +105,38 @@ func productToData(p *domain.Product) ProductData {
 		imgs = []string{}
 	}
 	return ProductData{
-		ID:           p.Id,
-		WebsiteID:    p.WebsiteId,
-		Name:         p.Name,
-		Description:  p.Description,
-		Price:        p.Price,
-		ComparePrice: p.ComparePrice,
-		Stock:        p.Stock,
-		Sku:          p.Sku,
-		Category:     p.Category,
-		Images:       imgs,
-		Active:       p.Active,
-		CreatedBy:    p.CreatedBy,
-		UpdatedAt:    p.UpdatedAt.Format(time.RFC3339),
-		CreatedAt:    p.CreatedAt.Format(time.RFC3339),
+		ID:               p.Id,
+		WebsiteID:        p.WebsiteId,
+		Name:             p.Name,
+		Description:      p.Description,
+		ShortDescription: p.ShortDescription,
+		Price:            p.Price,
+		ComparePrice:     p.ComparePrice,
+		Stock:            p.Stock,
+		Sku:              p.Sku,
+		Category:         p.Category,
+		Slug:             p.Slug,
+		Brand:            p.Brand,
+		Model:            p.Model,
+		Barcode:          p.Barcode,
+		Condition:        p.Condition,
+		WeightGrams:      p.WeightGrams,
+		WidthCm:          p.WidthCm,
+		HeightCm:         p.HeightCm,
+		LengthCm:         p.LengthCm,
+		Material:         p.Material,
+		Color:            p.Color,
+		Size:             p.Size,
+		WarrantyMonths:   p.WarrantyMonths,
+		OriginCountry:    p.OriginCountry,
+		Tags:             p.Tags,
+		Attributes:       p.Attributes,
+		RequiresShipping: p.RequiresShipping,
+		Images:           imgs,
+		Active:           p.Active,
+		CreatedBy:        p.CreatedBy,
+		UpdatedAt:        p.UpdatedAt.Format(time.RFC3339),
+		CreatedAt:        p.CreatedAt.Format(time.RFC3339),
 	}
 }
 
@@ -122,15 +176,33 @@ func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	p, err := h.productService.CreateProduct(userID, siteID, service.CreateProductInput{
-		Name:         req.Name,
-		Description:  req.Description,
-		Price:        req.Price,
-		ComparePrice: req.ComparePrice,
-		Stock:        req.Stock,
-		Sku:          req.Sku,
-		Category:     req.Category,
-		Images:       req.Images,
-		Active:       req.Active,
+		Name:             req.Name,
+		Description:      req.Description,
+		ShortDescription: req.ShortDescription,
+		Price:            req.Price,
+		ComparePrice:     req.ComparePrice,
+		Stock:            req.Stock,
+		Sku:              req.Sku,
+		Category:         req.Category,
+		Slug:             req.Slug,
+		Brand:            req.Brand,
+		Model:            req.Model,
+		Barcode:          req.Barcode,
+		Condition:        req.Condition,
+		WeightGrams:      req.WeightGrams,
+		WidthCm:          req.WidthCm,
+		HeightCm:         req.HeightCm,
+		LengthCm:         req.LengthCm,
+		Material:         req.Material,
+		Color:            req.Color,
+		Size:             req.Size,
+		WarrantyMonths:   req.WarrantyMonths,
+		OriginCountry:    req.OriginCountry,
+		Tags:             req.Tags,
+		Attributes:       req.Attributes,
+		RequiresShipping: req.RequiresShipping,
+		Images:           req.Images,
+		Active:           req.Active,
 	})
 	if err != nil {
 		http.Error(w, err.Error(), productErrStatus(err))
@@ -191,15 +263,33 @@ func (h *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	p, err := h.productService.UpdateProduct(userID, siteID, productID, service.UpdateProductInput{
-		Name:         req.Name,
-		Description:  req.Description,
-		Price:        req.Price,
-		ComparePrice: req.ComparePrice,
-		Stock:        req.Stock,
-		Sku:          req.Sku,
-		Category:     req.Category,
-		Images:       req.Images,
-		Active:       req.Active,
+		Name:             req.Name,
+		Description:      req.Description,
+		ShortDescription: req.ShortDescription,
+		Price:            req.Price,
+		ComparePrice:     req.ComparePrice,
+		Stock:            req.Stock,
+		Sku:              req.Sku,
+		Category:         req.Category,
+		Slug:             req.Slug,
+		Brand:            req.Brand,
+		Model:            req.Model,
+		Barcode:          req.Barcode,
+		Condition:        req.Condition,
+		WeightGrams:      req.WeightGrams,
+		WidthCm:          req.WidthCm,
+		HeightCm:         req.HeightCm,
+		LengthCm:         req.LengthCm,
+		Material:         req.Material,
+		Color:            req.Color,
+		Size:             req.Size,
+		WarrantyMonths:   req.WarrantyMonths,
+		OriginCountry:    req.OriginCountry,
+		Tags:             req.Tags,
+		Attributes:       req.Attributes,
+		RequiresShipping: req.RequiresShipping,
+		Images:           req.Images,
+		Active:           req.Active,
 	})
 	if err != nil {
 		http.Error(w, err.Error(), productErrStatus(err))

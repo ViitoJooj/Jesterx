@@ -145,7 +145,7 @@ func (s *AuthService) Register(input RegisterInput) (*domain.User, error) {
 	return user, nil
 }
 
-func (s *AuthService) VerifyEmail(user_id string) (*domain.User, error) {
+func (s *AuthService) VerifyEmail(user_id string, websiteID string) (*domain.User, error) {
 	user, err := s.userRepo.FindUserByID(user_id)
 	if err != nil {
 		return nil, err
@@ -153,12 +153,19 @@ func (s *AuthService) VerifyEmail(user_id string) (*domain.User, error) {
 	if user == nil {
 		return nil, errors.New("user not found")
 	}
+	if websiteID != "" && user.WebsiteId != websiteID {
+		return nil, errors.New("user not found")
+	}
 
 	if user.Verified_email {
 		return nil, errors.New("user already verified.")
 	}
 
-	err = s.userRepo.UpdateVerifiedEmailToTrue(user_id)
+	if websiteID != "" {
+		err = s.userRepo.UpdateVerifiedEmailToTrueByWebsite(user_id, websiteID)
+	} else {
+		err = s.userRepo.UpdateVerifiedEmailToTrue(user_id)
+	}
 	if err != nil {
 		return nil, errors.New("Internal error")
 	}
@@ -297,6 +304,69 @@ func (s *AuthService) UpdateProfile(userID string, data domain.UpdateProfileData
 			data.CpfCnpj = nil
 		} else {
 			data.CpfCnpj = &raw
+		}
+	}
+	if data.DisplayName != nil {
+		raw := strings.TrimSpace(*data.DisplayName)
+		if raw == "" {
+			data.DisplayName = nil
+		} else if len(raw) > 100 {
+			return errors.New("display_name muito longo")
+		} else {
+			data.DisplayName = &raw
+		}
+	}
+	if data.Bio != nil {
+		raw := strings.TrimSpace(*data.Bio)
+		if raw == "" {
+			data.Bio = nil
+		} else if len(raw) > 500 {
+			return errors.New("bio muito longa")
+		} else {
+			data.Bio = &raw
+		}
+	}
+	if data.Gender != nil {
+		raw := strings.ToLower(strings.TrimSpace(*data.Gender))
+		if raw == "" {
+			data.Gender = nil
+		} else if raw != "male" && raw != "female" && raw != "other" && raw != "prefer_not" {
+			return errors.New("gênero inválido")
+		} else {
+			data.Gender = &raw
+		}
+	}
+	if data.BirthDate != nil && data.BirthDate.After(time.Now()) {
+		return errors.New("data de nascimento inválida")
+	}
+	if data.Instagram != nil {
+		raw := strings.TrimSpace(*data.Instagram)
+		if raw == "" {
+			data.Instagram = nil
+		} else if len(raw) > 100 {
+			return errors.New("instagram inválido")
+		} else {
+			data.Instagram = &raw
+		}
+	}
+	if data.WebsiteUrl != nil {
+		raw := strings.TrimSpace(*data.WebsiteUrl)
+		if raw == "" {
+			data.WebsiteUrl = nil
+		} else if len(raw) > 200 {
+			return errors.New("site inválido")
+		} else {
+			data.WebsiteUrl = &raw
+		}
+	}
+	if data.Whatsapp != nil {
+		raw := strings.TrimSpace(*data.Whatsapp)
+		if raw == "" {
+			data.Whatsapp = nil
+		} else if len(raw) > 20 {
+			return errors.New("whatsapp inválido")
+		} else {
+			data.Whatsapp = &raw
 		}
 	}
 	return s.userRepo.UpdateUserProfile(userID, data)

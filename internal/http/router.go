@@ -102,7 +102,8 @@ func RegisterProductRoutes(mux *http.ServeMux, h *handlers.ProductHandler, authS
 }
 
 func RegisterOrderRoutes(mux *http.ServeMux, h *handlers.OrderHandler, auth *service.AuthService) {
-	mux.HandleFunc("POST /api/store/{siteID}/orders", h.CreateOrder)
+	mux.Handle("POST /api/store/{siteID}/orders",
+		middleware.IdentityMiddleware(auth)(middleware.RequireAuth(http.HandlerFunc(h.CreateOrder))))
 	mux.Handle("GET /api/v1/sites/{siteID}/orders",
 		middleware.IdentityMiddleware(auth)(middleware.RequireAuth(http.HandlerFunc(h.ListSiteOrders))))
 }

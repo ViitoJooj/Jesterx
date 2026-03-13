@@ -7,30 +7,38 @@ import (
 )
 
 type User struct {
-	Id               string
-	WebsiteId        string
-	First_name       string
-	Last_name        string
-	Email            string
-	Verified_email   bool
-	Password         string
-	Role             string
-	Plan             *string
-	CpfCnpj          *string
-	AvatarUrl        *string
-	AccountType      string
-	CompanyName      *string
-	TradeName        *string
-	Phone            *string
-	ZipCode          *string
-	AddressStreet    *string
-	AddressNumber    *string
+	Id                string
+	WebsiteId         string
+	First_name        string
+	Last_name         string
+	Email             string
+	Verified_email    bool
+	Password          string
+	Role              string
+	Plan              *string
+	CpfCnpj           *string
+	AvatarUrl         *string
+	AccountType       string
+	CompanyName       *string
+	TradeName         *string
+	Phone             *string
+	ZipCode           *string
+	AddressStreet     *string
+	AddressNumber     *string
 	AddressComplement *string
-	AddressCity      *string
-	AddressState     *string
-	AddressCountry   *string
-	Updated_at       time.Time
-	Created_at       time.Time
+	AddressDistrict   *string
+	AddressCity       *string
+	AddressState      *string
+	AddressCountry    *string
+	DisplayName       *string
+	BirthDate         *time.Time
+	Gender            *string
+	Bio               *string
+	Instagram         *string
+	WebsiteUrl        *string
+	Whatsapp          *string
+	Updated_at        time.Time
+	Created_at        time.Time
 }
 
 type UpdateProfileData struct {
@@ -38,16 +46,24 @@ type UpdateProfileData struct {
 	LastName          string
 	CpfCnpj           *string
 	AvatarUrl         *string
-	CompanyName        *string
-	TradeName          *string
-	Phone              *string
-	ZipCode            *string
-	AddressStreet      *string
-	AddressNumber      *string
-	AddressComplement  *string
-	AddressCity        *string
-	AddressState       *string
-	AddressCountry     *string
+	CompanyName       *string
+	TradeName         *string
+	Phone             *string
+	ZipCode           *string
+	AddressStreet     *string
+	AddressNumber     *string
+	AddressComplement *string
+	AddressDistrict   *string
+	AddressCity       *string
+	AddressState      *string
+	AddressCountry    *string
+	DisplayName       *string
+	BirthDate         *time.Time
+	Gender            *string
+	Bio               *string
+	Instagram         *string
+	WebsiteUrl        *string
+	Whatsapp          *string
 }
 
 func NewUser(WebsiteId string, first_name string, last_name string, email string, password_hash string, accountType string) *User {

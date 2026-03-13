@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"strings"
@@ -72,11 +73,19 @@ type UserMeResponse struct {
 	AccountType       string `json:"account_type"`
 	CompanyName       string `json:"company_name"`
 	TradeName         string `json:"trade_name"`
+	DisplayName       string `json:"display_name"`
+	BirthDate         string `json:"birth_date"`
+	Gender            string `json:"gender"`
+	Bio               string `json:"bio"`
+	Instagram         string `json:"instagram"`
+	WebsiteUrl        string `json:"website_url"`
+	Whatsapp          string `json:"whatsapp"`
 	Phone             string `json:"phone"`
 	ZipCode           string `json:"zip_code"`
 	AddressStreet     string `json:"address_street"`
 	AddressNumber     string `json:"address_number"`
 	AddressComplement string `json:"address_complement"`
+	AddressDistrict   string `json:"address_district"`
 	AddressCity       string `json:"address_city"`
 	AddressState      string `json:"address_state"`
 	AddressCountry    string `json:"address_country"`
@@ -89,16 +98,24 @@ type UpdateProfileRequest struct {
 	LastName          string  `json:"last_name"`
 	CpfCnpj           *string `json:"cpf_cnpj"`
 	AvatarUrl         *string `json:"avatar_url"`
-	CompanyName        *string `json:"company_name"`
-	TradeName          *string `json:"trade_name"`
-	Phone              *string `json:"phone"`
-	ZipCode            *string `json:"zip_code"`
-	AddressStreet      *string `json:"address_street"`
-	AddressNumber      *string `json:"address_number"`
-	AddressComplement  *string `json:"address_complement"`
-	AddressCity        *string `json:"address_city"`
-	AddressState       *string `json:"address_state"`
-	AddressCountry     *string `json:"address_country"`
+	CompanyName       *string `json:"company_name"`
+	TradeName         *string `json:"trade_name"`
+	DisplayName       *string `json:"display_name"`
+	BirthDate         *string `json:"birth_date"`
+	Gender            *string `json:"gender"`
+	Bio               *string `json:"bio"`
+	Instagram         *string `json:"instagram"`
+	WebsiteUrl        *string `json:"website_url"`
+	Whatsapp          *string `json:"whatsapp"`
+	Phone             *string `json:"phone"`
+	ZipCode           *string `json:"zip_code"`
+	AddressStreet     *string `json:"address_street"`
+	AddressNumber     *string `json:"address_number"`
+	AddressComplement *string `json:"address_complement"`
+	AddressDistrict   *string `json:"address_district"`
+	AddressCity       *string `json:"address_city"`
+	AddressState      *string `json:"address_state"`
+	AddressCountry    *string `json:"address_country"`
 }
 
 type AuthHandler struct {
@@ -166,7 +183,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = security.SendVerifyEmail(user.Email, user.Id)
+	err = security.SendVerifyEmail(user.Email, user.Id, user.WebsiteId)
 	if err != nil {
 		log.Println("Error on sending email")
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -209,7 +226,8 @@ func (h *AuthHandler) VerifyEmail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.authService.VerifyEmail(id)
+	websiteID := r.URL.Query().Get("website_id")
+	user, err := h.authService.VerifyEmail(id, websiteID)
 	if err != nil {
 		log.Println(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -432,11 +450,19 @@ func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
 		AccountType:       user.AccountType,
 		CompanyName:       derefString(user.CompanyName),
 		TradeName:         derefString(user.TradeName),
+		DisplayName:       derefString(user.DisplayName),
+		BirthDate:         formatDate(user.BirthDate),
+		Gender:            derefString(user.Gender),
+		Bio:               derefString(user.Bio),
+		Instagram:         derefString(user.Instagram),
+		WebsiteUrl:        derefString(user.WebsiteUrl),
+		Whatsapp:          derefString(user.Whatsapp),
 		Phone:             derefString(user.Phone),
 		ZipCode:           derefString(user.ZipCode),
 		AddressStreet:     derefString(user.AddressStreet),
 		AddressNumber:     derefString(user.AddressNumber),
 		AddressComplement: derefString(user.AddressComplement),
+		AddressDistrict:   derefString(user.AddressDistrict),
 		AddressCity:       derefString(user.AddressCity),
 		AddressState:      derefString(user.AddressState),
 		AddressCountry:    derefString(user.AddressCountry),
@@ -482,6 +508,28 @@ func derefString(s *string) string {
 	return *s
 }
 
+func formatDate(d *time.Time) string {
+	if d == nil {
+		return ""
+	}
+	return d.Format("2006-01-02")
+}
+
+func parseBirthDate(raw *string) (*time.Time, error) {
+	if raw == nil {
+		return nil, nil
+	}
+	trimmed := strings.TrimSpace(*raw)
+	if trimmed == "" {
+		return nil, nil
+	}
+	parsed, err := time.Parse("2006-01-02", trimmed)
+	if err != nil {
+		return nil, errors.New("data de nascimento inválida")
+	}
+	return &parsed, nil
+}
+
 func (h *AuthHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	userID, ok := middleware.UserID(r.Context())
 	if !ok {
@@ -496,21 +544,35 @@ func (h *AuthHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	birthDate, err := parseBirthDate(req.BirthDate)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 	if err := h.authService.UpdateProfile(userID, domain.UpdateProfileData{
 		FirstName:         req.FirstName,
 		LastName:          req.LastName,
 		CpfCnpj:           req.CpfCnpj,
 		AvatarUrl:         req.AvatarUrl,
-		CompanyName:        req.CompanyName,
-		TradeName:          req.TradeName,
-		Phone:              req.Phone,
-		ZipCode:            req.ZipCode,
-		AddressStreet:      req.AddressStreet,
-		AddressNumber:      req.AddressNumber,
-		AddressComplement:  req.AddressComplement,
-		AddressCity:        req.AddressCity,
-		AddressState:       req.AddressState,
-		AddressCountry:     req.AddressCountry,
+		CompanyName:       req.CompanyName,
+		TradeName:         req.TradeName,
+		DisplayName:       req.DisplayName,
+		BirthDate:         birthDate,
+		Gender:            req.Gender,
+		Bio:               req.Bio,
+		Instagram:         req.Instagram,
+		WebsiteUrl:        req.WebsiteUrl,
+		Whatsapp:          req.Whatsapp,
+		Phone:             req.Phone,
+		ZipCode:           req.ZipCode,
+		AddressStreet:     req.AddressStreet,
+		AddressNumber:     req.AddressNumber,
+		AddressComplement: req.AddressComplement,
+		AddressDistrict:   req.AddressDistrict,
+		AddressCity:       req.AddressCity,
+		AddressState:      req.AddressState,
+		AddressCountry:    req.AddressCountry,
 	}); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

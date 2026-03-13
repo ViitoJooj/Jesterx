@@ -20,6 +20,13 @@ export function Profile() {
   const [avatarUrl, setAvatarUrl] = useState(me?.avatar_url ?? "");
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(resolveMediaUrl(me?.avatar_url) ?? null);
+  const [displayName, setDisplayName] = useState(me?.display_name ?? "");
+  const [birthDate, setBirthDate] = useState(me?.birth_date ?? "");
+  const [gender, setGender] = useState(me?.gender ?? "");
+  const [bio, setBio] = useState(me?.bio ?? "");
+  const [instagram, setInstagram] = useState(me?.instagram ?? "");
+  const [websiteUrl, setWebsiteUrl] = useState(me?.website_url ?? "");
+  const [whatsapp, setWhatsapp] = useState(me?.whatsapp ?? "");
 
   // business fields
   const [companyName, setCompanyName] = useState(me?.company_name ?? "");
@@ -29,6 +36,7 @@ export function Profile() {
   const [addressStreet, setAddressStreet] = useState(me?.address_street ?? "");
   const [addressNumber, setAddressNumber] = useState(me?.address_number ?? "");
   const [addressComplement, setAddressComplement] = useState(me?.address_complement ?? "");
+  const [addressDistrict, setAddressDistrict] = useState(me?.address_district ?? "");
   const [addressCity, setAddressCity] = useState(me?.address_city ?? "");
   const [addressState, setAddressState] = useState(me?.address_state ?? "");
   const [addressCountry, setAddressCountry] = useState(me?.address_country ?? "");
@@ -72,10 +80,18 @@ export function Profile() {
         phone: phone || null,
         company_name: isBusiness ? companyName || null : null,
         trade_name: isBusiness ? tradeName || null : null,
+        display_name: displayName || null,
+        birth_date: birthDate || null,
+        gender: gender || null,
+        bio: bio || null,
+        instagram: instagram || null,
+        website_url: websiteUrl || null,
+        whatsapp: whatsapp || null,
         zip_code: zipCode || null,
         address_street: addressStreet || null,
         address_number: addressNumber || null,
         address_complement: addressComplement || null,
+        address_district: addressDistrict || null,
         address_city: addressCity || null,
         address_state: addressState || null,
         address_country: addressCountry || null,
@@ -163,6 +179,26 @@ export function Profile() {
               E-mail (não editável)
               <input value={me?.email ?? ""} disabled />
             </label>
+            <div className={styles.row}>
+              <label>
+                Nome de exibição
+                <input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Como você quer aparecer na loja" />
+              </label>
+              <label>
+                Data de nascimento
+                <input type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} />
+              </label>
+            </div>
+            <label className={styles.fullWidth}>
+              Gênero
+              <select className={styles.select} value={gender} onChange={(e) => setGender(e.target.value)}>
+                <option value="">Prefiro não informar</option>
+                <option value="male">Masculino</option>
+                <option value="female">Feminino</option>
+                <option value="other">Outro</option>
+                <option value="prefer_not">Prefiro não dizer</option>
+              </select>
+            </label>
             {!isBusiness && (
               <label className={styles.fullWidth}>
                 CPF
@@ -185,6 +221,35 @@ export function Profile() {
                 />
               </label>
             )}
+          </section>
+
+          <section className={styles.section}>
+            <h2>Perfil na Loja</h2>
+            <label className={styles.fullWidth}>
+              Bio
+              <textarea
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                placeholder="Fale um pouco sobre você"
+                rows={3}
+              />
+            </label>
+            <div className={styles.row}>
+              <label>
+                Instagram
+                <input value={instagram} onChange={(e) => setInstagram(e.target.value)} placeholder="@seuperfil" />
+              </label>
+              <label>
+                Website
+                <input value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} placeholder="https://seusite.com" />
+              </label>
+            </div>
+            <div className={styles.row}>
+              <label>
+                WhatsApp
+                <input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="(11) 91234-5678" maxLength={20} />
+              </label>
+            </div>
           </section>
 
           {/* Business Info */}
@@ -249,12 +314,16 @@ export function Profile() {
                 <input value={addressCity} onChange={(e) => setAddressCity(e.target.value)} placeholder="São Paulo" />
               </label>
               <label>
-                Complemento
-                <input value={addressComplement} onChange={(e) => setAddressComplement(e.target.value)} placeholder="Sala 10" />
+                Bairro
+                <input value={addressDistrict} onChange={(e) => setAddressDistrict(e.target.value)} placeholder="Centro" />
               </label>
             </div>
             <div className={styles.row}>
-              <label className={styles.fullWidth}>
+              <label>
+                Complemento
+                <input value={addressComplement} onChange={(e) => setAddressComplement(e.target.value)} placeholder="Sala 10" />
+              </label>
+              <label>
                 País
                 <input value={addressCountry} onChange={(e) => setAddressCountry(e.target.value)} placeholder="Brasil" />
               </label>

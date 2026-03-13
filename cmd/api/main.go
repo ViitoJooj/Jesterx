@@ -20,11 +20,11 @@ import (
 )
 
 const (
-	maxBodyBytes    = 10 * 1024 * 1024
-	maxUploadBytes  = 50 * 1024 * 1024
-	maxPaginationN  = 100
-	banStrikes      = 20
-	banDuration     = 30 * time.Minute
+	maxBodyBytes   = 10 * 1024 * 1024
+	maxUploadBytes = 50 * 1024 * 1024
+	maxPaginationN = 100
+	banStrikes     = 20
+	banDuration    = 30 * time.Minute
 )
 
 func main() {
@@ -48,7 +48,7 @@ func main() {
 	websiteService := service.NewWebSiteService(websiteRepo, authRepo, paymentRepo)
 	paymentService := service.NewPaymentService(paymentRepo, authRepo)
 	productService := service.NewProductService(productRepo, websiteRepo, authRepo)
-	orderService := service.NewOrderService(orderRepo, websiteRepo, productRepo)
+	orderService := service.NewOrderService(orderRepo, websiteRepo, productRepo, authRepo)
 	reportService := service.NewReportService(reportRepo, websiteRepo)
 	storeSocialService := service.NewStoreSocialService(storeSocialRepo, websiteRepo)
 

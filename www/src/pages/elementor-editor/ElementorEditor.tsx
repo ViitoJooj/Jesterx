@@ -750,8 +750,8 @@ export const ElementorEditor = () => {
 
           {leftTab === "elements" && (
             <div className={styles.blockList}>
-              {editingProductCard && <div className={styles.varHint} style={{ padding: "6px 10px", margin: "0 0 6px", background: "#e0f2fe", borderRadius: 6, fontSize: ".75rem", color: "#0369a1" }}>🛍 <strong>Vars produto:</strong> {"{{product_name}}"} {"{{product_price}}"} {"{{product_image}}"} {"{{product_description}}"} {"{{product_sku}}"}</div>}
-              {!editingProductCard && <div className={styles.varHint} style={{ padding: "6px 10px", margin: "0 0 6px", background: "#f1f5f9", borderRadius: 6, fontSize: ".75rem" }}>👤 <strong>Vars usuário:</strong> {"{{user_name}}"} {"{{user_email}}"} {"{{cart_count}}"}</div>}
+              {editingProductCard && <div className={styles.varHint} style={{ padding: "6px 10px", margin: "0 0 6px", background: "#e0f2fe", borderRadius: 6, fontSize: ".75rem", color: "#0369a1" }}>🛍 <strong>Vars produto:</strong> {"{{product_name}}"} {"{{product_price}}"} {"{{product_image}}"} {"{{product_description}}"} {"{{product_short_description}}"} {"{{product_sku}}"} {"{{product_brand}}"} {"{{product_model}}"} {"{{product_barcode}}"} {"{{product_weight}}"} {"{{product_color}}"} {"{{product_size}}"}</div>}
+              {!editingProductCard && <div className={styles.varHint} style={{ padding: "6px 10px", margin: "0 0 6px", background: "#f1f5f9", borderRadius: 6, fontSize: ".75rem" }}>👤 <strong>Vars usuário:</strong> {"{{user_name}}"} {"{{user_display_name}}"} {"{{user_email}}"} {"{{user_phone}}"} {"{{user_address_city}}"} {"{{user_address_state}}"} {"{{cart_count}}"}</div>}
               {BLOCK_CATEGORIES.map(cat => (
                 <div key={cat.label}>
                   <div className={styles.catLabel}>{cat.label}</div>
@@ -883,7 +883,7 @@ export const ElementorEditor = () => {
           {editingProductCard && !editingPopup && (
             <div style={{ background: "#0ea5e9", color: "#fff", padding: "8px 16px", fontSize: ".82rem", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
               <strong>🛍 Editando Layout do Product Card</strong>
-              <span style={{ opacity: .7, fontSize: ".75rem" }}>Vars: {"{{product_name}}"} {"{{product_price}}"} {"{{product_image}}"} {"{{product_description}}"} {"{{cart_count}}"}</span>
+              <span style={{ opacity: .7, fontSize: ".75rem" }}>Vars: {"{{product_name}}"} {"{{product_price}}"} {"{{product_image}}"} {"{{product_description}}"} {"{{product_short_description}}"} {"{{product_brand}}"} {"{{product_barcode}}"} {"{{cart_count}}"}</span>
               <button type="button" onClick={() => { setEditingProductCard(null); setSelected(null); }} style={{ background: "none", border: "1px solid rgba(255,255,255,.5)", color: "#fff", borderRadius: 6, padding: "2px 10px", cursor: "pointer", fontSize: ".8rem", marginLeft: "auto" }}>← Sair do Product Card</button>
             </div>
           )}

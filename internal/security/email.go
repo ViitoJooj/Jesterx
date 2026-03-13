@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/url"
 
 	"github.com/ViitoJooj/Jesterx/internal/config"
 	"github.com/resend/resend-go/v3"
@@ -92,8 +93,34 @@ func SendSalesDigestEmail(to, subject, htmlBody string) error {
 	return nil
 }
 
-func SendVerifyEmail(email string, token string) error {
+func SendOrderNotificationEmail(to, subject, htmlBody string) error {
+	if config.ResendKey == "" {
+		if config.IsDev {
+			return nil
+		}
+		return errors.New("email service not configured")
+	}
+	client := resend.NewClient(config.ResendKey)
+	params := &resend.SendEmailRequest{
+		From:    "JesterX <jesterx@resend.dev>",
+		To:      []string{to},
+		Subject: subject,
+		Html:    htmlBody,
+	}
+	sent, err := client.Emails.Send(params)
+	if err != nil {
+		log.Println("error sending order notification email:", err)
+		return errors.New("Internal error")
+	}
+	log.Println("Order notification email sent! ID:", sent.Id)
+	return nil
+}
+
+func SendVerifyEmail(email string, token string, websiteID string) error {
 	verifyURL := config.BackendURL + "/api/v1/auth/verify/" + token
+	if websiteID != "" {
+		verifyURL += "?website_id=" + url.QueryEscape(websiteID)
+	}
 
 	// In dev mode always log the URL so it can be used directly from the console
 	// without needing real email delivery (Resend test-mode restrictions apply).

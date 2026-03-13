@@ -30,11 +30,27 @@ func (r *connection) Create(order *domain.Order) error {
 	}
 
 	_, err = tx.ExecContext(ctx, `
-		INSERT INTO orders (id, website_id, buyer_name, buyer_email, buyer_phone, status, subtotal, platform_fee, total, notes, created_at, updated_at)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
-		order.ID, order.WebsiteID, order.BuyerName, order.BuyerEmail,
-		nullableString(order.BuyerPhone), string(order.Status),
-		order.Subtotal, order.PlatformFee, order.Total,
+		INSERT INTO orders (
+			id, website_id, buyer_user_id, buyer_name, buyer_email, buyer_phone, buyer_document,
+			shipping_name, shipping_phone, shipping_zip_code, shipping_address_street, shipping_address_number,
+			shipping_address_complement, shipping_address_district, shipping_address_city, shipping_address_state,
+			shipping_address_country, shipping_method, shipping_cost, discount_total, tax_total, currency,
+			status, subtotal, platform_fee, total, notes, created_at, updated_at
+		)
+		VALUES (
+			$1,$2,$3,$4,$5,$6,$7,
+			$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,
+			$23,$24,$25,$26,$27,$28,$29
+		)`,
+		order.ID, order.WebsiteID, nullableStringPtr(order.BuyerUserID), order.BuyerName, order.BuyerEmail,
+		nullableString(order.BuyerPhone), nullableString(order.BuyerDocument),
+		nullableString(order.ShippingName), nullableString(order.ShippingPhone), nullableString(order.ShippingZipCode),
+		nullableString(order.ShippingAddressStreet), nullableString(order.ShippingAddressNumber),
+		nullableString(order.ShippingAddressComplement), nullableString(order.ShippingAddressDistrict),
+		nullableString(order.ShippingAddressCity), nullableString(order.ShippingAddressState),
+		nullableString(order.ShippingAddressCountry), nullableString(order.ShippingMethod),
+		order.ShippingCost, order.DiscountTotal, order.TaxTotal, order.Currency,
+		string(order.Status), order.Subtotal, order.PlatformFee, order.Total,
 		nullableString(order.Notes), order.CreatedAt, order.UpdatedAt,
 	)
 	if err != nil {
@@ -68,8 +84,11 @@ func (r *connection) GetByID(orderID string) (*domain.Order, error) {
 	defer cancel()
 
 	order, err := r.scanOrderRow(r.db.QueryRowContext(ctx, `
-		SELECT id, website_id, buyer_name, buyer_email, buyer_phone, status,
-		       subtotal, platform_fee, total, notes, created_at, updated_at
+		SELECT id, website_id, buyer_user_id, buyer_name, buyer_email, buyer_phone, buyer_document,
+		       shipping_name, shipping_phone, shipping_zip_code, shipping_address_street, shipping_address_number,
+		       shipping_address_complement, shipping_address_district, shipping_address_city, shipping_address_state,
+		       shipping_address_country, shipping_method, shipping_cost, discount_total, tax_total, currency,
+		       status, subtotal, platform_fee, total, notes, created_at, updated_at
 		FROM orders WHERE id = $1`, orderID))
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
@@ -91,8 +110,11 @@ func (r *connection) ListBySite(websiteID string) ([]domain.Order, error) {
 	defer cancel()
 
 	rows, err := r.db.QueryContext(ctx, `
-		SELECT id, website_id, buyer_name, buyer_email, buyer_phone, status,
-		       subtotal, platform_fee, total, notes, created_at, updated_at
+		SELECT id, website_id, buyer_user_id, buyer_name, buyer_email, buyer_phone, buyer_document,
+		       shipping_name, shipping_phone, shipping_zip_code, shipping_address_street, shipping_address_number,
+		       shipping_address_complement, shipping_address_district, shipping_address_city, shipping_address_state,
+		       shipping_address_country, shipping_method, shipping_cost, discount_total, tax_total, currency,
+		       status, subtotal, platform_fee, total, notes, created_at, updated_at
 		FROM orders WHERE website_id = $1
 		ORDER BY created_at DESC`, websiteID)
 	if err != nil {
@@ -108,8 +130,11 @@ func (r *connection) ListSince(from, to time.Time) ([]domain.Order, error) {
 	defer cancel()
 
 	rows, err := r.db.QueryContext(ctx, `
-		SELECT id, website_id, buyer_name, buyer_email, buyer_phone, status,
-		       subtotal, platform_fee, total, notes, created_at, updated_at
+		SELECT id, website_id, buyer_user_id, buyer_name, buyer_email, buyer_phone, buyer_document,
+		       shipping_name, shipping_phone, shipping_zip_code, shipping_address_street, shipping_address_number,
+		       shipping_address_complement, shipping_address_district, shipping_address_city, shipping_address_state,
+		       shipping_address_country, shipping_method, shipping_cost, discount_total, tax_total, currency,
+		       status, subtotal, platform_fee, total, notes, created_at, updated_at
 		FROM orders
 		WHERE created_at >= $1 AND created_at < $2
 		ORDER BY created_at DESC`, from, to)
@@ -142,18 +167,64 @@ func (r *connection) UpdateStatus(orderID string, status domain.OrderStatus) err
 
 func (r *connection) scanOrderRow(row *sql.Row) (*domain.Order, error) {
 	var o domain.Order
-	var buyerPhone, notes sql.NullString
+	var buyerUserID, buyerPhone, buyerDocument sql.NullString
+	var shippingName, shippingPhone, shippingZipCode sql.NullString
+	var shippingStreet, shippingNumber, shippingComplement sql.NullString
+	var shippingDistrict, shippingCity, shippingState, shippingCountry sql.NullString
+	var shippingMethod, notes sql.NullString
 	err := row.Scan(
-		&o.ID, &o.WebsiteID, &o.BuyerName, &o.BuyerEmail,
-		&buyerPhone, &o.Status,
-		&o.Subtotal, &o.PlatformFee, &o.Total,
+		&o.ID, &o.WebsiteID, &buyerUserID, &o.BuyerName, &o.BuyerEmail,
+		&buyerPhone, &buyerDocument,
+		&shippingName, &shippingPhone, &shippingZipCode, &shippingStreet, &shippingNumber,
+		&shippingComplement, &shippingDistrict, &shippingCity, &shippingState,
+		&shippingCountry, &shippingMethod, &o.ShippingCost, &o.DiscountTotal, &o.TaxTotal, &o.Currency,
+		&o.Status, &o.Subtotal, &o.PlatformFee, &o.Total,
 		&notes, &o.CreatedAt, &o.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err
 	}
+	if buyerUserID.Valid {
+		o.BuyerUserID = &buyerUserID.String
+	}
 	if buyerPhone.Valid {
 		o.BuyerPhone = buyerPhone.String
+	}
+	if buyerDocument.Valid {
+		o.BuyerDocument = buyerDocument.String
+	}
+	if shippingName.Valid {
+		o.ShippingName = shippingName.String
+	}
+	if shippingPhone.Valid {
+		o.ShippingPhone = shippingPhone.String
+	}
+	if shippingZipCode.Valid {
+		o.ShippingZipCode = shippingZipCode.String
+	}
+	if shippingStreet.Valid {
+		o.ShippingAddressStreet = shippingStreet.String
+	}
+	if shippingNumber.Valid {
+		o.ShippingAddressNumber = shippingNumber.String
+	}
+	if shippingComplement.Valid {
+		o.ShippingAddressComplement = shippingComplement.String
+	}
+	if shippingDistrict.Valid {
+		o.ShippingAddressDistrict = shippingDistrict.String
+	}
+	if shippingCity.Valid {
+		o.ShippingAddressCity = shippingCity.String
+	}
+	if shippingState.Valid {
+		o.ShippingAddressState = shippingState.String
+	}
+	if shippingCountry.Valid {
+		o.ShippingAddressCountry = shippingCountry.String
+	}
+	if shippingMethod.Valid {
+		o.ShippingMethod = shippingMethod.String
 	}
 	if notes.Valid {
 		o.Notes = notes.String
@@ -185,17 +256,63 @@ func (r *connection) collectOrdersWithItems(ctx context.Context, rows *sql.Rows)
 	orders := make([]domain.Order, 0)
 	for rows.Next() {
 		var o domain.Order
-		var buyerPhone, notes sql.NullString
+		var buyerUserID, buyerPhone, buyerDocument sql.NullString
+		var shippingName, shippingPhone, shippingZipCode sql.NullString
+		var shippingStreet, shippingNumber, shippingComplement sql.NullString
+		var shippingDistrict, shippingCity, shippingState, shippingCountry sql.NullString
+		var shippingMethod, notes sql.NullString
 		if err := rows.Scan(
-			&o.ID, &o.WebsiteID, &o.BuyerName, &o.BuyerEmail,
-			&buyerPhone, &o.Status,
-			&o.Subtotal, &o.PlatformFee, &o.Total,
+			&o.ID, &o.WebsiteID, &buyerUserID, &o.BuyerName, &o.BuyerEmail,
+			&buyerPhone, &buyerDocument,
+			&shippingName, &shippingPhone, &shippingZipCode, &shippingStreet, &shippingNumber,
+			&shippingComplement, &shippingDistrict, &shippingCity, &shippingState,
+			&shippingCountry, &shippingMethod, &o.ShippingCost, &o.DiscountTotal, &o.TaxTotal, &o.Currency,
+			&o.Status, &o.Subtotal, &o.PlatformFee, &o.Total,
 			&notes, &o.CreatedAt, &o.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
+		if buyerUserID.Valid {
+			o.BuyerUserID = &buyerUserID.String
+		}
 		if buyerPhone.Valid {
 			o.BuyerPhone = buyerPhone.String
+		}
+		if buyerDocument.Valid {
+			o.BuyerDocument = buyerDocument.String
+		}
+		if shippingName.Valid {
+			o.ShippingName = shippingName.String
+		}
+		if shippingPhone.Valid {
+			o.ShippingPhone = shippingPhone.String
+		}
+		if shippingZipCode.Valid {
+			o.ShippingZipCode = shippingZipCode.String
+		}
+		if shippingStreet.Valid {
+			o.ShippingAddressStreet = shippingStreet.String
+		}
+		if shippingNumber.Valid {
+			o.ShippingAddressNumber = shippingNumber.String
+		}
+		if shippingComplement.Valid {
+			o.ShippingAddressComplement = shippingComplement.String
+		}
+		if shippingDistrict.Valid {
+			o.ShippingAddressDistrict = shippingDistrict.String
+		}
+		if shippingCity.Valid {
+			o.ShippingAddressCity = shippingCity.String
+		}
+		if shippingState.Valid {
+			o.ShippingAddressState = shippingState.String
+		}
+		if shippingCountry.Valid {
+			o.ShippingAddressCountry = shippingCountry.String
+		}
+		if shippingMethod.Valid {
+			o.ShippingMethod = shippingMethod.String
 		}
 		if notes.Valid {
 			o.Notes = notes.String
@@ -221,4 +338,11 @@ func nullableString(s string) sql.NullString {
 		return sql.NullString{}
 	}
 	return sql.NullString{String: s, Valid: true}
+}
+
+func nullableStringPtr(s *string) sql.NullString {
+	if s == nil || *s == "" {
+		return sql.NullString{}
+	}
+	return sql.NullString{String: *s, Valid: true}
 }

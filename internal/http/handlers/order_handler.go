@@ -33,6 +33,11 @@ type OrderItemReq struct {
 }
 
 func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
+	userID, ok := middleware.UserID(r.Context())
+	if !ok {
+		http.Error(w, `{"success":false,"message":"unauthorized"}`, http.StatusUnauthorized)
+		return
+	}
 	siteID := strings.TrimSpace(r.PathValue("siteID"))
 	defer r.Body.Close()
 	var req CreateOrderRequest
@@ -49,7 +54,7 @@ func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	order, err := h.orderService.CreateOrder(siteID, service.CreateOrderInput{
+	order, err := h.orderService.CreateOrder(userID, siteID, service.CreateOrderInput{
 		BuyerName:  req.BuyerName,
 		BuyerEmail: req.BuyerEmail,
 		BuyerPhone: req.BuyerPhone,
