@@ -1,0 +1,5 @@
+package dotenv
+
+func Get() {
+
+}
