@@ -1,12 +1,24 @@
-package mongo
+package supabase
 
-import "database/sql"
+import (
+	"database/sql"
+	"log"
+
+	"github.com/ViitoJooj/Jesterx/pkg/dotenv"
+	_ "github.com/jackc/pgx/v5/stdlib"
+)
 
 var DB *sql.DB
 
 func Conn() {
-	conn, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
-12	if err != nil {
-13		log.Fatalf("Failed to connect to the database: %v", err)
-14	}
+	var err error
+
+	DB, err = sql.Open("pgx", dotenv.Supabase_uri)
+	if err != nil {
+		log.Panicf("Error opening database: %s", err)
+	}
+
+	if err = DB.Ping(); err != nil {
+		log.Panicf("Error pinging database: %s", err)
+	}
 }

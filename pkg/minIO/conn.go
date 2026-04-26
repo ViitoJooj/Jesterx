@@ -1,5 +1,0 @@
-package minio
-
-func Conn() {
-
-}
