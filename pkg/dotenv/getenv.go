@@ -7,25 +7,25 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var Supabase_uri string
+var SupabaseURI string
+var ResendKey string
+var SecretKey string
 
 func Set() {
-
 	err := godotenv.Load(".env")
 	if err != nil {
-		log.Panic("Error on get .env")
+		log.Panicf("Error loading .env: %v", err)
 	}
 
-	Supabase_uri = get("Supabase_uri")
-
+	SupabaseURI = get("SUPABASE_URI")
+	ResendKey = get("RESEND_KEY")
+	SecretKey = get("SECRET_KEY")
 }
 
-func get(env_name string) string {
-
-	env := os.Getenv(env_name)
+func get(envName string) string {
+	env := os.Getenv(envName)
 	if env == "" {
-		log.Panicf("%s is null", env)
+		log.Panicf("%s is null", envName)
 	}
-
 	return env
 }
