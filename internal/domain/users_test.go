@@ -20,12 +20,16 @@ func TestNewUserCurrentBehavior(t *testing.T) {
 	cpf := "52998224725"
 
 	user, err := NewUser(name, email, password, "admin", cpf)
-	if err == nil {
-		t.Fatalf("expected error, got user = %#v", user)
+	if err != nil {
+		t.Fatalf("expected success, got error: %v", err)
 	}
 
-	if err.Error() != "internal error." {
-		t.Fatalf("unexpected error: %v", err)
+	if user == nil {
+		t.Fatal("expected user, got nil")
+	}
+
+	if user.Email != email {
+		t.Fatalf("expected email %q, got %q", email, user.Email)
 	}
 }
 

@@ -6,13 +6,15 @@ import (
 	httpx "github.com/ViitoJooj/Jesterx/internal/http"
 	"github.com/ViitoJooj/Jesterx/internal/repository"
 	"github.com/ViitoJooj/Jesterx/pkg/dotenv"
+	"github.com/ViitoJooj/Jesterx/pkg/redis"
 	"github.com/ViitoJooj/Jesterx/pkg/supabase"
 	"github.com/ViitoJooj/Jesterx/pkg/validators"
 )
 
 func main() {
-	dotenv.Set()
+	dotenv.Conn()
 	supabase.Conn()
+	redis.Conn()
 	validators.LoadEmbedded()
 
 	router := httpx.RegisterRouters()

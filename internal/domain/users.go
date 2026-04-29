@@ -8,7 +8,7 @@ import (
 )
 
 type User struct {
-	Uuid         any
+	Uuid         string
 	Avatar       *string
 	Name         string
 	Email        string
@@ -37,10 +37,15 @@ type Addresses struct {
 
 func NewUser(name string, email string, password, role string, cpf string) (*User, error) {
 
-	uuid, _ := uuid.NewV7()
+	id, err := uuid.NewV7()
+	if err != nil {
+		return nil, err
+	}
+
+	uuidString := id.String()
 
 	//validate data
-	if err := validators.Uuid(uuid); err != nil {
+	if err := validators.Uuid(uuidString); err != nil {
 		return nil, err
 	}
 
@@ -61,7 +66,7 @@ func NewUser(name string, email string, password, role string, cpf string) (*Use
 	}
 
 	return &User{
-		Uuid:       uuid,
+		Uuid:       uuidString,
 		Name:       name,
 		Email:      email,
 		Password:   password,

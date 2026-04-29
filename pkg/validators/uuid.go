@@ -7,14 +7,8 @@ import (
 	"github.com/google/uuid"
 )
 
-func Uuid(value any) error {
-	str, ok := value.(string)
-	if !ok {
-		log.Println("uuid must be a string")
-		return errors.New("internal error.")
-	}
-
-	id, err := uuid.Parse(str)
+func Uuid(value string) error {
+	id, err := uuid.Parse(value)
 	if err != nil {
 		log.Println("invalid uuid")
 		return errors.New("internal error.")

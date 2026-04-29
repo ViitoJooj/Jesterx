@@ -14,10 +14,10 @@ func NewUserRepository(db *sql.DB) UsersRepository {
 
 type UsersRepository interface {
 	InsertUser(*domain.User) (*domain.User, error)
-	FindUserById(id any) (*domain.User, error)
+	FindUserById(id string) (*domain.User, error)
 	FindUserByEmail(email string) (*domain.User, error)
 	UpdateUser(*domain.User) error
-	DeleteUserById(id any) error
+	DeleteUserById(id string) error
 }
 
 type userRepository struct {
@@ -71,7 +71,7 @@ func (r *userRepository) InsertUser(user *domain.User) (*domain.User, error) {
 	return &newUser, nil
 }
 
-func (r *userRepository) FindUserById(id any) (*domain.User, error) {
+func (r *userRepository) FindUserById(id string) (*domain.User, error) {
 	ctx := context.Background()
 
 	query := `
@@ -181,7 +181,7 @@ func (r *userRepository) UpdateUser(user *domain.User) error {
 	return nil
 }
 
-func (r *userRepository) DeleteUserById(id any) error {
+func (r *userRepository) DeleteUserById(id string) error {
 	ctx := context.Background()
 
 	exists, err := r.UserExists(id)
@@ -211,7 +211,7 @@ func (r *userRepository) DeleteUserById(id any) error {
 	return nil
 }
 
-func (r *userRepository) UserExists(id any) (bool, error) {
+func (r *userRepository) UserExists(id string) (bool, error) {
 	ctx := context.Background()
 
 	query := `SELECT EXISTS(SELECT 1 FROM users WHERE id = $1)`
