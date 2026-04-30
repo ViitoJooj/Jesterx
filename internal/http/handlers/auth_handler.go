@@ -3,10 +3,12 @@ package handlers
 import (
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/ViitoJooj/Jesterx/internal/http/dtos"
 	"github.com/ViitoJooj/Jesterx/internal/repository"
 	"github.com/ViitoJooj/Jesterx/internal/service"
+	"github.com/ViitoJooj/Jesterx/pkg/dotenv"
 	"github.com/gin-gonic/gin"
 )
 
@@ -53,7 +55,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	accessToken, refreshToken, err := h.authService.Login(req.Email, req.Password)
 	if err != nil {
-		if errors.Is(err, err) {
+		if errors.Is(err, service.ErrInvalidCredentials) {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
 			return
 		}
@@ -61,49 +63,46 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"access_token":  accessToken,
-		"refresh_token": refreshToken,
-	})
+	accessExp, _ := strconv.Atoi(dotenv.AccessTokenExpMinutes)
+	refreshExp, _ := strconv.Atoi(dotenv.RefreshTokenExpDays)
+
+	secure := dotenv.Environment == "production"
+
+	c.SetCookie("access_token", accessToken, accessExp*60, "/", "", secure, true)
+	c.SetCookie("refresh_token", refreshToken, refreshExp*24*60*60, "/api/v1/auth", "", secure, true)
+
+	c.JSON(http.StatusOK, gin.H{"message": "logged in"})
 }
 
-func (h *AuthHandler) Refresh(c *gin.Context) {
-	var req dtos.RefreshRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	accessToken, err := h.authService.Refresh(req.RefreshToken)
+func (h *AuthHandler) Token(c *gin.Context) {
+	refreshToken, err := c.Cookie("refresh_token")
 	if err != nil {
-		if errors.Is(err, err) {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
-			return
-		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "missing refresh token"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"access_token": accessToken,
-	})
+	accessToken, err := h.authService.Token(refreshToken)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "session expired, please login again"})
+		return
+	}
+
+	accessExp, _ := strconv.Atoi(dotenv.AccessTokenExpMinutes)
+	secure := dotenv.Environment == "production"
+
+	c.SetCookie("access_token", accessToken, accessExp*60, "/", "", secure, true)
+	c.JSON(http.StatusOK, gin.H{"message": "token refreshed"})
 }
 
 func (h *AuthHandler) Logout(c *gin.Context) {
-	var req dtos.LogoutRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+	refreshToken, _ := c.Cookie("refresh_token")
 
-	if err := h.authService.Logout(req.RefreshToken); err != nil {
-		if errors.Is(err, err) {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
-			return
-		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
-		return
-	}
+	_ = h.authService.Logout(refreshToken)
+
+	secure := dotenv.Environment == "production"
+
+	c.SetCookie("access_token", "", -1, "/", "", secure, true)
+	c.SetCookie("refresh_token", "", -1, "/api/v1/auth", "", secure, true)
 
 	c.JSON(http.StatusOK, gin.H{"message": "logged out"})
 }

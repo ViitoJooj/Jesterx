@@ -15,6 +15,7 @@ var RefreshTokenExpDays string
 var RedisHost string
 var RedisPort string
 var RedisPassword string
+var Environment string
 
 func Conn() {
 	err := godotenv.Load(".env")
@@ -30,6 +31,7 @@ func Conn() {
 	RedisHost = get("REDIS_HOST")
 	RedisPort = get("REDIS_PORT")
 	RedisPassword = get("REDIS_PASSWORD")
+	Environment = get("ENVIRONMENT")
 }
 
 // Getters

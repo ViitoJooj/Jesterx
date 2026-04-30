@@ -13,28 +13,31 @@ import (
 	goredis "github.com/redis/go-redis/v9"
 )
 
+var ErrInvalidCredentials = errors.New("invalid credentials")
+
 type AuthService interface {
 	Register(name, email, password, role, cpf string) (*domain.User, error)
 	Login(email, password string) (accessToken, refreshToken string, err error)
-	Refresh(refreshToken string) (accessToken string, err error)
+	Token(refreshToken string) (accessToken string, err error)
 	Logout(refreshToken string) error
 }
 
 type authService struct {
-	userDomain  *domain.User
+	userFactory *domain.User
 	userRepo    repository.UsersRepository
 	redisClient *goredis.Client
 }
 
 func NewAuthService(userRepo repository.UsersRepository, redisClient *goredis.Client) AuthService {
 	return &authService{
+		userFactory: &domain.User{},
 		userRepo:    userRepo,
 		redisClient: redisClient,
 	}
 }
 
 func (s *authService) Register(name, email, password, role, cpf string) (*domain.User, error) {
-	user, err := s.userDomain.NewUser(name, email, password, role, cpf)
+	user, err := s.userFactory.NewUser(name, email, password, role, cpf)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +55,7 @@ func (s *authService) Login(email, password string) (string, string, error) {
 	user, err := s.userRepo.FindUserByEmail(email)
 	if err != nil {
 		if errors.Is(err, repository.ErrUserNotFound) {
-			return "", "", err
+			return "", "", ErrInvalidCredentials
 		}
 		return "", "", err
 	}
@@ -62,7 +65,7 @@ func (s *authService) Login(email, password string) (string, string, error) {
 		return "", "", err
 	}
 	if !match {
-		return "", "", err
+		return "", "", ErrInvalidCredentials
 	}
 
 	accessToken, err := jwt.GenAccessToken(user)
@@ -89,16 +92,16 @@ func (s *authService) Login(email, password string) (string, string, error) {
 	return accessToken, refreshToken, nil
 }
 
-func (s *authService) Refresh(refreshToken string) (string, error) {
+func (s *authService) Token(refreshToken string) (string, error) {
 	claims, err := jwt.ValidateRefreshToken(refreshToken)
 	if err != nil {
-		return "", err
+		return "", repository.ErrUserNotFound
 	}
 
 	key := fmt.Sprintf("refresh:%s", claims.ID)
 	userID, err := s.redisClient.Get(context.Background(), key).Result()
 	if err != nil {
-		return "", err
+		return "", errors.New("session expired or invalid")
 	}
 
 	user, err := s.userRepo.FindUserById(userID)
@@ -112,7 +115,7 @@ func (s *authService) Refresh(refreshToken string) (string, error) {
 func (s *authService) Logout(refreshToken string) error {
 	claims, err := jwt.ValidateRefreshToken(refreshToken)
 	if err != nil {
-		return err
+		return nil
 	}
 
 	key := fmt.Sprintf("refresh:%s", claims.ID)
