@@ -17,7 +17,7 @@ func GenRefreshToken(user *domain.User) (string, error) {
 		return "", errors.New("internal error")
 	}
 
-	expDays, err := strconv.Atoi(dotenv.SecretKeyExpTime)
+	expDays, err := strconv.Atoi(dotenv.RefreshTokenExpDays)
 	if err != nil {
 		return "", errors.New("internal error")
 	}
@@ -44,7 +44,7 @@ func GenRefreshToken(user *domain.User) (string, error) {
 }
 
 func GenAccessToken(user *domain.User) (string, error) {
-	expMinutes, err := strconv.Atoi(dotenv.SecretKeyExpTime)
+	expMinutes, err := strconv.Atoi(dotenv.AccessTokenExpMinutes)
 	if err != nil {
 		return "", errors.New("internal error")
 	}

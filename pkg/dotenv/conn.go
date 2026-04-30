@@ -10,7 +10,8 @@ import (
 var SupabaseURI string
 var ResendKey string
 var SecretKey string
-var SecretKeyExpTime string
+var AccessTokenExpMinutes string
+var RefreshTokenExpDays string
 var RedisHost string
 var RedisPort string
 var RedisPassword string
@@ -24,7 +25,8 @@ func Conn() {
 	SupabaseURI = get("SUPABASE_URI")
 	ResendKey = get("RESEND_API_KEY")
 	SecretKey = get("SECRET_KEY")
-	SecretKeyExpTime = get("SECRET_KEY_EXP_TIME")
+	AccessTokenExpMinutes = get("ACCESS_TOKEN_EXP_MINUTES")
+	RefreshTokenExpDays = get("REFRESH_TOKEN_EXP_DAYS")
 	RedisHost = get("REDIS_HOST")
 	RedisPort = get("REDIS_PORT")
 	RedisPassword = get("REDIS_PASSWORD")

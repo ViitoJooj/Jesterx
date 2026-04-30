@@ -35,17 +35,9 @@ type Addresses struct {
 	Address_state      *string
 }
 
-func NewUser(name string, email string, password, role string, cpf string) (*User, error) {
-
+func (u *User) NewUser(name, email, password, role, cpf string) (*User, error) {
 	id, err := uuid.NewV7()
 	if err != nil {
-		return nil, err
-	}
-
-	uuidString := id.String()
-
-	//validate data
-	if err := validators.Uuid(uuidString); err != nil {
 		return nil, err
 	}
 
@@ -65,8 +57,12 @@ func NewUser(name string, email string, password, role string, cpf string) (*Use
 		return nil, err
 	}
 
+	if err := validators.Cpf(cpf); err != nil {
+		return nil, err
+	}
+
 	return &User{
-		Uuid:       uuidString,
+		Uuid:       id.String(),
 		Name:       name,
 		Email:      email,
 		Password:   password,

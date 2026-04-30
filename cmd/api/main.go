@@ -4,7 +4,9 @@ import (
 	"log"
 
 	httpx "github.com/ViitoJooj/Jesterx/internal/http"
+	"github.com/ViitoJooj/Jesterx/internal/http/handlers"
 	"github.com/ViitoJooj/Jesterx/internal/repository"
+	"github.com/ViitoJooj/Jesterx/internal/service"
 	"github.com/ViitoJooj/Jesterx/pkg/dotenv"
 	"github.com/ViitoJooj/Jesterx/pkg/redis"
 	"github.com/ViitoJooj/Jesterx/pkg/supabase"
@@ -17,13 +19,14 @@ func main() {
 	redis.Conn()
 	validators.LoadEmbedded()
 
-	router := httpx.RegisterRouters()
+	userRepo := repository.NewUserRepository(supabase.DB)
+	authService := service.NewAuthService(userRepo, redis.Client)
+	authHandler := handlers.NewAuthHandler(authService)
 
-	userRepository := repository.NewUserRepository(supabase.DB)
-	_ = userRepository
+	router := httpx.NewRouter(authHandler)
 
-	log.Println("Running...")
-	if err := router.Run(); err != nil {
+	log.Println("Running on :8080...")
+	if err := router.Run(":8080"); err != nil {
 		log.Panicf("Error running server: %s", err)
 	}
 }
