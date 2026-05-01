@@ -42,4 +42,18 @@ func (u *WebsiteID) NewWebsite(owner_id uuid.UUID, name string, website_type str
 		return nil, err
 	}
 
+	return &WebsiteID{
+		Uuid:              uid,
+		Owner_id:          owner_id,
+		Name:              name,
+		Website_type:      website_type,
+		Logo:              &logo,
+		Short_description: &short_description,
+		Description:       &description,
+		Banned:            banned,
+		Mature_content:    mature_content,
+		Rating_count:      Rating_count,
+		Created_at:        time.Now(),
+		Updated_at:        time.Now(),
+	}, nil
 }

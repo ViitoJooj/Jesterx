@@ -59,6 +59,9 @@ func (u *Users) NewUser(websiteID uuid.UUID, name, email, password, role, cpf st
 	if err := users_validations.Role(role); err != nil {
 		return nil, err
 	}
+	if err := users_validations.Cpf(cpf); err != nil {
+		return nil, err
+	}
 
 	cpfVal := cpf
 
