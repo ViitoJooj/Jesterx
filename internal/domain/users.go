@@ -4,53 +4,67 @@ import (
 	"time"
 
 	"github.com/ViitoJooj/Jesterx/pkg/validators"
+	"github.com/ViitoJooj/Jesterx/pkg/validators/users_validations"
 	"github.com/google/uuid"
 )
 
-type Auth struct {
-	Uid                string
-	DisplayName        string
-	Email              string
-	Phone              *string
-	Providers          []string
-	ProviderType       string
+type Users struct {
+	Uid                uuid.UUID
+	WebsiteID          uuid.UUID
 	AvatarURL          *string
-	Email_confirmed_at *time.Time
+	Name               string
+	Email              string
+	Email_confirmed_at time.Time
+	Phone              string
+	Password           string
+	Avatar             *string
+	Role               string
+	Plan               *string
+	Cpf                *string
+	CountryCode        *int
+	AreaCode           *int
+	Address            Address
+	Updated_at         time.Time
 	Created_at         time.Time
-	Last_sign_inAt     time.Time
 }
 
-type Profile struct {
-	Uid         uuid.UUID
-	WebsiteID   uuid.UUID
-	Name        string
-	Email       string
-	Password    string
-	Avatar      *string
-	Role        string
-	Plan        *string
-	Cpf         *string
-	CountryCode *int
-	AreaCode    *int
-	Address     Address
-	Updated_at  time.Time
-	Created_at  time.Time
-}
+func (u *Users) NewUser(websiteID uuid.UUID, name, email, password, role, cpf string) (*Users, error) {
 
-func (u *Profile) NewUser(name, email, password, role, cpf string) (*Profile, error) {
-	id, err := uuid.NewV7()
+	uid, err := uuid.NewV7()
 	if err != nil {
 		return nil, err
 	}
 
-	if err := validators.User(name, email, password, role, cpf); err != nil {
+	// validate data
+	if err := validators.Uuid(uid); err != nil {
+		return nil, err
+	}
+
+	if err := validators.Uuid(websiteID); err != nil {
+		return nil, err
+	}
+
+	if err := users_validations.Name(name); err != nil {
+		return nil, err
+	}
+
+	if err := users_validations.Email(email); err != nil {
+		return nil, err
+	}
+
+	if err := users_validations.Password(password); err != nil {
+		return nil, err
+	}
+
+	if err := users_validations.Role(role); err != nil {
 		return nil, err
 	}
 
 	cpfVal := cpf
 
-	return &Profile{
-		Uid:        id,
+	return &Users{
+		Uid:        uid,
+		WebsiteID:  websiteID,
 		Name:       name,
 		Email:      email,
 		Password:   password,

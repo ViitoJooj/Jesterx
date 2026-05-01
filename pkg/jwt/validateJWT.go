@@ -5,13 +5,12 @@ import (
 	"fmt"
 
 	"github.com/ViitoJooj/Jesterx/pkg/dotenv"
-	"github.com/ViitoJooj/Jesterx/pkg/validators"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
 
-func ValidateAccessToken(tokenValue string) (*jwt.RegisteredClaims, error) {
-	claims, err := validateToken(tokenValue)
+func ValidateAccessToken(tokenValue string, cfg dotenv.JWTConfig) (*jwt.RegisteredClaims, error) {
+	claims, err := validateToken(tokenValue, cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -23,8 +22,8 @@ func ValidateAccessToken(tokenValue string) (*jwt.RegisteredClaims, error) {
 	return claims, nil
 }
 
-func ValidateRefreshToken(tokenValue string) (*jwt.RegisteredClaims, error) {
-	claims, err := validateToken(tokenValue)
+func ValidateRefreshToken(tokenValue string, cfg dotenv.JWTConfig) (*jwt.RegisteredClaims, error) {
+	claims, err := validateToken(tokenValue, cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +39,7 @@ func ValidateRefreshToken(tokenValue string) (*jwt.RegisteredClaims, error) {
 	return claims, nil
 }
 
-func validateToken(tokenValue string) (*jwt.RegisteredClaims, error) {
+func validateToken(tokenValue string, cfg dotenv.JWTConfig) (*jwt.RegisteredClaims, error) {
 	if tokenValue == "" {
 		return nil, errors.New("invalid token")
 	}
@@ -50,8 +49,9 @@ func validateToken(tokenValue string) (*jwt.RegisteredClaims, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		return []byte(dotenv.SecretKey), nil
+		return []byte(cfg.SecretKey), nil
 	})
+
 	if err != nil || !token.Valid {
 		return nil, errors.New("invalid token")
 	}
@@ -61,10 +61,6 @@ func validateToken(tokenValue string) (*jwt.RegisteredClaims, error) {
 	}
 
 	if claims.Subject == "" {
-		return nil, errors.New("invalid token")
-	}
-
-	if err := validators.Uuid(claims.Subject); err != nil {
 		return nil, errors.New("invalid token")
 	}
 

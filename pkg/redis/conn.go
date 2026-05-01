@@ -11,20 +11,21 @@ import (
 
 var Client *goredis.Client
 
-func Conn() {
-	Client = goredis.NewClient(&goredis.Options{
-		Addr:     dotenv.RedisHost + ":" + dotenv.RedisPort,
+func Conn(cfg dotenv.RedisConfig) (*goredis.Client, error) {
+	client := goredis.NewClient(&goredis.Options{
+		Addr:     cfg.RedisHost + ":" + cfg.RedisPort,
 		Username: "default",
-		Password: dotenv.RedisPassword,
+		Password: cfg.RedisPassword,
 		DB:       0,
 	})
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	if err := Client.Ping(ctx).Err(); err != nil {
-		log.Panicf("error connecting to redis: %v", err)
+	if err := client.Ping(ctx).Err(); err != nil {
+		return nil, err
 	}
 
 	log.Println("Redis connected successfully")
+	return client, nil
 }

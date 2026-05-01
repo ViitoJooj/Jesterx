@@ -1,4 +1,4 @@
-package users_validations
+package website_validations
 
 import (
 	"errors"
@@ -7,6 +7,14 @@ import (
 )
 
 func Name(name string) error {
+	if len(name) > 250 {
+		return errors.New("Invalid full name.")
+	}
+
+	if len(name) < 5 {
+		return errors.New("Invalid full name.")
+	}
+
 	parts := strings.Fields(name)
 	if len(parts) < 2 {
 		return errors.New("Invalid full name.")

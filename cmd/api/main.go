@@ -3,27 +3,26 @@ package main
 import (
 	"log"
 
-	httpx "github.com/ViitoJooj/Jesterx/internal/http"
-	"github.com/ViitoJooj/Jesterx/internal/http/handlers"
-	"github.com/ViitoJooj/Jesterx/internal/repository"
-	"github.com/ViitoJooj/Jesterx/internal/service"
 	"github.com/ViitoJooj/Jesterx/pkg/dotenv"
+	postgres "github.com/ViitoJooj/Jesterx/pkg/postgres"
 	"github.com/ViitoJooj/Jesterx/pkg/redis"
-	"github.com/ViitoJooj/Jesterx/pkg/supabase"
-	"github.com/ViitoJooj/Jesterx/pkg/validators"
+	validators "github.com/ViitoJooj/Jesterx/pkg/validators/users_validations"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	dotenv.Conn()
-	supabase.Conn()
-	redis.Conn()
+	cfg := dotenv.Load()
+
+	db, err := postgres.Conn(cfg.Postgres)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	redis.Conn(cfg.Redis)
 	validators.LoadEmbedded()
 
-	userRepo := repository.NewUserRepository(supabase.DB)
-	authService := service.NewAuthService(userRepo, redis.Client)
-	authHandler := handlers.NewAuthHandler(authService)
-
-	router := httpx.NewRouter(authHandler)
+	router := gin.Default()
 
 	log.Println("Running on :8080...")
 	if err := router.Run(":8080"); err != nil {

@@ -6,11 +6,12 @@ import (
 	"log"
 	"time"
 
-	"github.com/ViitoJooj/Jesterx/pkg/supabase"
+	postgres "github.com/ViitoJooj/Jesterx/pkg/postgres"
+	"github.com/google/uuid"
 )
 
-func Exists(value string) (bool, error) {
-	if supabase.DB == nil {
+func Exists(value uuid.UUID) (bool, error) {
+	if postgres.DB == nil {
 		log.Println("database connection is not initialized")
 		return false, errors.New("internal error.")
 	}
@@ -21,7 +22,7 @@ func Exists(value string) (bool, error) {
 	query := `SELECT EXISTS(SELECT 1 FROM users WHERE id = $1)`
 
 	var exists bool
-	if err := supabase.DB.QueryRowContext(ctx, query, value).Scan(&exists); err != nil {
+	if err := postgres.DB.QueryRowContext(ctx, query, value).Scan(&exists); err != nil {
 		log.Printf("error checking uuid existence: %v", err)
 		return false, errors.New("internal error.")
 	}

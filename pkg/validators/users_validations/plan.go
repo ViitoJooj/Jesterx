@@ -1,4 +1,4 @@
-package validators
+package users_validations
 
 func Plan(plan string) error {
 

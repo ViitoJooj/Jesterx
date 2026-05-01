@@ -11,13 +11,13 @@ import (
 	"github.com/google/uuid"
 )
 
-func GenRefreshToken(user *domain.Profile) (string, error) {
+func GenRefreshToken(user *domain.Users, cfg dotenv.JWTConfig) (string, error) {
 	tokenUUID, err := uuid.NewV7()
 	if err != nil {
 		return "", errors.New("internal error")
 	}
 
-	expDays, err := strconv.Atoi(dotenv.RefreshTokenExpDays)
+	expDays, err := strconv.Atoi(cfg.RefreshTokenExpDays)
 	if err != nil {
 		return "", errors.New("internal error")
 	}
@@ -35,7 +35,7 @@ func GenRefreshToken(user *domain.Profile) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	signedToken, err := token.SignedString([]byte(dotenv.SecretKey))
+	signedToken, err := token.SignedString([]byte(cfg.SecretKey))
 	if err != nil {
 		return "", errors.New("internal error")
 	}
@@ -43,8 +43,8 @@ func GenRefreshToken(user *domain.Profile) (string, error) {
 	return signedToken, nil
 }
 
-func GenAccessToken(user *domain.Profile) (string, error) {
-	expMinutes, err := strconv.Atoi(dotenv.AccessTokenExpMinutes)
+func GenAccessToken(user *domain.Users, cfg dotenv.JWTConfig) (string, error) {
+	expMinutes, err := strconv.Atoi(cfg.AccessTokenExpMinutes)
 	if err != nil {
 		return "", errors.New("internal error")
 	}
@@ -61,7 +61,7 @@ func GenAccessToken(user *domain.Profile) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	signedToken, err := token.SignedString([]byte(dotenv.SecretKey))
+	signedToken, err := token.SignedString([]byte(cfg.SecretKey))
 	if err != nil {
 		return "", errors.New("internal error")
 	}

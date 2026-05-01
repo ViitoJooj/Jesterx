@@ -5,9 +5,10 @@ import (
 	"log"
 
 	utils_repository "github.com/ViitoJooj/Jesterx/pkg/validators/repository"
+	"github.com/google/uuid"
 )
 
-func Uuid(value string) error {
+func Uuid(value uuid.UUID) error {
 
 	ok, err := utils_repository.Exists(value)
 	if err != nil {
