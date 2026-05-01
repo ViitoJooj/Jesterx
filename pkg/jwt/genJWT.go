@@ -11,7 +11,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func GenRefreshToken(user *domain.User) (string, error) {
+func GenRefreshToken(user *domain.Profile) (string, error) {
 	tokenUUID, err := uuid.NewV7()
 	if err != nil {
 		return "", errors.New("internal error")
@@ -27,7 +27,7 @@ func GenRefreshToken(user *domain.User) (string, error) {
 	claims := jwt.RegisteredClaims{
 		ID:        tokenUUID.String(),
 		Issuer:    "JesterX",
-		Subject:   user.Uuid,
+		Subject:   user.Uid.String(),
 		IssuedAt:  jwt.NewNumericDate(now),
 		NotBefore: jwt.NewNumericDate(now),
 		ExpiresAt: jwt.NewNumericDate(now.Add(time.Duration(expDays) * 24 * time.Hour)),
@@ -43,7 +43,7 @@ func GenRefreshToken(user *domain.User) (string, error) {
 	return signedToken, nil
 }
 
-func GenAccessToken(user *domain.User) (string, error) {
+func GenAccessToken(user *domain.Profile) (string, error) {
 	expMinutes, err := strconv.Atoi(dotenv.AccessTokenExpMinutes)
 	if err != nil {
 		return "", errors.New("internal error")
@@ -53,7 +53,7 @@ func GenAccessToken(user *domain.User) (string, error) {
 
 	claims := jwt.RegisteredClaims{
 		Issuer:    "JesterX",
-		Subject:   user.Uuid,
+		Subject:   user.Uid.String(),
 		IssuedAt:  jwt.NewNumericDate(now),
 		NotBefore: jwt.NewNumericDate(now),
 		ExpiresAt: jwt.NewNumericDate(now.Add(time.Duration(expMinutes) * time.Minute)),

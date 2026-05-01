@@ -1,0 +1,52 @@
+@use "./variables.scss" as *;
+
+:root {
+  --jx-color-primary:       #{$color-primary-raw};
+  --jx-color-primary-light: #{$color-primary-light-raw};
+  --jx-color-primary-dark:  #{$color-primary-dark-raw};
+  --jx-color-secondary:     #{$color-secondary-raw};
+  --jx-color-accent:        #{$color-accent-raw};
+  --jx-bg:                  #{$bg-raw};
+  --jx-bg-primary:          #{$bg-primary-raw};
+  --jx-bg-secondary:        #{$bg-secondary-raw};
+  --jx-bg-tertiary:         #{$bg-tertiary-raw};
+  --jx-border:              #{$border-color-raw};
+  --jx-font-primary:        #{$font-primary-raw};
+  --jx-font-secondary:      #{$font-secondary-raw};
+  --jx-font-inverse:        #{$font-inverse-raw};
+  --jx-font-muted:          #{$font-muted-raw};
+}
+
+[data-theme="dark"] {
+  --jx-color-primary:       #{$dark-color-primary-raw};
+  --jx-color-primary-light: #{$dark-color-primary-light-raw};
+  --jx-color-primary-dark:  #{$dark-color-primary-dark-raw};
+  --jx-color-secondary:     #{$dark-color-secondary-raw};
+  --jx-color-accent:        #{$dark-color-accent-raw};
+  --jx-bg:                  #{$dark-bg-raw};
+  --jx-bg-primary:          #{$dark-bg-primary-raw};
+  --jx-bg-secondary:        #{$dark-bg-secondary-raw};
+  --jx-bg-tertiary:         #{$dark-bg-tertiary-raw};
+  --jx-border:              #{$dark-border-raw};
+  --jx-font-primary:        #{$dark-font-primary-raw};
+  --jx-font-secondary:      #{$dark-font-secondary-raw};
+  --jx-font-inverse:        #{$dark-font-inverse-raw};
+  --jx-font-muted:          #{$dark-font-muted-raw};
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  padding: 0;
+  background: $background-color;
+  color: $font-color-primary;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+a {
+  color: $color-primary;
+}
+
+* {
+  box-sizing: border-box;
+}

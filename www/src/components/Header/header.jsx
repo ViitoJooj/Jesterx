@@ -1,7 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import { NavLink, Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import styles from "./header.module.scss";
 import Button from "../Button/button";
+import { Brand } from "../Brand/brand";
+
+const NAV_LINKS = [
+  { to: "/", end: true, label: "Início" },
+  { to: "/pages", label: "Minhas páginas" },
+  { to: "/plans", label: "Planos" },
+];
 
 export function Header() {
   const [theme, setTheme] = useState("light");
@@ -9,7 +16,6 @@ export function Header() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef(null);
 
-  // dados fake só pra visual
   const me = {
     first_name: "João",
     avatar_url: null,
@@ -63,17 +69,14 @@ export function Header() {
     <>
       <header className={styles.header}>
         <div className={styles.inner}>
-          <Link to="/" className={styles.brand}>
-            <span className={styles.logo}>J</span>
-            <span className={styles.name}>Jester</span>
-          </Link>
+          <Brand to="/" />
 
           <nav className={styles.nav}>
-            <NavLink to="/" end>
-              Início
-            </NavLink>
-            <NavLink to="/pages">Minhas páginas</NavLink>
-            <NavLink to="/plans">Planos</NavLink>
+            {NAV_LINKS.map(({ to, end, label }) => (
+              <NavLink key={to} to={to} end={end}>
+                {label}
+              </NavLink>
+            ))}
           </nav>
 
           <div className={styles.actions}>
@@ -115,21 +118,21 @@ export function Header() {
                     userMenuOpen ? styles.open : ""
                   }`}
                 >
-                  <Link
+                  <NavLink
                     to="/profile"
                     className={styles.user_menu_item}
                     onClick={() => setUserMenuOpen(false)}
                   >
                     Perfil
-                  </Link>
+                  </NavLink>
 
-                  <Link
+                  <NavLink
                     to="/settings"
                     className={styles.user_menu_item}
                     onClick={() => setUserMenuOpen(false)}
                   >
                     Configurações
-                  </Link>
+                  </NavLink>
 
                   <div className={styles.menu_divider} />
 
@@ -168,7 +171,7 @@ export function Header() {
       <aside className={`${styles.drawer} ${open ? styles.open : ""}`}>
         <div className={styles.drawer_header}>
           <p>Menu</p>
-          <button onClick={() => setOpen(false)}>×</button>
+          <button className={styles.drawer_close} onClick={() => setOpen(false)}>×</button>
         </div>
 
         <div className={styles.drawer_ctas_top}>
@@ -227,15 +230,11 @@ export function Header() {
         </div>
 
         <nav className={styles.drawer_nav}>
-          <NavLink to="/" onClick={() => setOpen(false)}>
-            Início
-          </NavLink>
-          <NavLink to="/pages" onClick={() => setOpen(false)}>
-            Minhas páginas
-          </NavLink>
-          <NavLink to="/plans" onClick={() => setOpen(false)}>
-            Planos
-          </NavLink>
+          {NAV_LINKS.map(({ to, end, label }) => (
+            <NavLink key={to} to={to} end={end} onClick={() => setOpen(false)}>
+              {label}
+            </NavLink>
+          ))}
         </nav>
       </aside>
     </>

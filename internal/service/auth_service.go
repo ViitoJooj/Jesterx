@@ -16,28 +16,27 @@ import (
 var ErrInvalidCredentials = errors.New("invalid credentials")
 
 type AuthService interface {
-	Register(name, email, password, role, cpf string) (*domain.User, error)
+	Register(name, email, password, role, cpf string) (*domain.Profile, error)
 	Login(email, password string) (accessToken, refreshToken string, err error)
 	Token(refreshToken string) (accessToken string, err error)
 	Logout(refreshToken string) error
 }
 
 type authService struct {
-	userFactory *domain.User
 	userRepo    repository.UsersRepository
+	userDomain  *domain.Profile
 	redisClient *goredis.Client
 }
 
 func NewAuthService(userRepo repository.UsersRepository, redisClient *goredis.Client) AuthService {
 	return &authService{
-		userFactory: &domain.User{},
 		userRepo:    userRepo,
 		redisClient: redisClient,
 	}
 }
 
-func (s *authService) Register(name, email, password, role, cpf string) (*domain.User, error) {
-	user, err := s.userFactory.NewUser(name, email, password, role, cpf)
+func (s *authService) Register(name, email, password, role, cpf string) (*domain.Profile, error) {
+	user, err := s.userDomain.NewUser(name, email, password, role, cpf)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +84,7 @@ func (s *authService) Login(email, password string) (string, string, error) {
 
 	ttl := time.Until(claims.ExpiresAt.Time)
 	key := fmt.Sprintf("refresh:%s", claims.ID)
-	if err := s.redisClient.Set(context.Background(), key, user.Uuid, ttl).Err(); err != nil {
+	if err := s.redisClient.Set(context.Background(), key, user.Uid.String(), ttl).Err(); err != nil {
 		return "", "", err
 	}
 

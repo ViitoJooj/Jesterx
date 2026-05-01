@@ -1,4 +1,4 @@
-@use '../../variables.scss' as *;
+@use '../../styles/variables.scss' as *;
 
 :root,
 html,
@@ -28,31 +28,6 @@ body {
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 1rem;
-}
-
-.brand {
-  display: inline-flex;
-  align-items: center;
-  text-decoration: none;
-  color: $font-color-primary;
-  gap: 0.5rem;
-
-  .logo {
-    width: 30px;
-    height: 30px;
-    border-radius: 10px;
-    background: $color-primary;
-    display: grid;
-    place-items: center;
-    font-weight: 800;
-    color: $font-color-inverse;
-    box-shadow: 0 10px 18px rgba(0, 0, 0, 0.14);
-  }
-
-  .name {
-    font-weight: 800;
-    letter-spacing: -0.02em;
-  }
 }
 
 .nav {
@@ -107,25 +82,6 @@ body {
 
   &:hover {
     background: $background-color-secondary;
-  }
-}
-
-.userLabel {
-  font-size: 0.9rem;
-  color: $font-color-secondary;
-  max-width: 210px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.user {
-  display: none;
-
-  @media (min-width: 860px) {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
   }
 }
 
@@ -379,14 +335,6 @@ body {
   }
 }
 
-.menu_section_label {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: $font-color-secondary;
-  padding: 0.3rem 0.4rem 0.2rem;
-}
-
 .menu_divider {
   height: 1px;
   background: $border-color;
@@ -413,7 +361,6 @@ body {
     background: $background-color-secondary;
   }
 }
-
 
 .danger {
   color: $error-color;

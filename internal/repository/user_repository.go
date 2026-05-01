@@ -13,10 +13,10 @@ func NewUserRepository(db *sql.DB) UsersRepository {
 }
 
 type UsersRepository interface {
-	InsertUser(*domain.User) (*domain.User, error)
-	FindUserById(id string) (*domain.User, error)
-	FindUserByEmail(email string) (*domain.User, error)
-	UpdateUser(*domain.User) error
+	InsertUser(*domain.Profile) (*domain.Profile, error)
+	FindUserById(id string) (*domain.Profile, error)
+	FindUserByEmail(email string) (*domain.Profile, error)
+	UpdateUser(*domain.Profile) error
 	DeleteUserById(id string) error
 }
 
@@ -29,7 +29,7 @@ var (
 	ErrEmailAlreadyInUse = errors.New("email already in use")
 )
 
-func (r *userRepository) InsertUser(user *domain.User) (*domain.User, error) {
+func (r *userRepository) InsertUser(user *domain.Profile) (*domain.Profile, error) {
 	ctx := context.Background()
 	exists, err := r.UserExistsByEmail(user.Email)
 	if err != nil {
@@ -45,7 +45,7 @@ func (r *userRepository) InsertUser(user *domain.User) (*domain.User, error) {
 		RETURNING id, name, email, password, role, cpf, created_at, updated_at
 	`
 
-	var newUser domain.User
+	var newUser domain.Profile
 
 	err = r.db.QueryRowContext(ctx, query,
 		user.Name,
@@ -54,7 +54,7 @@ func (r *userRepository) InsertUser(user *domain.User) (*domain.User, error) {
 		user.Role,
 		user.Cpf,
 	).Scan(
-		&newUser.Uuid,
+		&newUser.Uid,
 		&newUser.Name,
 		&newUser.Email,
 		&newUser.Password,
@@ -71,7 +71,7 @@ func (r *userRepository) InsertUser(user *domain.User) (*domain.User, error) {
 	return &newUser, nil
 }
 
-func (r *userRepository) FindUserById(id string) (*domain.User, error) {
+func (r *userRepository) FindUserById(id string) (*domain.Profile, error) {
 	ctx := context.Background()
 
 	query := `
@@ -80,10 +80,10 @@ func (r *userRepository) FindUserById(id string) (*domain.User, error) {
 		WHERE id = $1
 	`
 
-	var user domain.User
+	var user domain.Profile
 
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
-		&user.Uuid,
+		&user.Uid,
 		&user.Name,
 		&user.Email,
 		&user.Password,
@@ -103,7 +103,7 @@ func (r *userRepository) FindUserById(id string) (*domain.User, error) {
 	return &user, nil
 }
 
-func (r *userRepository) FindUserByEmail(email string) (*domain.User, error) {
+func (r *userRepository) FindUserByEmail(email string) (*domain.Profile, error) {
 	ctx := context.Background()
 
 	query := `
@@ -112,10 +112,10 @@ func (r *userRepository) FindUserByEmail(email string) (*domain.User, error) {
 		WHERE email = $1
 	`
 
-	var user domain.User
+	var user domain.Profile
 
 	err := r.db.QueryRowContext(ctx, query, email).Scan(
-		&user.Uuid,
+		&user.Uid,
 		&user.Name,
 		&user.Email,
 		&user.Password,
@@ -135,10 +135,10 @@ func (r *userRepository) FindUserByEmail(email string) (*domain.User, error) {
 	return &user, nil
 }
 
-func (r *userRepository) UpdateUser(user *domain.User) error {
+func (r *userRepository) UpdateUser(user *domain.Profile) error {
 	ctx := context.Background()
 
-	exists, err := r.UserExists(user.Uuid)
+	exists, err := r.UserExists(user.Uid.String())
 	if err != nil {
 		return err
 	}
@@ -163,7 +163,7 @@ func (r *userRepository) UpdateUser(user *domain.User) error {
 		user.Password,
 		user.Role,
 		user.Cpf,
-		user.Uuid,
+		user.Uid,
 	)
 	if err != nil {
 		return err

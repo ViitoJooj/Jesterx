@@ -1,4 +1,4 @@
-@use '../../variables' as *;
+@use '../../styles/variables.scss' as *;
 
 .footer {
   border-top: 1px solid $border-color;
@@ -26,35 +26,13 @@
 .brand {
   display: grid;
   gap: .75rem;
+}
 
-  .logoRow {
-    display: inline-flex;
-    align-items: center;
-    gap: .75rem;
-
-    .logo {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      background: $color-primary;
-      display: grid;
-      place-items: center;
-      font-weight: 800;
-      color: $font-color-inverse;
-      letter-spacing: .03em;
-    }
-    .name {
-      font-weight: 800;
-      letter-spacing: .02em;
-      color: $font-color-primary;
-    }
-  }
-
-  .tagline {
-    color: $font-color-muted;
-    font-size: .95rem;
-    max-width: 24ch;
-  }
+.tagline {
+  color: $font-color-muted;
+  font-size: .95rem;
+  max-width: 24ch;
+  margin: 0;
 }
 
 .links {

@@ -7,68 +7,56 @@ import (
 	"github.com/google/uuid"
 )
 
-type User struct {
-	Uuid         string
-	Avatar       *string
-	Name         string
-	Email        string
-	Password     string
-	Role         string
-	Plan         *string
-	Cpf          string
-	Country_code *int
-	Area_code    *int
-	Phone        *int
-	Address      Addresses
-	Updated_at   time.Time
-	Created_at   time.Time
+type Auth struct {
+	Uid                string
+	DisplayName        string
+	Email              string
+	Phone              *string
+	Providers          []string
+	ProviderType       string
+	AvatarURL          *string
+	Email_confirmed_at *time.Time
+	Created_at         time.Time
+	Last_sign_inAt     time.Time
 }
 
-type Addresses struct {
-	Address_country    *string
-	Zip_code           *string
-	Address_street     *string
-	Address_number     *string
-	Address_complement *string
-	Address_district   *string
-	Address_city       *string
-	Address_state      *string
+type Profile struct {
+	Uid         uuid.UUID
+	WebsiteID   uuid.UUID
+	Name        string
+	Email       string
+	Password    string
+	Avatar      *string
+	Role        string
+	Plan        *string
+	Cpf         *string
+	CountryCode *int
+	AreaCode    *int
+	Address     Address
+	Updated_at  time.Time
+	Created_at  time.Time
 }
 
-func (u *User) NewUser(name, email, password, role, cpf string) (*User, error) {
+func (u *Profile) NewUser(name, email, password, role, cpf string) (*Profile, error) {
 	id, err := uuid.NewV7()
 	if err != nil {
 		return nil, err
 	}
 
-	if err := validators.Name(name); err != nil {
+	if err := validators.User(name, email, password, role, cpf); err != nil {
 		return nil, err
 	}
 
-	if err := validators.Email(email); err != nil {
-		return nil, err
-	}
+	cpfVal := cpf
 
-	if err := validators.Password(password); err != nil {
-		return nil, err
-	}
-
-	if err := validators.Role(role); err != nil {
-		return nil, err
-	}
-
-	if err := validators.Cpf(cpf); err != nil {
-		return nil, err
-	}
-
-	return &User{
-		Uuid:       id.String(),
+	return &Profile{
+		Uid:        id,
 		Name:       name,
 		Email:      email,
 		Password:   password,
 		Role:       role,
-		Cpf:        cpf,
-		Updated_at: time.Now(),
+		Cpf:        &cpfVal,
 		Created_at: time.Now(),
+		Updated_at: time.Now(),
 	}, nil
 }
