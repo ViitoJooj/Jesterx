@@ -105,7 +105,7 @@ func (s *WebSiteService) getPlanLimits(planName string) (maxSites int, maxRoutes
 			return plan.MaxSites, plan.MaxRoutes
 		}
 	}
-	// Fallback: infer from name
+
 	normalized := strings.ToLower(strings.TrimSpace(planName))
 	if strings.Contains(normalized, "enterprise") || strings.Contains(normalized, "ultra") {
 		return 50, 100
@@ -145,7 +145,7 @@ func (s *WebSiteService) ensureOwnership(websiteID string, userID string) (*doma
 	return website, nil
 }
 
-func (s *WebSiteService) CreateWebSite(Type string, Image []byte, Name string, Short_description string, Description string, Creator_id string) (*domain.WebSite, error) {
+func (s *WebSiteService) CreateWebSite(Type string, ImageUrl *string, Name string, Short_description string, Description string, Creator_id string) (*domain.WebSite, error) {
 	Type = strings.ToUpper(strings.TrimSpace(Type))
 	Name = strings.TrimSpace(Name)
 
@@ -176,30 +176,24 @@ func (s *WebSiteService) CreateWebSite(Type string, Image []byte, Name string, S
 		return nil, err
 	}
 	if existing != nil {
-		return nil, errors.New("this site already exists")
+		if existing.Creator_id == Creator_id {
+			return existing, nil
+		}
+		return nil, errors.New("this site name is already taken")
 	}
 
-	website := domain.NewWebSite(Type, Image, Name, strings.TrimSpace(Short_description), strings.TrimSpace(Description), Creator_id)
+	website := domain.NewWebSite(Type, ImageUrl, Name, strings.TrimSpace(Short_description), strings.TrimSpace(Description), Creator_id)
 	if err := s.webSiteRepo.SaveWebSite(*website); err != nil {
 		return nil, err
 	}
 
-	// Auto-register the creator as admin of the new store so they can log in immediately.
 	if creator, err := s.userRepo.FindUserByID(Creator_id); err == nil && creator != nil {
-		// Only create if no user with this email exists in this website yet
 		if existing, _ := s.userRepo.FindUserByEmailAndWebsite(creator.Email, website.Id); existing == nil {
-			adminUser := domain.NewUser(
-				website.Id,
-				creator.First_name, creator.Last_name,
-				creator.Email, creator.Password,
-				creator.AccountType,
-			)
+			adminUser := domain.NewUser(website.Id, creator.First_name, creator.Last_name, creator.Email, creator.Password)
 			adminUser.Role = "admin"
 			adminUser.Verified_email = true
-			adminUser.CpfCnpj = creator.CpfCnpj
+			adminUser.Cpf = creator.Cpf
 			adminUser.AvatarUrl = creator.AvatarUrl
-			adminUser.CompanyName = creator.CompanyName
-			adminUser.TradeName = creator.TradeName
 			adminUser.DisplayName = creator.DisplayName
 			adminUser.BirthDate = creator.BirthDate
 			adminUser.Gender = creator.Gender
@@ -208,14 +202,6 @@ func (s *WebSiteService) CreateWebSite(Type string, Image []byte, Name string, S
 			adminUser.WebsiteUrl = creator.WebsiteUrl
 			adminUser.Whatsapp = creator.Whatsapp
 			adminUser.Phone = creator.Phone
-			adminUser.ZipCode = creator.ZipCode
-			adminUser.AddressStreet = creator.AddressStreet
-			adminUser.AddressNumber = creator.AddressNumber
-			adminUser.AddressComplement = creator.AddressComplement
-			adminUser.AddressDistrict = creator.AddressDistrict
-			adminUser.AddressCity = creator.AddressCity
-			adminUser.AddressState = creator.AddressState
-			adminUser.AddressCountry = creator.AddressCountry
 			_ = s.userRepo.UserRegister(*adminUser)
 		}
 	}

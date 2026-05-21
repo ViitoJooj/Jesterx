@@ -2,16 +2,15 @@
 
 .page {
   min-height: calc(100vh - 72px);
-  background: #f8f9fc;
-  color: #1a2035;
+  background: $background-color;
+  color: $font-color-primary;
 }
 
-/* ── Hero ── */
-.hero {
-  padding: 3rem 1rem;
-}
+// ── Hero ──────────────────────────────────────────────────────────────────────
 
-.heroOk   { background: linear-gradient(135deg, #065f46 0%, #047857 100%); }
+.hero { padding: 3rem 1.5rem; }
+
+.heroOk    { background: linear-gradient(135deg, #065f46 0%, #047857 100%); }
 .heroIssue { background: linear-gradient(135deg, #78350f 0%, #b45309 100%); }
 
 .heroInner {
@@ -23,57 +22,60 @@
   color: #fff;
 }
 
-.heroIcon { font-size: 2.2rem; line-height: 1; }
+.heroIcon  { font-size: 2.2rem; line-height: 1; }
 
 .heroTitle {
   font-size: 1.35rem;
   font-weight: 800;
-  margin: 0 0 .2rem;
+  margin: 0 0 0.2rem;
 }
 
 .heroSub {
-  font-size: .82rem;
-  opacity: .75;
+  font-size: 0.82rem;
+  opacity: 0.75;
   margin: 0;
 }
 
-/* ── Body ── */
+// ── Body ──────────────────────────────────────────────────────────────────────
+
 .body {
   max-width: 860px;
   margin: 0 auto;
-  padding: 2.5rem 1rem 4rem;
+  padding: 2.5rem 1.5rem 4rem;
   display: flex;
   flex-direction: column;
   gap: 2.5rem;
 }
 
-/* ── Section ── */
+// ── Section ───────────────────────────────────────────────────────────────────
+
 .section {}
 
 .sectionTitle {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 700;
-  color: #0f1b35;
+  color: $font-color-primary;
   margin: 0 0 1rem;
-  padding-bottom: .6rem;
-  border-bottom: 1px solid #e2e8f2;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid $border-color;
 }
 
-/* ── Service list ── */
+// ── Service list ──────────────────────────────────────────────────────────────
+
 .serviceList {
   display: flex;
   flex-direction: column;
-  gap: .5rem;
+  gap: 0.5rem;
 }
 
 .serviceRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #fff;
-  border: 1px solid #dde3ef;
-  border-radius: 10px;
-  padding: .9rem 1.1rem;
+  background: $background-color-primary;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-md;
+  padding: 0.9rem 1.1rem;
   gap: 1rem;
   flex-wrap: wrap;
 }
@@ -81,10 +83,10 @@
 .serviceInfo {
   display: flex;
   flex-direction: column;
-  gap: .15rem;
+  gap: 0.15rem;
 
-  strong { font-size: .9rem; color: #0f1b35; }
-  span   { font-size: .78rem; color: #6b7a99; }
+  strong { font-size: 0.9rem; color: $font-color-primary; }
+  span   { font-size: 0.78rem; color: $font-color-muted; }
 }
 
 .serviceMeta {
@@ -95,23 +97,24 @@
 }
 
 .uptimeLabel {
-  font-size: .78rem;
-  color: #6b7a99;
+  font-size: 0.78rem;
+  color: $font-color-muted;
 
-  strong { color: #0f1b35; }
+  strong { color: $font-color-primary; }
 }
 
-/* ── Status badge ── */
+// ── Status badge ──────────────────────────────────────────────────────────────
+
 .statusBadge {
   display: inline-flex;
   align-items: center;
-  gap: .35rem;
-  padding: .25rem .65rem;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
   border-radius: 999px;
-  font-size: .73rem;
+  font-size: 0.73rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: .04em;
+  letter-spacing: 0.04em;
 }
 
 .statusDot {
@@ -127,15 +130,15 @@
 }
 
 .status_degraded {
-  background: #f7ecf1;
-  color: #7a2746;
+  background: #fef3c7;
+  color: #92400e;
   .statusDot { background: #f59e0b; animation: pulse 1.2s infinite; }
 }
 
 .status_outage {
-  background: #fce8e8;
+  background: #fee2e2;
   color: #b91c1c;
-  .statusDot { background: #dc2626; animation: pulse .8s infinite; }
+  .statusDot { background: #dc2626; animation: pulse 0.8s infinite; }
 }
 
 .status_maintenance {
@@ -146,31 +149,32 @@
 
 @keyframes pulse {
   0%, 100% { opacity: 1; }
-  50% { opacity: .3; }
+  50%       { opacity: 0.3; }
 }
 
-/* ── Uptime bars ── */
+// ── Uptime bars ───────────────────────────────────────────────────────────────
+
 .uptimeGrid {
   display: flex;
   flex-direction: column;
-  gap: .65rem;
+  gap: 0.65rem;
 }
 
 .uptimeRow {
   display: grid;
   grid-template-columns: 180px 1fr 48px;
-  gap: .8rem;
+  gap: 0.8rem;
   align-items: center;
 
   @media (max-width: 600px) {
     grid-template-columns: 1fr;
-    gap: .25rem;
+    gap: 0.25rem;
   }
 }
 
 .uptimeName {
-  font-size: .8rem;
-  color: #3d4a61;
+  font-size: 0.8rem;
+  color: $font-color-secondary;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -196,24 +200,24 @@
 .barIssue { background: #f97316; }
 
 .uptimePct {
-  font-size: .78rem;
+  font-size: 0.78rem;
   font-weight: 700;
-  color: #0f1b35;
+  color: $font-color-primary;
   text-align: right;
 }
 
 .uptimeLegend {
   display: flex;
   gap: 1.2rem;
-  margin-top: .8rem;
+  margin-top: 0.8rem;
   flex-wrap: wrap;
 
   span {
     display: flex;
     align-items: center;
-    gap: .35rem;
-    font-size: .74rem;
-    color: #6b7a99;
+    gap: 0.35rem;
+    font-size: 0.74rem;
+    color: $font-color-muted;
   }
 }
 
@@ -224,22 +228,23 @@
   border-radius: 2px;
 }
 
-/* ── Incidents ── */
+// ── Incidents ─────────────────────────────────────────────────────────────────
+
 .noIncidents {
-  font-size: .9rem;
-  color: #4a5568;
+  font-size: 0.9rem;
+  color: $font-color-secondary;
 }
 
 .incidentList {
   display: flex;
   flex-direction: column;
-  gap: .7rem;
+  gap: 0.7rem;
 }
 
 .incidentCard {
-  background: #fff;
-  border: 1px solid #dde3ef;
-  border-radius: 10px;
+  background: $background-color-primary;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-md;
   overflow: hidden;
 }
 
@@ -248,104 +253,122 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: .9rem 1.1rem;
+  padding: 0.9rem 1.1rem;
   background: none;
   border: none;
   cursor: pointer;
-  gap: .8rem;
+  gap: 0.8rem;
   flex-wrap: wrap;
   text-align: left;
+  transition: $transition-fast;
 
-  &:hover { background: #fafbff; }
+  &:hover { background: $background-color-secondary; }
 }
 
 .incidentLeft {
   display: flex;
   align-items: center;
-  gap: .7rem;
+  gap: 0.7rem;
 
-  strong { font-size: .88rem; color: #0f1b35; }
+  strong { font-size: 0.88rem; color: $font-color-primary; }
 }
 
 .incidentRight {
   display: flex;
   align-items: center;
-  gap: .7rem;
+  gap: 0.7rem;
   flex-wrap: wrap;
 }
 
 .incBadge {
-  font-size: .68rem;
+  font-size: 0.68rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: .05em;
-  padding: .15rem .5rem;
+  letter-spacing: 0.05em;
+  padding: 0.15rem 0.5rem;
   border-radius: 999px;
 }
 
-.sev_critical { background: #fce8e8; color: #b91c1c; }
-.sev_major    { background: #f7ecf1; color: #7a2746; }
+.sev_critical { background: #fee2e2; color: #b91c1c; }
+.sev_major    { background: #fef3c7; color: #92400e; }
 .sev_minor    { background: #e0f0ff; color: #1753a3; }
 
 .incStatus {
-  font-size: .73rem;
+  font-size: 0.73rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: .04em;
+  letter-spacing: 0.04em;
 }
 
-.incResolved { color: #166534; }
-.incActive   { color: #7a2746; }
+.incResolved { color: $success-color; }
+.incActive   { color: $warning-color; }
 
 .incDate {
-  font-size: .75rem;
-  color: #8a96b0;
+  font-size: 0.75rem;
+  color: $font-color-muted;
 }
 
 .incChevron {
-  font-size: .65rem;
-  color: #8a96b0;
+  font-size: 0.65rem;
+  color: $font-color-muted;
 }
 
 .incidentUpdates {
-  border-top: 1px solid #eef0f6;
-  padding: .9rem 1.1rem;
+  border-top: 1px solid $border-color;
+  padding: 0.9rem 1.1rem;
   display: flex;
   flex-direction: column;
-  gap: .6rem;
-  background: #fafbff;
+  gap: 0.6rem;
+  background: $background-color;
 }
 
 .incidentUpdate {
   display: grid;
   grid-template-columns: 44px 1fr;
-  gap: .7rem;
-  font-size: .82rem;
-  color: #3d4a61;
+  gap: 0.7rem;
+  font-size: 0.82rem;
+  color: $font-color-secondary;
   line-height: 1.55;
 }
 
 .updateTime {
-  color: #8a96b0;
+  color: $font-color-muted;
   font-family: "Cascadia Code", Consolas, monospace;
-  font-size: .75rem;
-  padding-top: .05rem;
+  font-size: 0.75rem;
+  padding-top: 0.05rem;
 }
 
-/* ── Contact ── */
+// ── Contact ───────────────────────────────────────────────────────────────────
+
 .contactBox {
-  background: #fff;
-  border: 1px solid #dde3ef;
-  border-radius: 12px;
+  background: $background-color-primary;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-md;
   padding: 1.3rem 1.5rem;
   display: flex;
   gap: 1rem;
   align-items: flex-start;
 
-  strong { display: block; font-size: .9rem; color: #0f1b35; margin-bottom: .25rem; }
-  p { margin: 0; font-size: .84rem; color: #4a5568; line-height: 1.55; }
-  a { color: #2c7ef5; text-decoration: none; &:hover { text-decoration: underline; } }
+  strong {
+    display: block;
+    font-size: 0.9rem;
+    color: $font-color-primary;
+    margin-bottom: 0.25rem;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.84rem;
+    color: $font-color-secondary;
+    line-height: 1.55;
+  }
+
+  a {
+    color: $color-primary;
+    text-decoration: none;
+
+    &:hover { text-decoration: underline; }
+  }
 }
 
-.contactIcon { font-size: 1.6rem; line-height: 1; padding-top: .1rem; }
-
+.contactIcon { font-size: 1.6rem; line-height: 1; padding-top: 0.1rem; }

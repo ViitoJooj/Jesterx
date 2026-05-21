@@ -8,13 +8,15 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-chi/chi/v5"
+
 	middleware "github.com/ViitoJooj/Jesterx/internal/http/middlewares"
 	"github.com/ViitoJooj/Jesterx/internal/service"
 )
 
 type WebSiteRequest struct {
 	Type              string `json:"type"`
-	Image             []byte `json:"image,omitempty"`
+	ImageUrl          *string `json:"image_url,omitempty"`
 	Name              string `json:"name"`
 	Short_description string `json:"short_description,omitempty"`
 	Description       string `json:"description,omitempty"`
@@ -38,7 +40,7 @@ type CreateVersionRequest struct {
 type WebSiteData struct {
 	Id                string    `json:"id"`
 	Type              string    `json:"type"`
-	Image             []byte    `json:"image"`
+	ImageUrl          *string   `json:"image_url"`
 	Name              string    `json:"name"`
 	Short_description string    `json:"short_description"`
 	Description       string    `json:"description"`
@@ -130,9 +132,7 @@ type WebSiteHandler struct {
 }
 
 func NewWebSiteHandler(webSiteService *service.WebSiteService) *WebSiteHandler {
-	return &WebSiteHandler{
-		webSiteService: webSiteService,
-	}
+	return &WebSiteHandler{webSiteService: webSiteService}
 }
 
 func asVersionData(versionID string, websiteID string, version int, sourceType string, source string, scanStatus string, scanScore int, scanFindings string, published bool, publishedAt *time.Time) VersionData {
@@ -157,7 +157,6 @@ func asVersionData(versionID string, websiteID string, version int, sourceType s
 
 func (h *WebSiteHandler) CreateWebSite(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	var req WebSiteRequest
 
 	userID, ok := middleware.UserID(r.Context())
 	if !ok {
@@ -165,12 +164,13 @@ func (h *WebSiteHandler) CreateWebSite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var req WebSiteRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	website, err := h.webSiteService.CreateWebSite(req.Type, req.Image, req.Name, req.Short_description, req.Description, userID)
+	website, err := h.webSiteService.CreateWebSite(req.Type, req.ImageUrl, req.Name, req.Short_description, req.Description, userID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -182,7 +182,7 @@ func (h *WebSiteHandler) CreateWebSite(w http.ResponseWriter, r *http.Request) {
 		Data: WebSiteData{
 			Id:                website.Id,
 			Type:              website.Type,
-			Image:             website.Image,
+			ImageUrl:          website.ImageUrl,
 			Name:              website.Name,
 			Short_description: website.Short_description,
 			Description:       website.Description,
@@ -216,7 +216,7 @@ func (h *WebSiteHandler) ListWebSites(w http.ResponseWriter, r *http.Request) {
 		respData = append(respData, WebSiteData{
 			Id:                website.Id,
 			Type:              website.Type,
-			Image:             website.Image,
+			ImageUrl:          website.ImageUrl,
 			Name:              website.Name,
 			Short_description: website.Short_description,
 			Description:       website.Description,
@@ -227,14 +227,9 @@ func (h *WebSiteHandler) ListWebSites(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	resp := WebSitesResponse{
-		Success: true,
-		Message: "success",
-		Data:    respData,
-	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(resp)
+	json.NewEncoder(w).Encode(WebSitesResponse{Success: true, Message: "success", Data: respData})
 }
 
 func (h *WebSiteHandler) ReplaceRoutes(w http.ResponseWriter, r *http.Request) {
@@ -244,7 +239,7 @@ func (h *WebSiteHandler) ReplaceRoutes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	siteID := r.PathValue("siteID")
+	siteID := chi.URLParam(r, "siteID")
 	if strings.TrimSpace(siteID) == "" {
 		http.Error(w, "site_id is required", http.StatusBadRequest)
 		return
@@ -283,14 +278,9 @@ func (h *WebSiteHandler) ReplaceRoutes(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	resp := RoutesResponse{
-		Success: true,
-		Message: "routes saved",
-		Data:    respRoutes,
-	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(resp)
+	json.NewEncoder(w).Encode(RoutesResponse{Success: true, Message: "routes saved", Data: respRoutes})
 }
 
 func (h *WebSiteHandler) ListRoutes(w http.ResponseWriter, r *http.Request) {
@@ -300,7 +290,7 @@ func (h *WebSiteHandler) ListRoutes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	siteID := r.PathValue("siteID")
+	siteID := chi.URLParam(r, "siteID")
 	if strings.TrimSpace(siteID) == "" {
 		http.Error(w, "site_id is required", http.StatusBadRequest)
 		return
@@ -323,14 +313,9 @@ func (h *WebSiteHandler) ListRoutes(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	resp := RoutesResponse{
-		Success: true,
-		Message: "success",
-		Data:    respRoutes,
-	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(resp)
+	json.NewEncoder(w).Encode(RoutesResponse{Success: true, Message: "success", Data: respRoutes})
 }
 
 func (h *WebSiteHandler) CreateVersion(w http.ResponseWriter, r *http.Request) {
@@ -340,7 +325,7 @@ func (h *WebSiteHandler) CreateVersion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	siteID := r.PathValue("siteID")
+	siteID := chi.URLParam(r, "siteID")
 	if strings.TrimSpace(siteID) == "" {
 		http.Error(w, "site_id is required", http.StatusBadRequest)
 		return
@@ -359,26 +344,17 @@ func (h *WebSiteHandler) CreateVersion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := VersionResponse{
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(VersionResponse{
 		Success: true,
 		Message: scanReport.Summary,
 		Data: asVersionData(
-			version.Id,
-			version.WebsiteId,
-			version.Version,
-			version.SourceType,
-			version.Source,
-			version.ScanStatus,
-			version.ScanScore,
-			version.ScanFindings,
-			version.Published,
-			version.PublishedAt,
+			version.Id, version.WebsiteId, version.Version,
+			version.SourceType, version.Source, version.ScanStatus,
+			version.ScanScore, version.ScanFindings, version.Published, version.PublishedAt,
 		),
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(resp)
+	})
 }
 
 func (h *WebSiteHandler) PublishVersion(w http.ResponseWriter, r *http.Request) {
@@ -388,14 +364,13 @@ func (h *WebSiteHandler) PublishVersion(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	siteID := r.PathValue("siteID")
+	siteID := chi.URLParam(r, "siteID")
 	if strings.TrimSpace(siteID) == "" {
 		http.Error(w, "site_id is required", http.StatusBadRequest)
 		return
 	}
 
-	versionParam := r.PathValue("version")
-	versionNumber, err := strconv.Atoi(versionParam)
+	versionNumber, err := strconv.Atoi(chi.URLParam(r, "version"))
 	if err != nil || versionNumber <= 0 {
 		http.Error(w, "invalid version", http.StatusBadRequest)
 		return
@@ -407,25 +382,17 @@ func (h *WebSiteHandler) PublishVersion(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	resp := VersionResponse{
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(VersionResponse{
 		Success: true,
 		Message: "version published",
 		Data: asVersionData(
-			version.Id,
-			version.WebsiteId,
-			version.Version,
-			version.SourceType,
-			version.Source,
-			version.ScanStatus,
-			version.ScanScore,
-			version.ScanFindings,
-			version.Published,
-			version.PublishedAt,
+			version.Id, version.WebsiteId, version.Version,
+			version.SourceType, version.Source, version.ScanStatus,
+			version.ScanScore, version.ScanFindings, version.Published, version.PublishedAt,
 		),
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(resp)
+	})
 }
 
 func (h *WebSiteHandler) GetScanReport(w http.ResponseWriter, r *http.Request) {
@@ -435,14 +402,13 @@ func (h *WebSiteHandler) GetScanReport(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	siteID := r.PathValue("siteID")
+	siteID := chi.URLParam(r, "siteID")
 	if strings.TrimSpace(siteID) == "" {
 		http.Error(w, "site_id is required", http.StatusBadRequest)
 		return
 	}
 
-	versionParam := r.PathValue("version")
-	versionNumber, err := strconv.Atoi(versionParam)
+	versionNumber, err := strconv.Atoi(chi.URLParam(r, "version"))
 	if err != nil || versionNumber <= 0 {
 		http.Error(w, "invalid version", http.StatusBadRequest)
 		return
@@ -454,10 +420,7 @@ func (h *WebSiteHandler) GetScanReport(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := ScanReportResponse{
-		Success: true,
-		Message: "success",
-	}
+	resp := ScanReportResponse{Success: true, Message: "success"}
 	resp.Data.Version = version.Version
 	resp.Data.ScanStatus = version.ScanStatus
 	resp.Data.ScanScore = version.ScanScore
@@ -476,7 +439,7 @@ func (h *WebSiteHandler) ListVersions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	siteID := r.PathValue("siteID")
+	siteID := chi.URLParam(r, "siteID")
 	if strings.TrimSpace(siteID) == "" {
 		http.Error(w, "site_id is required", http.StatusBadRequest)
 		return
@@ -491,43 +454,25 @@ func (h *WebSiteHandler) ListVersions(w http.ResponseWriter, r *http.Request) {
 	respData := make([]VersionData, 0, len(versions))
 	for _, version := range versions {
 		respData = append(respData, asVersionData(
-			version.Id,
-			version.WebsiteId,
-			version.Version,
-			version.SourceType,
-			version.Source,
-			version.ScanStatus,
-			version.ScanScore,
-			version.ScanFindings,
-			version.Published,
-			version.PublishedAt,
+			version.Id, version.WebsiteId, version.Version,
+			version.SourceType, version.Source, version.ScanStatus,
+			version.ScanScore, version.ScanFindings, version.Published, version.PublishedAt,
 		))
 	}
 
-	resp := VersionsResponse{
-		Success: true,
-		Message: "success",
-		Data:    respData,
-	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(resp)
-}
-
-// PublicStoreInfo is now handled by StoreSocialHandler.GetStoreFullInfo.
-// This stub remains for legacy redirect compatibility.
-func (h *WebSiteHandler) PublicStoreInfo(w http.ResponseWriter, r *http.Request) {
-	http.NotFound(w, r)
+	json.NewEncoder(w).Encode(VersionsResponse{Success: true, Message: "success", Data: respData})
 }
 
 func (h *WebSiteHandler) PublicRender(w http.ResponseWriter, r *http.Request) {
-	siteID := strings.TrimSpace(r.PathValue("siteID"))
+	siteID := strings.TrimSpace(chi.URLParam(r, "siteID"))
 	if siteID == "" {
 		http.NotFound(w, r)
 		return
 	}
 
-	path := r.PathValue("path")
+	path := chi.URLParam(r, "*")
 	if strings.TrimSpace(path) == "" {
 		path = "/"
 	}
@@ -550,7 +495,7 @@ func (h *WebSiteHandler) DeleteWebSite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	siteID := strings.TrimSpace(r.PathValue("siteID"))
+	siteID := strings.TrimSpace(chi.URLParam(r, "siteID"))
 	if siteID == "" {
 		http.Error(w, "site_id is required", http.StatusBadRequest)
 		return
@@ -569,41 +514,11 @@ func (h *WebSiteHandler) ListSiteAPIs(w http.ResponseWriter, r *http.Request) {
 		Success: true,
 		Message: "success",
 		Data: []SiteAPIItem{
-			{
-				ID:          "store_products",
-				Method:      "GET",
-				Path:        "/api/store/products",
-				Label:       "Listar produtos",
-				Description: "Lista produtos públicos da loja.",
-			},
-			{
-				ID:          "store_login",
-				Method:      "POST",
-				Path:        "/api/store/login",
-				Label:       "Login de cliente",
-				Description: "Autenticação de clientes do site.",
-			},
-			{
-				ID:          "store_shipping_quote",
-				Method:      "POST",
-				Path:        "/api/store/shipping/quote",
-				Label:       "Calcular frete",
-				Description: "Retorna o valor estimado de frete.",
-			},
-			{
-				ID:          "software_download_token",
-				Method:      "POST",
-				Path:        "/api/software/download-token",
-				Label:       "Token de download",
-				Description: "Gera token seguro para download de software.",
-			},
-			{
-				ID:          "course_modules",
-				Method:      "GET",
-				Path:        "/api/course/modules",
-				Label:       "Módulos de curso",
-				Description: "Lista módulos e aulas publicadas.",
-			},
+			{ID: "store_products", Method: "GET", Path: "/api/store/products", Label: "Listar produtos", Description: "Lista produtos públicos da loja."},
+			{ID: "store_login", Method: "POST", Path: "/api/store/login", Label: "Login de cliente", Description: "Autenticação de clientes do site."},
+			{ID: "store_shipping_quote", Method: "POST", Path: "/api/store/shipping/quote", Label: "Calcular frete", Description: "Retorna o valor estimado de frete."},
+			{ID: "software_download_token", Method: "POST", Path: "/api/software/download-token", Label: "Token de download", Description: "Gera token seguro para download de software."},
+			{ID: "course_modules", Method: "GET", Path: "/api/course/modules", Label: "Módulos de curso", Description: "Lista módulos e aulas publicadas."},
 		},
 	}
 

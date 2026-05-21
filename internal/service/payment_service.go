@@ -116,7 +116,6 @@ func (s *PaymentService) CreateCheckoutSession(userID string, planID string, qua
 
 	payment := domain.Payment{
 		UserID:      user.Id,
-		WebsiteID:   user.WebsiteId,
 		PlanID:      plan.ID,
 		ReferenceID: session.ID,
 		Type:        paymentType,

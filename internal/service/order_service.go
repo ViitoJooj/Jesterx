@@ -88,7 +88,11 @@ func (s *OrderService) CreateOrder(userID, websiteID string, input CreateOrderIn
 	if user.WebsiteId != websiteID {
 		return nil, errors.New("usuário inválido para esta loja")
 	}
-	if missingAddress(user) {
+	defaultAddr, err := s.userRepo.GetDefaultUserAddress(userID)
+	if err != nil {
+		return nil, errors.New("erro ao buscar endereço")
+	}
+	if missingAddress(defaultAddr) {
 		return nil, errors.New("endereço obrigatório para finalizar a compra")
 	}
 
@@ -102,7 +106,6 @@ func (s *OrderService) CreateOrder(userID, websiteID string, input CreateOrderIn
 			it.Qty = 1
 		}
 
-		// Always fetch authoritative price from DB to prevent price manipulation.
 		product, err := s.productRepo.FindProductByID(it.ProductID, websiteID)
 		if err != nil {
 			return nil, errors.New("erro ao buscar produto")
@@ -151,17 +154,17 @@ func (s *OrderService) CreateOrder(userID, websiteID string, input CreateOrderIn
 		BuyerName:                 buyerName,
 		BuyerEmail:                user.Email,
 		BuyerPhone:                buyerPhone,
-		BuyerDocument:             derefString(user.CpfCnpj),
+		BuyerDocument:             derefString(user.Cpf),
 		ShippingName:              buyerName,
 		ShippingPhone:             buyerPhone,
-		ShippingZipCode:           derefString(user.ZipCode),
-		ShippingAddressStreet:     derefString(user.AddressStreet),
-		ShippingAddressNumber:     derefString(user.AddressNumber),
-		ShippingAddressComplement: derefString(user.AddressComplement),
-		ShippingAddressDistrict:   derefString(user.AddressDistrict),
-		ShippingAddressCity:       derefString(user.AddressCity),
-		ShippingAddressState:      derefString(user.AddressState),
-		ShippingAddressCountry:    derefString(user.AddressCountry),
+		ShippingZipCode:           derefString(defaultAddr.ZipCode),
+		ShippingAddressStreet:     derefString(defaultAddr.Street),
+		ShippingAddressNumber:     derefString(defaultAddr.Number),
+		ShippingAddressComplement: derefString(defaultAddr.Complement),
+		ShippingAddressDistrict:   derefString(defaultAddr.District),
+		ShippingAddressCity:       derefString(defaultAddr.City),
+		ShippingAddressState:      derefString(defaultAddr.State),
+		ShippingAddressCountry:    defaultAddr.Country,
 		ShippingCost:              0,
 		DiscountTotal:             0,
 		TaxTotal:                  0,
@@ -274,13 +277,14 @@ func buildOrderNotificationEmail(ownerName, siteName string, order *domain.Order
 	)
 }
 
-func missingAddress(user *domain.User) bool {
-	return user.ZipCode == nil || strings.TrimSpace(*user.ZipCode) == "" ||
-		user.AddressStreet == nil || strings.TrimSpace(*user.AddressStreet) == "" ||
-		user.AddressNumber == nil || strings.TrimSpace(*user.AddressNumber) == "" ||
-		user.AddressCity == nil || strings.TrimSpace(*user.AddressCity) == "" ||
-		user.AddressState == nil || strings.TrimSpace(*user.AddressState) == "" ||
-		user.AddressCountry == nil || strings.TrimSpace(*user.AddressCountry) == ""
+func missingAddress(addr *domain.UserAddress) bool {
+	if addr == nil {
+		return true
+	}
+	return addr.Street == nil || strings.TrimSpace(*addr.Street) == "" ||
+		addr.Number == nil || strings.TrimSpace(*addr.Number) == "" ||
+		addr.City == nil || strings.TrimSpace(*addr.City) == "" ||
+		addr.State == nil || strings.TrimSpace(*addr.State) == ""
 }
 
 func derefString(v *string) string {

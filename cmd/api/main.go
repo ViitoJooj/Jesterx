@@ -7,33 +7,28 @@ import (
 	"time"
 
 	"github.com/ViitoJooj/Jesterx/internal/config"
-	httpRouter "github.com/ViitoJooj/Jesterx/internal/http"
+	apphttp "github.com/ViitoJooj/Jesterx/internal/http"
 	"github.com/ViitoJooj/Jesterx/internal/http/handlers"
-	middleware "github.com/ViitoJooj/Jesterx/internal/http/middlewares"
+	mw "github.com/ViitoJooj/Jesterx/internal/http/middlewares"
 	"github.com/ViitoJooj/Jesterx/internal/jobs"
 	"github.com/ViitoJooj/Jesterx/internal/repository/postgres"
 	"github.com/ViitoJooj/Jesterx/internal/service"
+	"github.com/ViitoJooj/Jesterx/pkg/database"
 	"github.com/ViitoJooj/Jesterx/pkg/logger"
 	"github.com/ViitoJooj/Jesterx/pkg/migrate"
-	"github.com/ViitoJooj/Jesterx/pkg/ratelimit"
-	"github.com/ViitoJooj/Jesterx/pkg/safeguard"
-)
-
-const (
-	maxBodyBytes   = 10 * 1024 * 1024
-	maxUploadBytes = 50 * 1024 * 1024
-	maxPaginationN = 100
-	banStrikes     = 20
-	banDuration    = 30 * time.Minute
 )
 
 func main() {
-	config.LoadEnv()
-	mux := httpRouter.NewRouter()
-	db := postgres.NewPostgres(postgres.PostgresConfig(*config.PGCNN))
+	cfg := config.Load()
+
+	db, err := database.NewPostgres(cfg)
+	if err != nil {
+		log.Fatalf("database: %v", err)
+	}
+	defer db.Close()
 
 	if err := migrate.Run(db, "migrations"); err != nil {
-		log.Fatalf("migration failed: %v", err)
+		log.Fatalf("migrations: %v", err)
 	}
 
 	authRepo := postgres.NewAuthRepository(db)
@@ -51,7 +46,6 @@ func main() {
 	orderService := service.NewOrderService(orderRepo, websiteRepo, productRepo, authRepo)
 	reportService := service.NewReportService(reportRepo, websiteRepo)
 	storeSocialService := service.NewStoreSocialService(storeSocialRepo, websiteRepo)
-
 	storageService := service.NewStorageService()
 
 	authHandler := handlers.NewAuthHandler(authService)
@@ -63,54 +57,32 @@ func main() {
 	themeHandler := handlers.NewThemeHandler(db)
 	adminHandler := handlers.NewAdminHandler(db)
 	reportHandler := handlers.NewReportHandler(reportService, authService)
-	storeSocialHandler := handlers.NewStoreSocialHandler(storeSocialService, db)
+	storeSocialHandler := handlers.NewStoreSocialHandler(storeSocialService)
 
-	httpRouter.RegisterAuthRoutes(mux, authHandler, authService)
-	httpRouter.RegisterWebsiteRoutes(mux, websiteHandler, authService)
-	httpRouter.RegisterPaymentRoutes(mux, paymentHandler, authService)
-	httpRouter.RegisterProductRoutes(mux, productHandler, authService)
-	httpRouter.RegisterOrderRoutes(mux, orderHandler, authService)
-	httpRouter.RegisterStorageRoutes(mux, storageHandler, authService)
-	httpRouter.RegisterThemeRoutes(mux, themeHandler)
-	httpRouter.RegisterAdminRoutes(mux, adminHandler, authService)
-	httpRouter.RegisterReportRoutes(mux, reportHandler, authService)
-	httpRouter.RegisterStoreSocialRoutes(mux, storeSocialHandler, authService)
+	router := apphttp.NewRouter(
+		cfg,
+		authService,
+		authHandler,
+		websiteHandler,
+		paymentHandler,
+		productHandler,
+		orderHandler,
+		storageHandler,
+		themeHandler,
+		adminHandler,
+		reportHandler,
+		storeSocialHandler,
+	)
 
-	globalLimiter := ratelimit.NewLimiter(200)
-	authLimiter := ratelimit.NewLimiter(15)
-
-	routeLimiter := ratelimit.NewRouteRateLimiter().
-		Add("/api/v1/payments/", 10).
-		Add("/api/v1/upload", 20).
-		Add("/api/store/", 120)
-
-	ipBanner := safeguard.NewIPBanner(banStrikes, banDuration)
-
-	handler := safeguard.Recovery(
+	handler := mw.CORS(
 		logger.Middleware(func(ctx context.Context) string {
-			id, ok := middleware.UserID(ctx)
+			id, ok := mw.UserID(ctx)
 			if !ok {
 				return ""
 			}
 			return id
 		})(
-			middleware.CORS(
-				safeguard.PathTraversalGuard(
-					safeguard.PaginationGuard(maxPaginationN)(
-						safeguard.BodyLimit(maxBodyBytes)(
-							ipBanner.Middleware(
-								globalLimiter.Middleware(
-									routeLimiter.Middleware(
-										ratelimit.AuthRateLimit(authLimiter,
-											middleware.IdentityMiddleware(authService)(mux),
-										),
-									),
-								),
-							),
-						),
-					),
-				),
-			),
+			router,
 		),
 	)
 
@@ -118,7 +90,7 @@ func main() {
 	go jobs.StartSalesDigestWorker(orderService, authRepo, websiteRepo)
 
 	srv := &http.Server{
-		Addr:              ":8080",
+		Addr:              ":" + cfg.Port,
 		Handler:           handler,
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       15 * time.Second,
@@ -127,8 +99,8 @@ func main() {
 		MaxHeaderBytes:    1 << 20,
 	}
 
-	log.Println("Server starting on :8080")
+	log.Printf("server listening on :%s", cfg.Port)
 	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		log.Fatalf("server error: %v", err)
+		log.Fatalf("server: %v", err)
 	}
 }

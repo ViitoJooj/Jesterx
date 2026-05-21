@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/ViitoJooj/Jesterx/internal/security"
 	"github.com/ViitoJooj/Jesterx/internal/service"
@@ -21,13 +22,20 @@ func IdentityMiddleware(auth *service.AuthService) func(http.Handler) http.Handl
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			websiteId := r.Header.Get("X-Website-Id")
-			if websiteId == "" {
-				next.ServeHTTP(w, r)
-				return
-			}
 
-			cookie, err := r.Cookie(security.AccessCookieName(websiteId))
-			if err != nil {
+			var cookie *http.Cookie
+			if websiteId != "" {
+				cookie, _ = r.Cookie(security.AccessCookieName(websiteId))
+			}
+			if cookie == nil {
+				for _, c := range r.Cookies() {
+					if strings.HasPrefix(c.Name, "access_token_") {
+						cookie = c
+						break
+					}
+				}
+			}
+			if cookie == nil {
 				next.ServeHTTP(w, r)
 				return
 			}
@@ -36,6 +44,9 @@ func IdentityMiddleware(auth *service.AuthService) func(http.Handler) http.Handl
 			if err != nil {
 				next.ServeHTTP(w, r)
 				return
+			}
+			if websiteId == "" {
+				websiteId = claims.WebsiteId
 			}
 
 			user, err := auth.GetUserByID(claims.Sub)

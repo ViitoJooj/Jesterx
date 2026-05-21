@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-chi/chi/v5"
+
 	"github.com/ViitoJooj/Jesterx/internal/domain"
 	middleware "github.com/ViitoJooj/Jesterx/internal/http/middlewares"
 	"github.com/ViitoJooj/Jesterx/internal/service"
@@ -157,7 +159,8 @@ func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
-	siteID := strings.TrimSpace(r.PathValue("siteID"))
+	siteID := strings.TrimSpace(chi.URLParam(r, "siteID"))
+
 	defer r.Body.Close()
 	var req CreateProductRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -176,33 +179,15 @@ func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	p, err := h.productService.CreateProduct(userID, siteID, service.CreateProductInput{
-		Name:             req.Name,
-		Description:      req.Description,
-		ShortDescription: req.ShortDescription,
-		Price:            req.Price,
-		ComparePrice:     req.ComparePrice,
-		Stock:            req.Stock,
-		Sku:              req.Sku,
-		Category:         req.Category,
-		Slug:             req.Slug,
-		Brand:            req.Brand,
-		Model:            req.Model,
-		Barcode:          req.Barcode,
-		Condition:        req.Condition,
-		WeightGrams:      req.WeightGrams,
-		WidthCm:          req.WidthCm,
-		HeightCm:         req.HeightCm,
-		LengthCm:         req.LengthCm,
-		Material:         req.Material,
-		Color:            req.Color,
-		Size:             req.Size,
-		WarrantyMonths:   req.WarrantyMonths,
-		OriginCountry:    req.OriginCountry,
-		Tags:             req.Tags,
-		Attributes:       req.Attributes,
-		RequiresShipping: req.RequiresShipping,
-		Images:           req.Images,
-		Active:           req.Active,
+		Name: req.Name, Description: req.Description, ShortDescription: req.ShortDescription,
+		Price: req.Price, ComparePrice: req.ComparePrice, Stock: req.Stock, Sku: req.Sku,
+		Category: req.Category, Slug: req.Slug, Brand: req.Brand, Model: req.Model,
+		Barcode: req.Barcode, Condition: req.Condition, WeightGrams: req.WeightGrams,
+		WidthCm: req.WidthCm, HeightCm: req.HeightCm, LengthCm: req.LengthCm,
+		Material: req.Material, Color: req.Color, Size: req.Size,
+		WarrantyMonths: req.WarrantyMonths, OriginCountry: req.OriginCountry,
+		Tags: req.Tags, Attributes: req.Attributes, RequiresShipping: req.RequiresShipping,
+		Images: req.Images, Active: req.Active,
 	})
 	if err != nil {
 		http.Error(w, err.Error(), productErrStatus(err))
@@ -220,7 +205,7 @@ func (h *ProductHandler) ListProducts(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
-	siteID := strings.TrimSpace(r.PathValue("siteID"))
+	siteID := strings.TrimSpace(chi.URLParam(r, "siteID"))
 
 	products, err := h.productService.ListProducts(userID, siteID)
 	if err != nil {
@@ -243,8 +228,9 @@ func (h *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
-	siteID := strings.TrimSpace(r.PathValue("siteID"))
-	productID := strings.TrimSpace(r.PathValue("productID"))
+	siteID := strings.TrimSpace(chi.URLParam(r, "siteID"))
+	productID := strings.TrimSpace(chi.URLParam(r, "productID"))
+
 	defer r.Body.Close()
 	var req UpdateProductRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -263,33 +249,15 @@ func (h *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	p, err := h.productService.UpdateProduct(userID, siteID, productID, service.UpdateProductInput{
-		Name:             req.Name,
-		Description:      req.Description,
-		ShortDescription: req.ShortDescription,
-		Price:            req.Price,
-		ComparePrice:     req.ComparePrice,
-		Stock:            req.Stock,
-		Sku:              req.Sku,
-		Category:         req.Category,
-		Slug:             req.Slug,
-		Brand:            req.Brand,
-		Model:            req.Model,
-		Barcode:          req.Barcode,
-		Condition:        req.Condition,
-		WeightGrams:      req.WeightGrams,
-		WidthCm:          req.WidthCm,
-		HeightCm:         req.HeightCm,
-		LengthCm:         req.LengthCm,
-		Material:         req.Material,
-		Color:            req.Color,
-		Size:             req.Size,
-		WarrantyMonths:   req.WarrantyMonths,
-		OriginCountry:    req.OriginCountry,
-		Tags:             req.Tags,
-		Attributes:       req.Attributes,
-		RequiresShipping: req.RequiresShipping,
-		Images:           req.Images,
-		Active:           req.Active,
+		Name: req.Name, Description: req.Description, ShortDescription: req.ShortDescription,
+		Price: req.Price, ComparePrice: req.ComparePrice, Stock: req.Stock, Sku: req.Sku,
+		Category: req.Category, Slug: req.Slug, Brand: req.Brand, Model: req.Model,
+		Barcode: req.Barcode, Condition: req.Condition, WeightGrams: req.WeightGrams,
+		WidthCm: req.WidthCm, HeightCm: req.HeightCm, LengthCm: req.LengthCm,
+		Material: req.Material, Color: req.Color, Size: req.Size,
+		WarrantyMonths: req.WarrantyMonths, OriginCountry: req.OriginCountry,
+		Tags: req.Tags, Attributes: req.Attributes, RequiresShipping: req.RequiresShipping,
+		Images: req.Images, Active: req.Active,
 	})
 	if err != nil {
 		http.Error(w, err.Error(), productErrStatus(err))
@@ -307,8 +275,8 @@ func (h *ProductHandler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
-	siteID := strings.TrimSpace(r.PathValue("siteID"))
-	productID := strings.TrimSpace(r.PathValue("productID"))
+	siteID := strings.TrimSpace(chi.URLParam(r, "siteID"))
+	productID := strings.TrimSpace(chi.URLParam(r, "productID"))
 
 	if err := h.productService.DeleteProduct(userID, siteID, productID); err != nil {
 		http.Error(w, err.Error(), productErrStatus(err))
@@ -318,7 +286,7 @@ func (h *ProductHandler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ProductHandler) PublicListProducts(w http.ResponseWriter, r *http.Request) {
-	siteID := strings.TrimSpace(r.PathValue("siteID"))
+	siteID := strings.TrimSpace(chi.URLParam(r, "siteID"))
 
 	products, err := h.productService.GetPublicProducts(siteID)
 	if err != nil {
@@ -336,8 +304,8 @@ func (h *ProductHandler) PublicListProducts(w http.ResponseWriter, r *http.Reque
 }
 
 func (h *ProductHandler) PublicGetProduct(w http.ResponseWriter, r *http.Request) {
-	siteID := strings.TrimSpace(r.PathValue("siteID"))
-	productID := strings.TrimSpace(r.PathValue("productID"))
+	siteID := strings.TrimSpace(chi.URLParam(r, "siteID"))
+	productID := strings.TrimSpace(chi.URLParam(r, "productID"))
 
 	p, err := h.productService.GetPublicProduct(siteID, productID)
 	if err != nil {

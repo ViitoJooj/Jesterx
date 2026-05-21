@@ -24,7 +24,6 @@ func (h *StorageHandler) Upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 50MB limit (matches service constant)
 	if err := r.ParseMultipartForm(50 << 20); err != nil {
 		jsonError(w, "falha ao processar formulário: "+err.Error(), http.StatusBadRequest)
 		return

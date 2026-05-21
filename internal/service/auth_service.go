@@ -10,6 +10,7 @@ import (
 	"github.com/ViitoJooj/Jesterx/internal/domain"
 	"github.com/ViitoJooj/Jesterx/internal/repository"
 	"github.com/ViitoJooj/Jesterx/internal/security"
+	"github.com/google/uuid"
 )
 
 type AuthService struct {
@@ -50,23 +51,30 @@ func (s *AuthService) DeleteExpiredDeactivatedUsers() error {
 	return s.userRepo.DeleteExpiredDeactivatedUsers()
 }
 
-type RegisterInput struct {
-	WebsiteId         string
-	FirstName         string
-	LastName          string
-	Email             string
-	Password          string
-	AccountType       string
-	CompanyName       *string
-	TradeName         *string
-	CpfCnpj           *string
-	Phone             *string
-	ZipCode           *string
-	AddressStreet     *string
-	AddressNumber     *string
+type CompanyInput struct {
+	CompanyName     string
+	TradeName       *string
+	Cnpj            *string
+	Phone           *string
+	ZipCode         *string
+	AddressStreet   *string
+	AddressNumber   *string
 	AddressComplement *string
-	AddressCity       *string
-	AddressState      *string
+	AddressDistrict *string
+	AddressCity     *string
+	AddressState    *string
+	AddressCountry  *string
+}
+
+type RegisterInput struct {
+	WebsiteId string
+	FirstName string
+	LastName  string
+	Email     string
+	Password  string
+	Cpf       *string
+	Phone     *string
+	Company   *CompanyInput
 }
 
 func (s *AuthService) Register(input RegisterInput) (*domain.User, error) {
@@ -78,31 +86,25 @@ func (s *AuthService) Register(input RegisterInput) (*domain.User, error) {
 		return nil, errors.New("invalid password")
 	}
 
-	if input.AccountType != "personal" && input.AccountType != "business" {
-		input.AccountType = "personal"
-	}
-
-	if input.AccountType == "business" {
-		if input.CompanyName == nil || strings.TrimSpace(*input.CompanyName) == "" {
-			return nil, errors.New("company name is required for business accounts")
+	if input.Company != nil {
+		co := input.Company
+		if strings.TrimSpace(co.CompanyName) == "" {
+			return nil, errors.New("company name is required")
 		}
-		if input.CpfCnpj == nil || strings.TrimSpace(*input.CpfCnpj) == "" {
-			return nil, errors.New("CNPJ is required for business accounts")
+		if co.Phone == nil || strings.TrimSpace(*co.Phone) == "" {
+			return nil, errors.New("company phone is required")
 		}
-		if input.Phone == nil || strings.TrimSpace(*input.Phone) == "" {
-			return nil, errors.New("phone is required for business accounts")
+		if co.ZipCode == nil || strings.TrimSpace(*co.ZipCode) == "" {
+			return nil, errors.New("company zip code is required")
 		}
-		if input.ZipCode == nil || strings.TrimSpace(*input.ZipCode) == "" {
-			return nil, errors.New("zip code is required for business accounts")
+		if co.AddressStreet == nil || strings.TrimSpace(*co.AddressStreet) == "" {
+			return nil, errors.New("company address is required")
 		}
-		if input.AddressStreet == nil || strings.TrimSpace(*input.AddressStreet) == "" {
-			return nil, errors.New("address is required for business accounts")
+		if co.AddressCity == nil || strings.TrimSpace(*co.AddressCity) == "" {
+			return nil, errors.New("company city is required")
 		}
-		if input.AddressCity == nil || strings.TrimSpace(*input.AddressCity) == "" {
-			return nil, errors.New("city is required for business accounts")
-		}
-		if input.AddressState == nil || strings.TrimSpace(*input.AddressState) == "" {
-			return nil, errors.New("state is required for business accounts")
+		if co.AddressState == nil || strings.TrimSpace(*co.AddressState) == "" {
+			return nil, errors.New("company state is required")
 		}
 	}
 
@@ -127,24 +129,30 @@ func (s *AuthService) Register(input RegisterInput) (*domain.User, error) {
 		return nil, err
 	}
 
-	user := domain.NewUser(input.WebsiteId, input.FirstName, input.LastName, input.Email, hashedPassword, input.AccountType)
-	user.CpfCnpj = input.CpfCnpj
-	user.CompanyName = input.CompanyName
-	user.TradeName = input.TradeName
+	user := domain.NewUser(input.WebsiteId, input.FirstName, input.LastName, input.Email, hashedPassword)
+	user.Cpf = input.Cpf
 	user.Phone = input.Phone
-	user.ZipCode = input.ZipCode
-	user.AddressStreet = input.AddressStreet
-	user.AddressNumber = input.AddressNumber
-	user.AddressComplement = input.AddressComplement
-	user.AddressCity = input.AddressCity
-	user.AddressState = input.AddressState
-	if input.AccountType == "business" {
-		country := "Brasil"
-		user.AddressCountry = &country
-	}
 
 	if err := s.userRepo.UserRegister(*user); err != nil {
 		return nil, err
+	}
+
+	if input.Company != nil {
+		co := input.Company
+		country := co.AddressCountry
+		if country == nil {
+			br := "BR"
+			country = &br
+		}
+		company := domain.NewCompany(
+			user.Id, co.CompanyName, co.TradeName, co.Cnpj, co.Phone,
+			co.ZipCode, co.AddressStreet, co.AddressNumber, co.AddressComplement,
+			co.AddressDistrict, co.AddressCity, co.AddressState, country,
+		)
+		if err := s.userRepo.CompanyRegister(*company); err != nil {
+			return nil, err
+		}
+		user.Company = company
 	}
 
 	return user, nil
@@ -300,15 +308,15 @@ func (s *AuthService) UpdateProfile(userID string, data domain.UpdateProfileData
 	if len(data.LastName) < 1 || len(data.LastName) > 50 {
 		return errors.New("invalid last name")
 	}
-	if data.CpfCnpj != nil {
-		raw := strings.TrimSpace(*data.CpfCnpj)
-		if len(raw) > 18 {
-			return errors.New("invalid cpf/cnpj")
+	if data.Cpf != nil {
+		raw := strings.TrimSpace(*data.Cpf)
+		if len(raw) > 14 {
+			return errors.New("CPF inválido")
 		}
 		if raw == "" {
-			data.CpfCnpj = nil
+			data.Cpf = nil
 		} else {
-			data.CpfCnpj = &raw
+			data.Cpf = &raw
 		}
 	}
 	if data.DisplayName != nil {
@@ -375,6 +383,52 @@ func (s *AuthService) UpdateProfile(userID string, data domain.UpdateProfileData
 		}
 	}
 	return s.userRepo.UpdateUserProfile(userID, data)
+}
+
+func (s *AuthService) ListAddresses(userID string) ([]*domain.UserAddress, error) {
+	return s.userRepo.ListUserAddresses(userID)
+}
+
+func (s *AuthService) CreateAddress(userID string, data domain.UpsertAddressData) error {
+	addrs, err := s.userRepo.ListUserAddresses(userID)
+	if err != nil {
+		return errors.New("erro interno")
+	}
+	if len(addrs) >= 10 {
+		return errors.New("limite de 10 endereços atingido")
+	}
+	country := "BR"
+	if data.Country != nil && strings.TrimSpace(*data.Country) != "" {
+		country = strings.TrimSpace(*data.Country)
+	}
+	id, _ := uuid.NewV7()
+	addr := domain.UserAddress{
+		Id:         id.String(),
+		UserId:     userID,
+		Label:      data.Label,
+		ZipCode:    data.ZipCode,
+		Street:     data.Street,
+		Number:     data.Number,
+		Complement: data.Complement,
+		District:   data.District,
+		City:       data.City,
+		State:      data.State,
+		Country:    country,
+		IsDefault:  len(addrs) == 0,
+	}
+	return s.userRepo.CreateUserAddress(addr)
+}
+
+func (s *AuthService) UpdateAddress(id, userID string, data domain.UpsertAddressData) error {
+	return s.userRepo.UpdateUserAddress(id, userID, data)
+}
+
+func (s *AuthService) DeleteAddress(id, userID string) error {
+	return s.userRepo.DeleteUserAddress(id, userID)
+}
+
+func (s *AuthService) SetDefaultAddress(id, userID string) error {
+	return s.userRepo.SetDefaultAddress(id, userID)
 }
 
 func (s *AuthService) Logout(w http.ResponseWriter) error {

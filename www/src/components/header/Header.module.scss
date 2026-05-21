@@ -77,8 +77,7 @@ body {
 
       &.active {
         color: $color-primary;
-        background: color-mix(in srgb, $color-primary 12%, white);
-        box-shadow: inset 0 0 0 1px color-mix(in srgb, $color-primary 26%, white);
+        font-weight: 600;
       }
     }
   }
@@ -274,10 +273,8 @@ body {
 }
 
 .drawer_nav a.active {
-  color: $font-color-primary;
-  background: linear-gradient(180deg, color-mix(in srgb, $color-primary 16%, white), color-mix(in srgb, $color-primary 10%, white));
-  border-color: color-mix(in srgb, $color-primary 28%, white);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+  color: $color-primary;
+  font-weight: 700;
 }
 
 .user_menu {
@@ -308,20 +305,19 @@ body {
 
 .avatar_btn {
   all: unset;
-  display: inline-grid;
-  place-items: center;
-  width: 38px;
-  height: 38px;
+  display: block;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   cursor: pointer;
-  border: 1px solid $border-color;
-  background: $background-color-primary;
+  background: $background-color-secondary;
   transition: $transition-fast;
+  box-shadow: 0 0 0 2px $border-color;
+  overflow: hidden;
+  flex-shrink: 0;
 
   &:hover {
-    box-shadow: 0 10px 18px rgba(0, 0, 0, 0.12);
-    outline: 2px solid color-mix(in srgb, $color-primary 30%, white);
-    outline-offset: 2px;
+    box-shadow: 0 0 0 2.5px $color-primary;
   }
 
   &:focus-visible {
@@ -331,23 +327,23 @@ body {
 }
 
 .avatar_img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 50%;
+  object-position: center center;
   pointer-events: none;
   -webkit-user-drag: none;
 }
 
 .avatar_fallback {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
   display: grid;
   place-items: center;
-  background: color-mix(in srgb, $color-primary 85%, black);
-  color: $font-color-inverse;
-  font-size: 0.85rem;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, $color-primary, color-mix(in srgb, $color-primary 70%, #ff8c69));
+  color: #fff;
+  font-size: 0.82rem;
   font-weight: 800;
   user-select: none;
 }

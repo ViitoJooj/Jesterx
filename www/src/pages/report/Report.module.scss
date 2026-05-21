@@ -76,7 +76,7 @@
   box-sizing: border-box;
   transition: border-color .2s;
 
-  &:focus { border-color: #b23a64; }
+  &:focus { border-color: $color-primary-raw; }
 }
 
 .select {
@@ -110,7 +110,7 @@
 .submitBtn {
   padding: .65rem 1.4rem;
   border-radius: 10px;
-  background: linear-gradient(90deg, #8b1e3f, #b23a64);
+  background: linear-gradient(90deg, $color-primary-raw, $color-primary-raw);
   border: none;
   color: #fff;
   font-weight: 600;
@@ -136,7 +136,7 @@ h2 { margin: 0; text-align: center; }
   text-align: center;
 
   span { display: block; font-size: .8rem; color: $font-color-secondary; margin-bottom: .35rem; }
-  strong { font-size: 1.6rem; color: #b23a64; }
+  strong { font-size: 1.6rem; color: $color-primary-raw; }
 }
 
 .hint {
@@ -189,7 +189,7 @@ h2 { margin: 0; text-align: center; }
   font-size: .875rem;
   cursor: pointer;
   transition: border-color .2s, color .2s;
-  &:hover { border-color: #b23a64; color: #b23a64; }
+  &:hover { border-color: $color-primary-raw; color: $color-primary-raw; }
 }
 
 .evidenceGrid {

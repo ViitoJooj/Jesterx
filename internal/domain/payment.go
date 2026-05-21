@@ -19,7 +19,6 @@ type Plan struct {
 type Payment struct {
 	ID          string
 	UserID      string
-	WebsiteID   string
 	PlanID      string
 	ReferenceID string
 	Type        string

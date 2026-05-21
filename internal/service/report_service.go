@@ -50,7 +50,6 @@ func (s *ReportService) CreateReport(input CreateReportInput) (*domain.Report, e
 		return nil, errors.New("motivo inválido")
 	}
 
-	// Validate evidence (max 5, each base64 item max ~1.3MB)
 	if len(input.EvidenceURLs) > 5 {
 		return nil, errors.New("máximo de 5 imagens de evidência permitidas")
 	}
@@ -116,7 +115,6 @@ func (s *ReportService) UpdateReport(id string, input UpdateReportInput) (*domai
 		return nil, err
 	}
 
-	// Send email notification if there is an admin response and reporter email exists
 	if input.AdminResponse != nil && *input.AdminResponse != "" && existing.ReporterEmail != "" {
 		_ = security.SendTicketResponseEmail(existing.ReporterEmail, existing.ReporterName, updated.TicketNumber, *input.AdminResponse, string(updated.Status))
 	}

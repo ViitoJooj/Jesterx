@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-chi/chi/v5"
+
 	"github.com/ViitoJooj/Jesterx/internal/domain"
 	middleware "github.com/ViitoJooj/Jesterx/internal/http/middlewares"
 	"github.com/ViitoJooj/Jesterx/internal/service"
@@ -90,8 +92,8 @@ func reportToData(r *domain.Report) ReportData {
 	}
 }
 
-// PublicCreateReport handles POST /api/v1/reports – anyone can submit a report.
-// If the user is authenticated, reporter_name and reporter_email are auto-filled from their profile.
+// PublicCreateReport handles POST /api/v1/reports – anyone can submit.
+// If the user is authenticated, reporter info is auto-filled from their profile.
 func (h *ReportHandler) PublicCreateReport(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
@@ -101,7 +103,6 @@ func (h *ReportHandler) PublicCreateReport(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	// Auto-fill reporter info from authenticated user if missing
 	var reporterUserID *string
 	if userID, ok := middleware.UserID(r.Context()); ok {
 		user, err := h.authService.GetUserByID(userID)
@@ -144,7 +145,6 @@ func (h *ReportHandler) AdminListReports(w http.ResponseWriter, r *http.Request)
 	status := r.URL.Query().Get("status")
 	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
 	perPage, _ := strconv.Atoi(r.URL.Query().Get("per_page"))
-
 	if page < 1 {
 		page = 1
 	}
@@ -166,18 +166,15 @@ func (h *ReportHandler) AdminListReports(w http.ResponseWriter, r *http.Request)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(ReportsListResponse{
-		Success: true,
-		Message: "success",
-		Total:   total,
-		Page:    page,
-		PerPage: perPage,
-		Data:    data,
+		Success: true, Message: "success",
+		Total: total, Page: page, PerPage: perPage,
+		Data: data,
 	})
 }
 
 // AdminGetReport handles GET /api/v1/admin/reports/{reportID} – admin only.
 func (h *ReportHandler) AdminGetReport(w http.ResponseWriter, r *http.Request) {
-	reportID := strings.TrimSpace(r.PathValue("reportID"))
+	reportID := strings.TrimSpace(chi.URLParam(r, "reportID"))
 	if reportID == "" {
 		http.Error(w, "reportID required", http.StatusBadRequest)
 		return
@@ -191,16 +188,12 @@ func (h *ReportHandler) AdminGetReport(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(ReportResponse{
-		Success: true,
-		Message: "success",
-		Data:    reportToData(report),
-	})
+	json.NewEncoder(w).Encode(ReportResponse{Success: true, Message: "success", Data: reportToData(report)})
 }
 
 // AdminUpdateReport handles PATCH /api/v1/admin/reports/{reportID} – admin only.
 func (h *ReportHandler) AdminUpdateReport(w http.ResponseWriter, r *http.Request) {
-	reportID := strings.TrimSpace(r.PathValue("reportID"))
+	reportID := strings.TrimSpace(chi.URLParam(r, "reportID"))
 	if reportID == "" {
 		http.Error(w, "reportID required", http.StatusBadRequest)
 		return
@@ -224,9 +217,5 @@ func (h *ReportHandler) AdminUpdateReport(w http.ResponseWriter, r *http.Request
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(ReportResponse{
-		Success: true,
-		Message: "Denúncia atualizada",
-		Data:    reportToData(report),
-	})
+	json.NewEncoder(w).Encode(ReportResponse{Success: true, Message: "Denúncia atualizada", Data: reportToData(report)})
 }

@@ -17,25 +17,10 @@ services:
       timeout: 5s
       retries: 5
 
-  redis:
-    image: redis:7-alpine
-    container_name: jesterx_redis
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    command: redis-server --save 60 1 --loglevel warning
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   api:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: docker/Dockerfile
     container_name: jesterx_api
     restart: unless-stopped
     ports:
@@ -54,18 +39,11 @@ services:
       - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
       - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
       - FRONTEND_URL=${FRONTEND_URL:-http://localhost:5173}
-      - SUPABASE_PROJECT_URL=${SUPABASE_PROJECT_URL}
-      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
-      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
       - PLATFORM_COMMISSION_PCT=${PLATFORM_COMMISSION_PCT:-5}
       - ENVIRONMENT=${ENVIRONMENT:-prod}
-      - REDIS_URL=redis://redis:6379
     depends_on:
       postgres:
-        condition: service_healthy
-      redis:
         condition: service_healthy
 
 volumes:
   postgres_data:
-  redis_data:

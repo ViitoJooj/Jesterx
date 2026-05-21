@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-chi/chi/v5"
+
 	"github.com/ViitoJooj/Jesterx/internal/config"
 	"github.com/ViitoJooj/Jesterx/internal/domain"
 	middleware "github.com/ViitoJooj/Jesterx/internal/http/middlewares"
@@ -16,22 +18,29 @@ import (
 	"github.com/ViitoJooj/Jesterx/pkg/validate"
 )
 
-type RegisterRequest struct {
-	First_name        string  `json:"first_name"`
-	Last_name         string  `json:"last_name"`
-	Email             string  `json:"email"`
-	Password          string  `json:"password"`
-	AccountType       string  `json:"account_type"`
-	CompanyName       *string `json:"company_name"`
+type CompanyRegisterRequest struct {
+	CompanyName       string  `json:"company_name"`
 	TradeName         *string `json:"trade_name"`
-	CpfCnpj           *string `json:"cpf_cnpj"`
+	Cnpj              *string `json:"cnpj"`
 	Phone             *string `json:"phone"`
 	ZipCode           *string `json:"zip_code"`
 	AddressStreet     *string `json:"address_street"`
 	AddressNumber     *string `json:"address_number"`
 	AddressComplement *string `json:"address_complement"`
+	AddressDistrict   *string `json:"address_district"`
 	AddressCity       *string `json:"address_city"`
 	AddressState      *string `json:"address_state"`
+	AddressCountry    *string `json:"address_country"`
+}
+
+type RegisterRequest struct {
+	First_name string                  `json:"first_name"`
+	Last_name  string                  `json:"last_name"`
+	Email      string                  `json:"email"`
+	Password   string                  `json:"password"`
+	Cpf        *string                 `json:"cpf"`
+	Phone      *string                 `json:"phone"`
+	Company    *CompanyRegisterRequest `json:"company"`
 }
 
 type LoginRequest struct {
@@ -59,27 +68,11 @@ type ResponseRefreshToken struct {
 	Message string `json:"message"`
 }
 
-type UserMeResponse struct {
+type CompanyResponse struct {
 	ID                string `json:"id"`
-	FirstName         string `json:"first_name"`
-	LastName          string `json:"last_name"`
-	Email             string `json:"email"`
-	Role              string `json:"role"`
-	Plan              string `json:"user_plan"`
-	CpfCnpj           string `json:"cpf_cnpj"`
-	AvatarUrl         string `json:"avatar_url"`
-	PlanMaxSites      int    `json:"plan_max_sites"`
-	PlanMaxRoutes     int    `json:"plan_max_routes"`
-	AccountType       string `json:"account_type"`
 	CompanyName       string `json:"company_name"`
 	TradeName         string `json:"trade_name"`
-	DisplayName       string `json:"display_name"`
-	BirthDate         string `json:"birth_date"`
-	Gender            string `json:"gender"`
-	Bio               string `json:"bio"`
-	Instagram         string `json:"instagram"`
-	WebsiteUrl        string `json:"website_url"`
-	Whatsapp          string `json:"whatsapp"`
+	Cnpj              string `json:"cnpj"`
 	Phone             string `json:"phone"`
 	ZipCode           string `json:"zip_code"`
 	AddressStreet     string `json:"address_street"`
@@ -89,17 +82,37 @@ type UserMeResponse struct {
 	AddressCity       string `json:"address_city"`
 	AddressState      string `json:"address_state"`
 	AddressCountry    string `json:"address_country"`
-	CreatedAt         string `json:"created_at"`
-	UpdatedAt         string `json:"updated_at"`
+}
+
+type UserMeResponse struct {
+	ID                string           `json:"id"`
+	FirstName         string           `json:"first_name"`
+	LastName          string           `json:"last_name"`
+	Email             string           `json:"email"`
+	Role              string           `json:"role"`
+	Plan              string           `json:"user_plan"`
+	Cpf               string           `json:"cpf"`
+	AvatarUrl         string           `json:"avatar_url"`
+	PlanMaxSites      int              `json:"plan_max_sites"`
+	PlanMaxRoutes     int              `json:"plan_max_routes"`
+	DisplayName       string           `json:"display_name"`
+	BirthDate         string           `json:"birth_date"`
+	Gender            string           `json:"gender"`
+	Bio               string           `json:"bio"`
+	Instagram         string           `json:"instagram"`
+	WebsiteUrl        string           `json:"website_url"`
+	Whatsapp          string           `json:"whatsapp"`
+	Phone             string           `json:"phone"`
+	Company           *CompanyResponse `json:"company"`
+	CreatedAt         string           `json:"created_at"`
+	UpdatedAt         string           `json:"updated_at"`
 }
 
 type UpdateProfileRequest struct {
 	FirstName         string  `json:"first_name"`
 	LastName          string  `json:"last_name"`
-	CpfCnpj           *string `json:"cpf_cnpj"`
+	Cpf               *string `json:"cpf"`
 	AvatarUrl         *string `json:"avatar_url"`
-	CompanyName       *string `json:"company_name"`
-	TradeName         *string `json:"trade_name"`
 	DisplayName       *string `json:"display_name"`
 	BirthDate         *string `json:"birth_date"`
 	Gender            *string `json:"gender"`
@@ -108,14 +121,6 @@ type UpdateProfileRequest struct {
 	WebsiteUrl        *string `json:"website_url"`
 	Whatsapp          *string `json:"whatsapp"`
 	Phone             *string `json:"phone"`
-	ZipCode           *string `json:"zip_code"`
-	AddressStreet     *string `json:"address_street"`
-	AddressNumber     *string `json:"address_number"`
-	AddressComplement *string `json:"address_complement"`
-	AddressDistrict   *string `json:"address_district"`
-	AddressCity       *string `json:"address_city"`
-	AddressState      *string `json:"address_state"`
-	AddressCountry    *string `json:"address_country"`
 }
 
 type AuthHandler struct {
@@ -123,9 +128,7 @@ type AuthHandler struct {
 }
 
 func NewAuthHandler(authService *service.AuthService) *AuthHandler {
-	return &AuthHandler{
-		authService: authService,
-	}
+	return &AuthHandler{authService: authService}
 }
 
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
@@ -154,28 +157,38 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	websiteId := r.Header.Get("X-Website-Id")
 	if websiteId == "" {
-		log.Println("websiteId is null")
 		http.Error(w, "invalid website id", http.StatusBadRequest)
 		return
 	}
 
+	var companyInput *service.CompanyInput
+	if req.Company != nil {
+		co := req.Company
+		companyInput = &service.CompanyInput{
+			CompanyName:       co.CompanyName,
+			TradeName:         co.TradeName,
+			Cnpj:              co.Cnpj,
+			Phone:             co.Phone,
+			ZipCode:           co.ZipCode,
+			AddressStreet:     co.AddressStreet,
+			AddressNumber:     co.AddressNumber,
+			AddressComplement: co.AddressComplement,
+			AddressDistrict:   co.AddressDistrict,
+			AddressCity:       co.AddressCity,
+			AddressState:      co.AddressState,
+			AddressCountry:    co.AddressCountry,
+		}
+	}
+
 	user, err := h.authService.Register(service.RegisterInput{
-		WebsiteId:         websiteId,
-		FirstName:         req.First_name,
-		LastName:          req.Last_name,
-		Email:             req.Email,
-		Password:          req.Password,
-		AccountType:       req.AccountType,
-		CompanyName:       req.CompanyName,
-		TradeName:         req.TradeName,
-		CpfCnpj:           req.CpfCnpj,
-		Phone:             req.Phone,
-		ZipCode:           req.ZipCode,
-		AddressStreet:     req.AddressStreet,
-		AddressNumber:     req.AddressNumber,
-		AddressComplement: req.AddressComplement,
-		AddressCity:       req.AddressCity,
-		AddressState:      req.AddressState,
+		WebsiteId: websiteId,
+		FirstName: req.First_name,
+		LastName:  req.Last_name,
+		Email:     req.Email,
+		Password:  req.Password,
+		Cpf:       req.Cpf,
+		Phone:     req.Phone,
+		Company:   companyInput,
 	})
 	if err != nil {
 		log.Println(err)
@@ -183,16 +196,18 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = security.SendVerifyEmail(user.Email, user.Id, user.WebsiteId)
-	if err != nil {
-		log.Println("Error on sending email")
+	if err := security.SendVerifyEmail(user.Email, user.Id, user.WebsiteId); err != nil {
+		log.Println("error sending verification email:", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	resp := AuthResponse{
+	log.Printf("user registered: %s %s", user.First_name, user.Last_name)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(AuthResponse{
 		Success: true,
-		Message: "registered, please verify you email.",
+		Message: "registered, please verify your email.",
 		Data: UserData{
 			Id:         user.Id,
 			WebsiteId:  user.WebsiteId,
@@ -200,28 +215,12 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 			Plan:       derefString(user.Plan),
 			Created_at: user.Created_at,
 		},
-	}
-
-	log.Printf("User: %s; is registred", user.First_name+" "+user.Last_name)
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(resp)
+	})
 }
 
 func (h *AuthHandler) VerifyEmail(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-
-	path := r.URL.Path
-	prefix := "/api/v1/auth/verify/"
-
-	if !strings.HasPrefix(path, prefix) {
-		http.NotFound(w, r)
-		return
-	}
-
-	id := strings.TrimPrefix(path, prefix)
+	id := strings.TrimSpace(chi.URLParam(r, "id"))
 	if id == "" {
-		log.Println("ID is requered")
 		http.Error(w, "token error", http.StatusBadRequest)
 		return
 	}
@@ -300,11 +299,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.authService.Login(
-		websiteId,
-		req.Email,
-		req.Password,
-	)
+	user, err := h.authService.Login(websiteId, req.Email, req.Password)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
@@ -316,10 +311,9 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		WebsiteId: user.WebsiteId,
 		Exp:       time.Now().Add(30 * 24 * time.Hour).Unix(),
 	}
-
 	refreshToken, err := security.RefreshToken(refreshClaims)
 	if err != nil {
-		http.Error(w, "Internal error", http.StatusBadGateway)
+		http.Error(w, "internal error", http.StatusBadGateway)
 		return
 	}
 
@@ -331,31 +325,16 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		Role:      user.Role,
 		Exp:       time.Now().Add(15 * time.Minute).Unix(),
 	}
-
 	accessToken, err := security.AccessToken(accessClaims)
 	if err != nil {
-		http.Error(w, "Internal error", http.StatusInternalServerError)
+		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
 
 	secure := !config.IsDev
-
 	var plan string
 	if user.Plan != nil {
 		plan = *user.Plan
-	}
-
-	resp := AuthResponse{
-		Success: true,
-		Message: "logged in.",
-		Data: UserData{
-			Id:         user.Id,
-			WebsiteId:  user.WebsiteId,
-			Email:      user.Email,
-			Plan:       plan,
-			Updated_at: user.Updated_at,
-			Created_at: user.Created_at,
-		},
 	}
 
 	http.SetCookie(w, &http.Cookie{
@@ -376,14 +355,24 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		Secure:   secure,
 		SameSite: http.SameSiteLaxMode,
 	})
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusAccepted)
-	json.NewEncoder(w).Encode(resp)
+	json.NewEncoder(w).Encode(AuthResponse{
+		Success: true,
+		Message: "logged in.",
+		Data: UserData{
+			Id:         user.Id,
+			WebsiteId:  user.WebsiteId,
+			Email:      user.Email,
+			Plan:       plan,
+			Updated_at: user.Updated_at,
+			Created_at: user.Created_at,
+		},
+	})
 }
 
 func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-
 	websiteId := r.Header.Get("X-Website-Id")
 	if websiteId == "" {
 		http.Error(w, "invalid website id", http.StatusBadRequest)
@@ -413,14 +402,9 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteLaxMode,
 	})
 
-	resp := ResponseRefreshToken{
-		Success: true,
-		Message: "success",
-	}
-
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusAccepted)
-	json.NewEncoder(w).Encode(resp)
+	json.NewEncoder(w).Encode(ResponseRefreshToken{Success: true, Message: "success"})
 }
 
 func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
@@ -443,13 +427,10 @@ func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
 		Email:             user.Email,
 		Role:              user.Role,
 		Plan:              derefString(user.Plan),
-		CpfCnpj:           derefString(user.CpfCnpj),
+		Cpf:               derefString(user.Cpf),
 		AvatarUrl:         derefString(user.AvatarUrl),
 		PlanMaxSites:      planLimits[0],
 		PlanMaxRoutes:     planLimits[1],
-		AccountType:       user.AccountType,
-		CompanyName:       derefString(user.CompanyName),
-		TradeName:         derefString(user.TradeName),
 		DisplayName:       derefString(user.DisplayName),
 		BirthDate:         formatDate(user.BirthDate),
 		Gender:            derefString(user.Gender),
@@ -458,18 +439,27 @@ func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
 		WebsiteUrl:        derefString(user.WebsiteUrl),
 		Whatsapp:          derefString(user.Whatsapp),
 		Phone:             derefString(user.Phone),
-		ZipCode:           derefString(user.ZipCode),
-		AddressStreet:     derefString(user.AddressStreet),
-		AddressNumber:     derefString(user.AddressNumber),
-		AddressComplement: derefString(user.AddressComplement),
-		AddressDistrict:   derefString(user.AddressDistrict),
-		AddressCity:       derefString(user.AddressCity),
-		AddressState:      derefString(user.AddressState),
-		AddressCountry:    derefString(user.AddressCountry),
 		CreatedAt:         user.Created_at.Format(time.RFC3339),
 		UpdatedAt:         user.Updated_at.Format(time.RFC3339),
 	}
-
+	if user.Company != nil {
+		co := user.Company
+		resp.Company = &CompanyResponse{
+			ID:                co.Id,
+			CompanyName:       co.CompanyName,
+			TradeName:         derefString(co.TradeName),
+			Cnpj:              derefString(co.Cnpj),
+			Phone:             derefString(co.Phone),
+			ZipCode:           derefString(co.ZipCode),
+			AddressStreet:     derefString(co.AddressStreet),
+			AddressNumber:     derefString(co.AddressNumber),
+			AddressComplement: derefString(co.AddressComplement),
+			AddressDistrict:   derefString(co.AddressDistrict),
+			AddressCity:       derefString(co.AddressCity),
+			AddressState:      derefString(co.AddressState),
+			AddressCountry:    derefString(co.AddressCountry),
+		}
+	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(resp)
@@ -501,6 +491,219 @@ func (h *AuthHandler) DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]any{"success": true, "message": "conta desativada; exclusão definitiva em 30 dias"})
 }
 
+func (h *AuthHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
+	userID, ok := middleware.UserID(r.Context())
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	defer r.Body.Close()
+	var req UpdateProfileRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	birthDate, err := parseBirthDate(req.BirthDate)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err := h.authService.UpdateProfile(userID, domain.UpdateProfileData{
+		FirstName:         req.FirstName,
+		LastName:          req.LastName,
+		Cpf:               req.Cpf,
+		AvatarUrl:         req.AvatarUrl,
+		DisplayName:       req.DisplayName,
+		BirthDate:         birthDate,
+		Gender:            req.Gender,
+		Bio:               req.Bio,
+		Instagram:         req.Instagram,
+		WebsiteUrl:        req.WebsiteUrl,
+		Whatsapp:          req.Whatsapp,
+		Phone:             req.Phone,
+	}); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]any{"success": true, "message": "profile updated"})
+}
+
+type UpsertAddressRequest struct {
+	Label      *string `json:"label"`
+	ZipCode    *string `json:"zip_code"`
+	Street     *string `json:"street"`
+	Number     *string `json:"number"`
+	Complement *string `json:"complement"`
+	District   *string `json:"district"`
+	City       *string `json:"city"`
+	State      *string `json:"state"`
+	Country    *string `json:"country"`
+}
+
+type AddressResponse struct {
+	ID         string `json:"id"`
+	Label      string `json:"label"`
+	ZipCode    string `json:"zip_code"`
+	Street     string `json:"street"`
+	Number     string `json:"number"`
+	Complement string `json:"complement"`
+	District   string `json:"district"`
+	City       string `json:"city"`
+	State      string `json:"state"`
+	Country    string `json:"country"`
+	IsDefault  bool   `json:"is_default"`
+	CreatedAt  string `json:"created_at"`
+	UpdatedAt  string `json:"updated_at"`
+}
+
+func addressToResponse(a *domain.UserAddress) AddressResponse {
+	return AddressResponse{
+		ID:         a.Id,
+		Label:      derefString(a.Label),
+		ZipCode:    derefString(a.ZipCode),
+		Street:     derefString(a.Street),
+		Number:     derefString(a.Number),
+		Complement: derefString(a.Complement),
+		District:   derefString(a.District),
+		City:       derefString(a.City),
+		State:      derefString(a.State),
+		Country:    a.Country,
+		IsDefault:  a.IsDefault,
+		CreatedAt:  a.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:  a.UpdatedAt.Format(time.RFC3339),
+	}
+}
+
+func (h *AuthHandler) ListAddresses(w http.ResponseWriter, r *http.Request) {
+	userID, ok := middleware.UserID(r.Context())
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+	addrs, err := h.authService.ListAddresses(userID)
+	if err != nil {
+		http.Error(w, "erro ao listar endereços", http.StatusInternalServerError)
+		return
+	}
+	resp := make([]AddressResponse, 0, len(addrs))
+	for _, a := range addrs {
+		resp = append(resp, addressToResponse(a))
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(resp)
+}
+
+func (h *AuthHandler) CreateAddress(w http.ResponseWriter, r *http.Request) {
+	userID, ok := middleware.UserID(r.Context())
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+	defer r.Body.Close()
+	var req UpsertAddressRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+	if err := h.authService.CreateAddress(userID, domain.UpsertAddressData{
+		Label:      req.Label,
+		ZipCode:    req.ZipCode,
+		Street:     req.Street,
+		Number:     req.Number,
+		Complement: req.Complement,
+		District:   req.District,
+		City:       req.City,
+		State:      req.State,
+		Country:    req.Country,
+	}); err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]any{"success": false, "message": err.Error()})
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]any{"success": true})
+}
+
+func (h *AuthHandler) UpdateAddress(w http.ResponseWriter, r *http.Request) {
+	userID, ok := middleware.UserID(r.Context())
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+	id := chi.URLParam(r, "id")
+	defer r.Body.Close()
+	var req UpsertAddressRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+	if err := h.authService.UpdateAddress(id, userID, domain.UpsertAddressData{
+		Label:      req.Label,
+		ZipCode:    req.ZipCode,
+		Street:     req.Street,
+		Number:     req.Number,
+		Complement: req.Complement,
+		District:   req.District,
+		City:       req.City,
+		State:      req.State,
+		Country:    req.Country,
+	}); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]any{"success": true})
+}
+
+func (h *AuthHandler) DeleteAddress(w http.ResponseWriter, r *http.Request) {
+	userID, ok := middleware.UserID(r.Context())
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+	id := chi.URLParam(r, "id")
+	if err := h.authService.DeleteAddress(id, userID); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (h *AuthHandler) SetDefaultAddress(w http.ResponseWriter, r *http.Request) {
+	userID, ok := middleware.UserID(r.Context())
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+	id := chi.URLParam(r, "id")
+	if err := h.authService.SetDefaultAddress(id, userID); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]any{"success": true})
+}
+
+func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
+	websiteId := r.Header.Get("X-Website-Id")
+	if websiteId == "" {
+		http.Error(w, "invalid website id", http.StatusBadRequest)
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{Name: security.RefreshCookieName(websiteId), Value: "", Path: "/", MaxAge: -1})
+	http.SetCookie(w, &http.Cookie{Name: security.AccessCookieName(websiteId), Value: "", Path: "/", MaxAge: -1})
+	w.WriteHeader(http.StatusNoContent)
+}
+
 func derefString(s *string) string {
 	if s == nil {
 		return ""
@@ -528,81 +731,4 @@ func parseBirthDate(raw *string) (*time.Time, error) {
 		return nil, errors.New("data de nascimento inválida")
 	}
 	return &parsed, nil
-}
-
-func (h *AuthHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
-	userID, ok := middleware.UserID(r.Context())
-	if !ok {
-		http.Error(w, "unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	defer r.Body.Close()
-	var req UpdateProfileRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "invalid request body", http.StatusBadRequest)
-		return
-	}
-
-	birthDate, err := parseBirthDate(req.BirthDate)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	if err := h.authService.UpdateProfile(userID, domain.UpdateProfileData{
-		FirstName:         req.FirstName,
-		LastName:          req.LastName,
-		CpfCnpj:           req.CpfCnpj,
-		AvatarUrl:         req.AvatarUrl,
-		CompanyName:       req.CompanyName,
-		TradeName:         req.TradeName,
-		DisplayName:       req.DisplayName,
-		BirthDate:         birthDate,
-		Gender:            req.Gender,
-		Bio:               req.Bio,
-		Instagram:         req.Instagram,
-		WebsiteUrl:        req.WebsiteUrl,
-		Whatsapp:          req.Whatsapp,
-		Phone:             req.Phone,
-		ZipCode:           req.ZipCode,
-		AddressStreet:     req.AddressStreet,
-		AddressNumber:     req.AddressNumber,
-		AddressComplement: req.AddressComplement,
-		AddressDistrict:   req.AddressDistrict,
-		AddressCity:       req.AddressCity,
-		AddressState:      req.AddressState,
-		AddressCountry:    req.AddressCountry,
-	}); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]any{"success": true, "message": "profile updated"})
-}
-
-func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
-	websiteId := r.Header.Get("X-Website-Id")
-	if websiteId == "" {
-		http.Error(w, "invalid website id", http.StatusBadRequest)
-		return
-	}
-
-	http.SetCookie(w, &http.Cookie{
-		Name:   security.RefreshCookieName(websiteId),
-		Value:  "",
-		Path:   "/",
-		MaxAge: -1,
-	})
-
-	http.SetCookie(w, &http.Cookie{
-		Name:   security.AccessCookieName(websiteId),
-		Value:  "",
-		Path:   "/",
-		MaxAge: -1,
-	})
-
-	w.WriteHeader(http.StatusNoContent)
 }

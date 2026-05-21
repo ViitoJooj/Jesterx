@@ -4,137 +4,139 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/go-chi/chi/v5"
+
 	"github.com/ViitoJooj/Jesterx/internal/config"
 	"github.com/ViitoJooj/Jesterx/internal/http/handlers"
-	middleware "github.com/ViitoJooj/Jesterx/internal/http/middlewares"
+	mw "github.com/ViitoJooj/Jesterx/internal/http/middlewares"
 	"github.com/ViitoJooj/Jesterx/internal/service"
 )
 
-func NewRouter() *http.ServeMux {
-	return http.NewServeMux()
-}
+// NewRouter builds the chi mux with all route registrations.
+// Identity extraction is applied globally so any route can optionally read
+// the authenticated user from context, whether or not it requires auth.
+func NewRouter(
+	cfg *config.Config,
+	authService *service.AuthService,
+	authHandler *handlers.AuthHandler,
+	websiteHandler *handlers.WebSiteHandler,
+	paymentHandler *handlers.PaymentHandler,
+	productHandler *handlers.ProductHandler,
+	orderHandler *handlers.OrderHandler,
+	storageHandler *handlers.StorageHandler,
+	themeHandler *handlers.ThemeHandler,
+	adminHandler *handlers.AdminHandler,
+	reportHandler *handlers.ReportHandler,
+	storeSocialHandler *handlers.StoreSocialHandler,
+) *chi.Mux {
+	r := chi.NewRouter()
 
-func RegisterAuthRoutes(mux *http.ServeMux, h *handlers.AuthHandler, authService *service.AuthService) {
-	mux.HandleFunc("POST /api/v1/auth/register", h.Register)
-	mux.HandleFunc("GET /api/v1/auth/verify/", h.VerifyEmail)
-	mux.HandleFunc("POST /api/v1/auth/login", h.Login)
-	mux.HandleFunc("GET /api/v1/auth/refresh", h.Refresh)
-	mux.Handle("GET /api/v1/auth/me", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.Me))))
-	mux.Handle("PATCH /api/v1/auth/me", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.UpdateProfile))))
-	mux.Handle("DELETE /api/v1/auth/me", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.DeleteAccount))))
-	mux.HandleFunc("GET /api/v1/auth/logout", h.Logout)
-}
+	r.Use(mw.IdentityMiddleware(authService))
 
-func RegisterWebsiteRoutes(mux *http.ServeMux, h *handlers.WebSiteHandler, authService *service.AuthService) {
-	mux.Handle("GET /p/{siteID}/{path...}", http.HandlerFunc(h.PublicRender))
-	mux.Handle("GET /p/{siteID}", http.HandlerFunc(h.PublicRender))
+	_ = os.MkdirAll(cfg.StoragePath, 0755)
+	fileServer := http.FileServer(http.Dir(cfg.StoragePath))
+	r.Handle("/files/*", http.StripPrefix("/files/", fileServer))
 
-	mux.Handle("GET /api/v1/websites", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.ListWebSites))))
-	mux.Handle("GET /api/v1/site-apis", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.ListSiteAPIs))))
-	mux.Handle("POST /api/v1/websites", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.CreateWebSite))))
-	mux.Handle("DELETE /api/v1/sites/{siteID}", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.DeleteWebSite))))
-	mux.Handle("POST /api/v1/sites/{siteID}/routes", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.ReplaceRoutes))))
-	mux.Handle("GET /api/v1/sites/{siteID}/routes", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.ListRoutes))))
-	mux.Handle("GET /api/v1/sites/{siteID}/versions", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.ListVersions))))
-	mux.Handle("POST /api/v1/sites/{siteID}/versions", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.CreateVersion))))
-	mux.Handle("POST /api/v1/sites/{siteID}/publish/{version}", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.PublishVersion))))
-	mux.Handle("GET /api/v1/sites/{siteID}/scan-reports/{version}", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.GetScanReport))))
-}
+	r.Get("/p/{siteID}", websiteHandler.PublicRender)
+	r.Get("/p/{siteID}/*", websiteHandler.PublicRender)
 
-func RegisterStoreSocialRoutes(mux *http.ServeMux, h *handlers.StoreSocialHandler, authService *service.AuthService) {
-	// Public
-	mux.HandleFunc("GET /api/store/{siteID}/info", h.GetStoreFullInfo)
-	mux.HandleFunc("GET /api/store/{siteID}/visits", h.GetVisitStats)
-	mux.HandleFunc("GET /api/store/{siteID}/comments", h.ListComments)
+	r.Route("/api/store/{siteID}", func(r chi.Router) {
+		r.Get("/info", storeSocialHandler.GetStoreFullInfo)
+		r.Get("/visits", storeSocialHandler.GetVisitStats)
+		r.Get("/comments", storeSocialHandler.ListComments)
+		r.Get("/products", productHandler.PublicListProducts)
+		r.Get("/products/{productID}", productHandler.PublicGetProduct)
 
-	// Auth required
-	mux.Handle("POST /api/store/{siteID}/comments",
-		middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.PostComment))))
-	mux.Handle("DELETE /api/store/{siteID}/comments/{commentID}",
-		middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.DeleteComment))))
-	mux.Handle("POST /api/store/{siteID}/ratings",
-		middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.RateStore))))
-	mux.Handle("GET /api/store/{siteID}/my-rating",
-		middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.GetMyRating))))
+		r.Group(func(r chi.Router) {
+			r.Use(mw.RequireAuth)
+			r.Post("/comments", storeSocialHandler.PostComment)
+			r.Delete("/comments/{commentID}", storeSocialHandler.DeleteComment)
+			r.Post("/comments/{commentID}/replies", storeSocialHandler.ReplyComment)
+			r.Post("/ratings", storeSocialHandler.RateStore)
+			r.Get("/my-rating", storeSocialHandler.GetMyRating)
+			r.Get("/my-role", storeSocialHandler.GetMyRole)
+			r.Post("/orders", orderHandler.CreateOrder)
+		})
+	})
 
-	// Owner
-	mux.Handle("PATCH /api/v1/sites/{siteID}/profile",
-		middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.UpdateStoreProfile))))
+	r.Route("/api/v1", func(r chi.Router) {
 
-	// Admin
-	mux.Handle("PATCH /api/v1/admin/sites/{siteID}/mature",
-		middleware.IdentityMiddleware(authService)(middleware.RequireRole(authService, "admin")(http.HandlerFunc(h.AdminSetMature))))
+		r.Get("/plans", paymentHandler.ListPlans)
+		r.Get("/themes", themeHandler.ListThemes)
+		r.Post("/reports", reportHandler.PublicCreateReport)
+		r.Post("/payments/webhook", paymentHandler.StripeWebhook)
 
-	// Team members (owner/manager/admin)
-	mux.Handle("GET /api/v1/sites/{siteID}/members",
-		middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.ListMembers))))
-	mux.Handle("POST /api/v1/sites/{siteID}/members",
-		middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.AddMember))))
-	mux.Handle("PATCH /api/v1/sites/{siteID}/members/{memberUserID}",
-		middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.UpdateMemberRole))))
-	mux.Handle("DELETE /api/v1/sites/{siteID}/members/{memberUserID}",
-		middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.RemoveMember))))
+		r.Route("/auth", func(r chi.Router) {
+			r.Post("/register", authHandler.Register)
+			r.Post("/login", authHandler.Login)
+			r.Get("/verify/{id}", authHandler.VerifyEmail)
+			r.Get("/refresh", authHandler.Refresh)
+			r.Get("/logout", authHandler.Logout)
 
-	// Comment replies (owner/manager/support/admin)
-	mux.Handle("POST /api/store/{siteID}/comments/{commentID}/replies",
-		middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.ReplyComment))))
+			r.Group(func(r chi.Router) {
+				r.Use(mw.RequireAuth)
+				r.Get("/me", authHandler.Me)
+				r.Patch("/me", authHandler.UpdateProfile)
+				r.Delete("/me", authHandler.DeleteAccount)
 
-	// My role in store (authenticated)
-	mux.Handle("GET /api/store/{siteID}/my-role",
-		middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.GetMyRole))))
-}
+				r.Get("/addresses", authHandler.ListAddresses)
+				r.Post("/addresses", authHandler.CreateAddress)
+				r.Patch("/addresses/{id}", authHandler.UpdateAddress)
+				r.Delete("/addresses/{id}", authHandler.DeleteAddress)
+				r.Post("/addresses/{id}/default", authHandler.SetDefaultAddress)
+			})
+		})
 
-func RegisterReportRoutes(mux *http.ServeMux, h *handlers.ReportHandler, authService *service.AuthService) {
-	requireAdmin := middleware.RequireRole(authService, "admin")
-	mux.HandleFunc("POST /api/v1/reports", h.PublicCreateReport)
-	mux.Handle("GET /api/v1/admin/reports", middleware.IdentityMiddleware(authService)(requireAdmin(http.HandlerFunc(h.AdminListReports))))
-	mux.Handle("GET /api/v1/admin/reports/{reportID}", middleware.IdentityMiddleware(authService)(requireAdmin(http.HandlerFunc(h.AdminGetReport))))
-	mux.Handle("PATCH /api/v1/admin/reports/{reportID}", middleware.IdentityMiddleware(authService)(requireAdmin(http.HandlerFunc(h.AdminUpdateReport))))
-}
+		r.Group(func(r chi.Router) {
+			r.Use(mw.RequireAuth)
 
-func RegisterProductRoutes(mux *http.ServeMux, h *handlers.ProductHandler, authService *service.AuthService) {
-	mux.Handle("POST /api/v1/sites/{siteID}/products", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.CreateProduct))))
-	mux.Handle("GET /api/v1/sites/{siteID}/products", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.ListProducts))))
-	mux.Handle("PATCH /api/v1/sites/{siteID}/products/{productID}", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.UpdateProduct))))
-	mux.Handle("DELETE /api/v1/sites/{siteID}/products/{productID}", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.DeleteProduct))))
-	mux.HandleFunc("GET /api/store/{siteID}/products", h.PublicListProducts)
-	mux.HandleFunc("GET /api/store/{siteID}/products/{productID}", h.PublicGetProduct)
-}
+			r.Get("/websites", websiteHandler.ListWebSites)
+			r.Get("/site-apis", websiteHandler.ListSiteAPIs)
+			r.Post("/websites", websiteHandler.CreateWebSite)
 
-func RegisterOrderRoutes(mux *http.ServeMux, h *handlers.OrderHandler, auth *service.AuthService) {
-	mux.Handle("POST /api/store/{siteID}/orders",
-		middleware.IdentityMiddleware(auth)(middleware.RequireAuth(http.HandlerFunc(h.CreateOrder))))
-	mux.Handle("GET /api/v1/sites/{siteID}/orders",
-		middleware.IdentityMiddleware(auth)(middleware.RequireAuth(http.HandlerFunc(h.ListSiteOrders))))
-}
+			r.Route("/sites/{siteID}", func(r chi.Router) {
+				r.Delete("/", websiteHandler.DeleteWebSite)
+				r.Get("/routes", websiteHandler.ListRoutes)
+				r.Post("/routes", websiteHandler.ReplaceRoutes)
+				r.Get("/versions", websiteHandler.ListVersions)
+				r.Post("/versions", websiteHandler.CreateVersion)
+				r.Post("/publish/{version}", websiteHandler.PublishVersion)
+				r.Get("/scan-reports/{version}", websiteHandler.GetScanReport)
+				r.Patch("/profile", storeSocialHandler.UpdateStoreProfile)
 
-func RegisterStorageRoutes(mux *http.ServeMux, h *handlers.StorageHandler, authService *service.AuthService) {
-	mux.Handle("POST /api/v1/upload",
-		middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.Upload))))
+				r.Get("/products", productHandler.ListProducts)
+				r.Post("/products", productHandler.CreateProduct)
+				r.Patch("/products/{productID}", productHandler.UpdateProduct)
+				r.Delete("/products/{productID}", productHandler.DeleteProduct)
 
-	// Serve uploaded files from the data directory.
-	_ = os.MkdirAll(config.StoragePath, 0755)
-	fileServer := http.FileServer(http.Dir(config.StoragePath))
-	mux.Handle("GET /files/", http.StripPrefix("/files/", fileServer))
-}
+				r.Get("/orders", orderHandler.ListSiteOrders)
 
-func RegisterThemeRoutes(mux *http.ServeMux, h *handlers.ThemeHandler) {
-	mux.HandleFunc("GET /api/v1/themes", h.ListThemes)
-}
+				r.Get("/members", storeSocialHandler.ListMembers)
+				r.Post("/members", storeSocialHandler.AddMember)
+				r.Patch("/members/{memberUserID}", storeSocialHandler.UpdateMemberRole)
+				r.Delete("/members/{memberUserID}", storeSocialHandler.RemoveMember)
+			})
 
-func RegisterAdminRoutes(mux *http.ServeMux, h *handlers.AdminHandler, authService *service.AuthService) {
-	requireAdmin := middleware.RequireRole(authService, "admin")
-	mux.Handle("GET /api/v1/admin/stats", middleware.IdentityMiddleware(authService)(requireAdmin(http.HandlerFunc(h.Stats))))
-	mux.Handle("GET /api/v1/admin/users", middleware.IdentityMiddleware(authService)(requireAdmin(http.HandlerFunc(h.ListUsers))))
-	mux.Handle("GET /api/v1/admin/sites", middleware.IdentityMiddleware(authService)(requireAdmin(http.HandlerFunc(h.ListSites))))
-	mux.Handle("GET /api/v1/admin/orders", middleware.IdentityMiddleware(authService)(requireAdmin(http.HandlerFunc(h.ListOrders))))
-	mux.Handle("GET /api/v1/admin/revenue", middleware.IdentityMiddleware(authService)(requireAdmin(http.HandlerFunc(h.Revenue))))
-}
+			r.Post("/payments/checkout", paymentHandler.CreateCheckout)
+			r.Get("/payments/confirm", paymentHandler.ConfirmCheckout)
+			r.Post("/payments/cancel", paymentHandler.CancelSubscription)
 
-func RegisterPaymentRoutes(mux *http.ServeMux, h *handlers.PaymentHandler, authService *service.AuthService) {
-	mux.HandleFunc("GET /api/v1/plans", h.ListPlans)
-	mux.Handle("POST /api/v1/payments/checkout", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.CreateCheckout))))
-	mux.Handle("GET /api/v1/payments/confirm", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.ConfirmCheckout))))
-	mux.Handle("POST /api/v1/payments/cancel", middleware.IdentityMiddleware(authService)(middleware.RequireAuth(http.HandlerFunc(h.CancelSubscription))))
-	mux.HandleFunc("POST /api/v1/payments/webhook", h.StripeWebhook)
+			r.Post("/upload", storageHandler.Upload)
+		})
+
+		r.Group(func(r chi.Router) {
+			r.Use(mw.RequireRole(authService, "admin"))
+			r.Get("/admin/stats", adminHandler.Stats)
+			r.Get("/admin/users", adminHandler.ListUsers)
+			r.Get("/admin/sites", adminHandler.ListSites)
+			r.Get("/admin/orders", adminHandler.ListOrders)
+			r.Get("/admin/revenue", adminHandler.Revenue)
+			r.Get("/admin/reports", reportHandler.AdminListReports)
+			r.Get("/admin/reports/{reportID}", reportHandler.AdminGetReport)
+			r.Patch("/admin/reports/{reportID}", reportHandler.AdminUpdateReport)
+			r.Patch("/admin/sites/{siteID}/mature", storeSocialHandler.AdminSetMature)
+		})
+	})
+
+	return r
 }

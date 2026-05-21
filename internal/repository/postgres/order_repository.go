@@ -163,8 +163,6 @@ func (r *connection) UpdateStatus(orderID string, status domain.OrderStatus) err
 	return nil
 }
 
-// helpers
-
 func (r *connection) scanOrderRow(row *sql.Row) (*domain.Order, error) {
 	var o domain.Order
 	var buyerUserID, buyerPhone, buyerDocument sql.NullString

@@ -113,12 +113,12 @@ func (r *connection) FindLatestCompletedPaymentByUserID(userID string) (*domain.
 	var p domain.Payment
 	var planID sql.NullString
 	err := r.db.QueryRowContext(ctx, `
-		SELECT id, user_id, website_id, COALESCE(plan_id,''), reference_id, type, quantity, amount, currency, status, purchased_in
+		SELECT id, user_id, COALESCE(plan_id,''), reference_id, type, quantity, amount, currency, status, purchased_in
 		FROM payments
 		WHERE user_id = $1 AND status = 'completed'
 		ORDER BY purchased_in DESC LIMIT 1
 	`, userID).Scan(
-		&p.ID, &p.UserID, &p.WebsiteID, &planID, &p.ReferenceID, &p.Type,
+		&p.ID, &p.UserID, &planID, &p.ReferenceID, &p.Type,
 		&p.Quantity, &p.Amount, &p.Currency, &p.Status, &p.PurchasedIn,
 	)
 	if errors.Is(err, sql.ErrNoRows) {
@@ -139,8 +139,8 @@ func (r *connection) CreatePayment(payment domain.Payment) (*domain.Payment, err
 
 	id, _ := uuid.NewV7()
 	query := `
-		INSERT INTO payments (id, user_id, website_id, plan_id, reference_id, type, quantity, amount, currency, status, purchased_in)
-		VALUES ($1, $2, $3, NULLIF($4,''), $5, $6, $7, $8, $9, $10, NOW())
+		INSERT INTO payments (id, user_id, plan_id, reference_id, type, quantity, amount, currency, status, purchased_in)
+		VALUES ($1, $2, NULLIF($3,''), $4, $5, $6, $7, $8, $9, NOW())
 		RETURNING id, purchased_in
 	`
 
@@ -151,7 +151,6 @@ func (r *connection) CreatePayment(payment domain.Payment) (*domain.Payment, err
 		query,
 		created.ID,
 		payment.UserID,
-		payment.WebsiteID,
 		payment.PlanID,
 		payment.ReferenceID,
 		payment.Type,

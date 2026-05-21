@@ -38,7 +38,6 @@ func (e Errors) First() string {
 	return e[0].Error()
 }
 
-// V is a validator that accumulates errors.
 type V struct {
 	errs Errors
 }

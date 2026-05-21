@@ -122,15 +122,13 @@ func SendVerifyEmail(email string, token string, websiteID string) error {
 		verifyURL += "?website_id=" + url.QueryEscape(websiteID)
 	}
 
-	// In dev mode always log the URL so it can be used directly from the console
-	// without needing real email delivery (Resend test-mode restrictions apply).
 	if config.IsDev {
 		log.Printf("[DEV] Verify email URL for %s → %s", email, verifyURL)
 	}
 
 	if config.ResendKey == "" {
 		if config.IsDev {
-			return nil // skip sending in dev when no key is set
+			return nil
 		}
 		return errors.New("email service not configured")
 	}

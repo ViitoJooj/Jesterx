@@ -1,47 +1,70 @@
 @use "sass:color";
 
-// Base palette (Jesterx vinho)
-$color-primary-raw: #8b1e3f;
-$color-primary-light-raw: color.adjust($color-primary-raw, $lightness: 10%);
-$color-primary-dark-raw: color.adjust($color-primary-raw, $lightness: -10%);
-$color-secondary-raw: #22131a;
-$color-accent-raw: #d489a5;
-$border-color-raw: #cfc5cc;
-$font-color-inverse-raw: #ffffff;
+// ── Light theme palette ───────────────────────────────────────────────────────
+$color-primary-raw:       #e60000;
+$color-primary-light-raw: #ff3b3b;
+$color-primary-dark-raw:  #b30000;
+$color-secondary-raw:     #1a1a1a;
+$color-accent-raw:        #ff6060;
+$border-color-raw:        #e2e2e2;
+$bg-raw:                  #f5f5f5;
+$bg-primary-raw:          #ffffff;
+$bg-secondary-raw:        #f0f0f0;
+$bg-tertiary-raw:         #e8e8e8;
+$font-primary-raw:        #0d0d0d;
+$font-secondary-raw:      #555555;
+$font-color-inverse-raw:  #ffffff;
+$font-muted-raw:          #999999;
 
-// CSS variable bindings (runtime theming)
-$color-primary: var(--jx-color-primary);
+// ── Dark theme palette ────────────────────────────────────────────────────────
+$dark-color-primary-raw:       #ff3333;
+$dark-color-primary-light-raw: #ff6b6b;
+$dark-color-primary-dark-raw:  #cc0000;
+$dark-color-secondary-raw:     #f0f0f0;
+$dark-color-accent-raw:        #ff8080;
+$dark-bg-raw:                  #0a0a0a;
+$dark-bg-primary-raw:          #111111;
+$dark-bg-secondary-raw:        #1c1c1c;
+$dark-bg-tertiary-raw:         #252525;
+$dark-border-raw:              #2e2e2e;
+$dark-font-primary-raw:        #f5f5f5;
+$dark-font-secondary-raw:      #999999;
+$dark-font-inverse-raw:        #ffffff;
+$dark-font-muted-raw:          #666666;
+
+// ── CSS variable bindings (runtime theming) ───────────────────────────────────
+$color-primary:       var(--jx-color-primary);
 $color-primary-light: var(--jx-color-primary-light);
-$color-primary-dark: var(--jx-color-primary-dark);
-$color-secondary: var(--jx-color-secondary);
-$color-accent: var(--jx-color-accent);
+$color-primary-dark:  var(--jx-color-primary-dark);
+$color-secondary:     var(--jx-color-secondary);
+$color-accent:        var(--jx-color-accent);
 
-$background-color: var(--jx-bg);
-$background-color-primary: var(--jx-bg-primary);
+$background-color:           var(--jx-bg);
+$background-color-primary:   var(--jx-bg-primary);
 $background-color-secondary: var(--jx-bg-secondary);
-$background-color-tertiary: var(--jx-bg-tertiary);
+$background-color-tertiary:  var(--jx-bg-tertiary);
 
-$border-color: var(--jx-border);
+$border-color:       var(--jx-border);
 $font-color-primary: var(--jx-font-primary);
 $font-color-secondary: var(--jx-font-secondary);
 $font-color-inverse: var(--jx-font-inverse);
-$font-color-muted: var(--jx-font-muted);
+$font-color-muted:   var(--jx-font-muted);
 
-// Layout and shadows
+// ── Layout ────────────────────────────────────────────────────────────────────
 $border-radius-sm: 6px;
 $border-radius-md: 10px;
 $border-radius-lg: 16px;
-$shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-$shadow-md: 0 3px 6px rgba(0, 0, 0, 0.1);
-$shadow-lg: 0 6px 12px rgba(0, 0, 0, 0.15);
+$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.07);
+$shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 8px 28px rgba(0, 0, 0, 0.15);
 
-// State colors
-$success-color: #27ae60;
-$warning-color: #f39c12;
-$error-color: #e74c3c;
-$info-color: #3498db;
+// ── State colors ──────────────────────────────────────────────────────────────
+$success-color: #16a34a;
+$warning-color: #d97706;
+$error-color:   #dc2626;
+$info-color:    #2563eb;
 
-// Transitions
-$transition-base: all 0.25s ease;
-$transition-fast: all 0.15s ease-in;
-$transition-slow: all 0.4s ease-out;
+// ── Transitions ───────────────────────────────────────────────────────────────
+$transition-base: all 0.22s ease;
+$transition-fast: all 0.14s ease;
+$transition-slow: all 0.38s ease;

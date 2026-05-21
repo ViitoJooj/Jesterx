@@ -7,6 +7,49 @@ import (
 	"github.com/joho/godotenv"
 )
 
+type Config struct {
+	Port        string
+	Environment string
+	IsDev       bool
+
+	PGHost     string
+	PGPort     string
+	PGUser     string
+	PGPassword string
+	PGDBName   string
+	PGSSLMode  string
+
+	JWTAccessSecret  string
+	JWTRefreshSecret string
+
+	ResendKey           string
+	StripePublic        string
+	StripeSecret        string
+	StripeWebhookSecret string
+
+	FrontendURL string
+	BackendURL  string
+	StoragePath string
+
+	PlatformCommissionPct string
+}
+
+var (
+	PGCNN = &PostgresConnection{}
+
+	Jwt_access_token  string
+	Jwt_refresh_token string
+
+	IsDev               bool
+	ResendKey           string
+	StripePublic        string
+	StripeSecret        string
+	StripeWebhookSecret string
+	FrontendURL         string
+	BackendURL          string
+	StoragePath         string
+)
+
 type PostgresConnection struct {
 	Host     string
 	Port     string
@@ -16,60 +59,71 @@ type PostgresConnection struct {
 	SSLMode  string
 }
 
-var PGCNN = &PostgresConnection{}
-var Jwt_access_token string
-var Jwt_refresh_token string
-var IsDev bool
-var ResendKey string
-var StripePublic string
-var StripeSecret string
-var StripeWebhookSecret string
-var FrontendURL string
-var BackendURL string
-var StoragePath string
-var RedisURL string
-
-func LoadEnv() {
+// Load reads environment variables and returns a Config struct.
+// It also sets the package-level globals for backward compatibility.
+func Load() *Config {
 	_ = godotenv.Load(".env")
 
-	PGCNN.User = mustGetenv("POSTGRES_USER")
-	PGCNN.Password = mustGetenv("POSTGRES_PASSWORD")
-	PGCNN.DBName = mustGetenv("POSTGRES_DB")
-	PGCNN.Port = mustGetenv("POSTGRES_PORT")
-	PGCNN.Host = mustGetenv("POSTGRES_HOST")
-	PGCNN.SSLMode = mustGetenv("POSTGRES_SSL")
+	cfg := &Config{
+		Port:        getEnvOrDefault("PORT", "8080"),
+		Environment: getEnvOrDefault("ENVIRONMENT", "dev"),
 
-	Jwt_access_token = mustGetenv("JWT_ACCESS_TOKEN")
-	Jwt_refresh_token = mustGetenv("JWT_REFRESH_TOKEN")
+		PGHost:     mustGetenv("POSTGRES_HOST"),
+		PGPort:     mustGetenv("POSTGRES_PORT"),
+		PGUser:     mustGetenv("POSTGRES_USER"),
+		PGPassword: mustGetenv("POSTGRES_PASSWORD"),
+		PGDBName:   mustGetenv("POSTGRES_DB"),
+		PGSSLMode:  getEnvOrDefault("POSTGRES_SSL", "disable"),
 
-	environment := mustGetenv("ENVIRONMENT")
-	if environment == "dev" {
-		IsDev = true
+		JWTAccessSecret:  mustGetenv("JWT_ACCESS_TOKEN"),
+		JWTRefreshSecret: mustGetenv("JWT_REFRESH_TOKEN"),
+
+		ResendKey:           mustGetenv("RESEND_KEY"),
+		StripePublic:        mustGetenv("STRIPE_PUBLIC_KEY"),
+		StripeSecret:        mustGetenv("STRIPE_SECRET_KEY"),
+		StripeWebhookSecret: getEnvOrDefault("STRIPE_WEBHOOK_SECRET", ""),
+
+		FrontendURL: getEnvOrDefault("FRONTEND_URL", "http://localhost:5173"),
+		BackendURL:  getEnvOrDefault("BACKEND_URL", "http://localhost:8080"),
+		StoragePath: getEnvOrDefault("STORAGE_PATH", "./data"),
+
+		PlatformCommissionPct: getEnvOrDefault("PLATFORM_COMMISSION_PCT", "5"),
 	}
+	cfg.IsDev = cfg.Environment == "dev"
 
-	ResendKey = mustGetenv("RESEND_KEY")
+	PGCNN.Host = cfg.PGHost
+	PGCNN.Port = cfg.PGPort
+	PGCNN.User = cfg.PGUser
+	PGCNN.Password = cfg.PGPassword
+	PGCNN.DBName = cfg.PGDBName
+	PGCNN.SSLMode = cfg.PGSSLMode
 
-	StripePublic = mustGetenv("STRIPE_PUBLIC_KEY")
-	StripeSecret = mustGetenv("STRIPE_SECRET_KEY")
-	StripeWebhookSecret = getEnvOrDefault("STRIPE_WEBHOOK_SECRET", "")
-	FrontendURL = getEnvOrDefault("FRONTEND_URL", "http://localhost:5173")
-	BackendURL  = getEnvOrDefault("BACKEND_URL",  "http://localhost:8080")
-	StoragePath = getEnvOrDefault("STORAGE_PATH", "./data")
-	RedisURL = getEnvOrDefault("REDIS_URL", "redis://localhost:6379")
+	Jwt_access_token = cfg.JWTAccessSecret
+	Jwt_refresh_token = cfg.JWTRefreshSecret
+
+	IsDev = cfg.IsDev
+	ResendKey = cfg.ResendKey
+	StripePublic = cfg.StripePublic
+	StripeSecret = cfg.StripeSecret
+	StripeWebhookSecret = cfg.StripeWebhookSecret
+	FrontendURL = cfg.FrontendURL
+	BackendURL = cfg.BackendURL
+	StoragePath = cfg.StoragePath
+
+	return cfg
 }
 
 func mustGetenv(key string) string {
 	v := os.Getenv(key)
 	if v == "" {
-		log.Fatal("Error on get " + key)
+		log.Fatalf("required env var not set: %s", key)
 	}
 	return v
 }
 
 func getEnvOrDefault(key, fallback string) string {
-	v := os.Getenv(key)
-	if v == "" {
-		return fallback
+	if v := os.Getenv(key); v != "" {
+		return v
 	}
-	return v
+	return fallback
 }

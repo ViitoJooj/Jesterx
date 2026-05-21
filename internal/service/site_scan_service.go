@@ -310,9 +310,9 @@ func compileElementorJSONToHTML(source string) string {
 		`.video-wrap{width:100%;height:100%;position:relative}` +
 		`.video-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0}` +
 		`.admin-add{display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:#e8f0fe;border:2px dashed #4a90e2;border-radius:10px;cursor:pointer;color:#1a56db;font-weight:600;font-family:inherit;font-size:inherit}` +
-		// toast
+
 		`.jx-toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#1a2740;color:#fff;padding:10px 22px;border-radius:8px;z-index:9999;font-family:Inter,system-ui,sans-serif;font-size:14px;pointer-events:none;transition:opacity .3s}` +
-		// modal
+
 		`.jx-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9990;display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box}` +
 		`.jx-modal-box{background:#fff;border-radius:12px;padding:28px;width:360px;max-width:100%;font-family:Inter,system-ui,sans-serif;position:relative}` +
 		`.jx-modal-title{margin:0 0 16px;font-size:18px;font-weight:700;color:#1a2740}` +
@@ -321,7 +321,7 @@ func compileElementorJSONToHTML(source string) string {
 		`.jx-modal-btn:disabled{opacity:.6;cursor:not-allowed}` +
 		`.jx-modal-err{color:#e53e3e;font-size:13px;margin:8px 0 0;display:none}` +
 		`.jx-modal-close{position:absolute;top:10px;right:14px;background:none;border:0;font-size:20px;cursor:pointer;color:#4b5774;line-height:1}` +
-		// product card
+
 		`.pc-wrap{display:flex;flex-direction:column;width:100%;height:100%;overflow:hidden}` +
 		`.pc-img{width:100%;height:55%;object-fit:cover;border-radius:6px 6px 0 0;display:block;flex-shrink:0}` +
 		`.pc-img-ph{width:100%;height:55%;background:#eef1f8;display:flex;align-items:center;justify-content:center;font-size:32px;border-radius:6px 6px 0 0;flex-shrink:0}` +
@@ -333,7 +333,7 @@ func compileElementorJSONToHTML(source string) string {
 		`.pc-desc{font-size:12px;color:#6a7387;line-height:1.4;overflow:hidden}` +
 		`.pc-cart-btn{margin:0 8px 8px;padding:8px;background:#8b1e3f;color:#fff;border:0;border-radius:6px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;width:calc(100% - 16px);flex-shrink:0}` +
 		`.pc-state{display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:#9aa5bc;font-size:13px}` +
-		// product list
+
 		`.plist-wrap{display:flex;flex-direction:column;width:100%;height:100%;overflow:hidden}` +
 		`.plist-grid{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;padding:4px;align-content:start}` +
 		`.plist-item{background:#fff;border:1px solid #dbe2f3;border-radius:8px;overflow:hidden;display:flex;flex-direction:column}` +
@@ -346,7 +346,7 @@ func compileElementorJSONToHTML(source string) string {
 		`.plist-pag-btn:disabled{opacity:.4;cursor:not-allowed}` +
 		`.plist-pag-info{font-size:13px;color:#6a7387}` +
 		`.plist-state{display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:#9aa5bc;font-size:13px}` +
-		// cart items
+
 		`.ci-wrap{display:flex;flex-direction:column;width:100%;height:100%;overflow-y:auto;gap:8px;padding:4px}` +
 		`.ci-item{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #dbe2f3;border-radius:8px;padding:8px;font-family:inherit}` +
 		`.ci-name{flex:1;font-size:13px;font-weight:600;color:#1a2740;overflow:hidden}` +
@@ -358,7 +358,6 @@ func compileElementorJSONToHTML(source string) string {
 		`.ci-rm-btn:hover{color:#e53e3e}` +
 		`.ci-empty{display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:#9aa5bc;font-size:13px}`
 
-	// JS renderer — uses var (ES5-compatible) and no template literals to keep Go raw-string escaping simple
 	jsBody := `var state={vars:{},products:[],storeUser:{email:localStorage.getItem('jx_su_'+getSiteId())||'',id:'',role:'',first_name:'',last_name:'',display_name:'',birth_date:'',gender:'',bio:'',instagram:'',website_url:'',whatsapp:'',phone:'',zip_code:'',address_street:'',address_number:'',address_complement:'',address_district:'',address_city:'',address_state:'',address_country:'',avatar:'',is_admin:false}};
 function getSiteId(){var seg=(window.location.pathname||'').split('/').filter(Boolean);return seg[0]==='p'&&seg[1]?seg[1]:'';}
 function getStoreToken(){return localStorage.getItem('jx_tk_'+getSiteId())||'';}
@@ -783,4 +782,3 @@ func blockLayoutStyle(block ElementorBlock) string {
 	}
 	return fmt.Sprintf("position:absolute;left:%dpx;top:%dpx;width:%dpx;min-height:%dpx;transform:rotate(%ddeg);box-sizing:border-box;", x, y, w, h, block.Rot)
 }
-

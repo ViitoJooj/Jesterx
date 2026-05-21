@@ -24,13 +24,14 @@ func (r *storeSocialRepo) GetStoreFullInfo(websiteID string) (*domain.StoreFullI
 
 	row := r.db.QueryRowContext(ctx, `
 		SELECT
-			w.id, w.name, w.short_description, w.description, w.image, w.website_type,
+			w.id, w.name, COALESCE(w.short_description, ''), COALESCE(w.description, ''), w.image_url, w.website_type,
 			w.mature_content, w.rating_avg, w.rating_count,
-			COALESCE(wv.source_type, '') AS editor_type,
+			COALESCE(wv.source_type::text, '') AS editor_type,
 			u.id, u.first_name || ' ' || u.last_name,
-			u.company_name, u.trade_name, u.avatar_url, u.account_type
+			c.company_name, c.trade_name, u.avatar_url
 		FROM websites w
 		JOIN users u ON u.id = w.creator_id
+		LEFT JOIN companies c ON c.owner_user_id = u.id AND c.is_active = TRUE
 		LEFT JOIN LATERAL (
 			SELECT source_type FROM website_versions
 			WHERE website_id = w.id
@@ -39,17 +40,20 @@ func (r *storeSocialRepo) GetStoreFullInfo(websiteID string) (*domain.StoreFullI
 		WHERE w.id = $1 AND w.banned = false`, websiteID)
 
 	var info domain.StoreFullInfo
-	var companyName, tradeName, avatarURL sql.NullString
+	var imageUrl, companyName, tradeName, avatarURL sql.NullString
 
 	err := row.Scan(
-		&info.ID, &info.Name, &info.ShortDescription, &info.Description, &info.Image, &info.Type,
+		&info.ID, &info.Name, &info.ShortDescription, &info.Description, &imageUrl, &info.Type,
 		&info.MatureContent, &info.RatingAvg, &info.RatingCount,
 		&info.EditorType,
 		&info.Creator.ID, &info.Creator.FullName,
-		&companyName, &tradeName, &avatarURL, &info.Creator.AccountType,
+		&companyName, &tradeName, &avatarURL,
 	)
 	if err != nil {
 		return nil, err
+	}
+	if imageUrl.Valid {
+		info.ImageUrl = &imageUrl.String
 	}
 	if companyName.Valid {
 		info.Creator.CompanyName = &companyName.String
@@ -61,7 +65,6 @@ func (r *storeSocialRepo) GetStoreFullInfo(websiteID string) (*domain.StoreFullI
 		info.Creator.AvatarURL = &avatarURL.String
 	}
 
-	// Fetch managers (role = 'manager') with user info
 	mrows, err := r.db.QueryContext(ctx, `
 		SELECT sm.id, sm.website_id, sm.user_id,
 		       u.first_name || ' ' || u.last_name, u.avatar_url,
@@ -94,8 +97,6 @@ func (r *storeSocialRepo) GetStoreFullInfo(websiteID string) (*domain.StoreFullI
 
 	return &info, nil
 }
-
-// ─── Comments ────────────────────────────────────────────────────────────────
 
 func (r *storeSocialRepo) SaveComment(comment domain.StoreComment) (*domain.StoreComment, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -241,8 +242,6 @@ func nullableInt(i *int) interface{} {
 	return *i
 }
 
-// ─── Ratings ─────────────────────────────────────────────────────────────────
-
 func (r *storeSocialRepo) UpsertRating(websiteID, userID string, stars int) (*domain.StoreRating, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -296,8 +295,6 @@ func (r *storeSocialRepo) RecalcRating(websiteID string) error {
 	return err
 }
 
-// ─── Visits ──────────────────────────────────────────────────────────────────
-
 func (r *storeSocialRepo) RecordVisit(websiteID string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -345,8 +342,6 @@ func (r *storeSocialRepo) GetVisitStats(websiteID string, days int) ([]domain.Vi
 	return stats, nil
 }
 
-// ─── Admin ───────────────────────────────────────────────────────────────────
-
 func (r *storeSocialRepo) SetMatureContent(websiteID string, mature bool) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -354,8 +349,6 @@ func (r *storeSocialRepo) SetMatureContent(websiteID string, mature bool) error 
 		`UPDATE websites SET mature_content = $2, updated_at = NOW() WHERE id = $1`, websiteID, mature)
 	return err
 }
-
-// ─── Owner update ────────────────────────────────────────────────────────────
 
 func (r *storeSocialRepo) UpdateStoreProfile(websiteID, name, shortDesc, description string, image []byte) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -377,8 +370,6 @@ func imageOrNil(b []byte) interface{} {
 	}
 	return b
 }
-
-// ─── Team members ────────────────────────────────────────────────────────────
 
 func (r *storeSocialRepo) AddMember(member domain.StoreMember) (*domain.StoreMember, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)

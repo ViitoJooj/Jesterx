@@ -1,13 +1,13 @@
 package handlers
 
 import (
-	"context"
-	"database/sql"
 	"encoding/json"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/go-chi/chi/v5"
 
 	"github.com/ViitoJooj/Jesterx/internal/domain"
 	middleware "github.com/ViitoJooj/Jesterx/internal/http/middlewares"
@@ -16,25 +16,15 @@ import (
 
 type StoreSocialHandler struct {
 	svc *service.StoreSocialService
-	db  *sql.DB // used only for admin role check
 }
 
-func NewStoreSocialHandler(svc *service.StoreSocialService, db *sql.DB) *StoreSocialHandler {
-	return &StoreSocialHandler{svc: svc, db: db}
+func NewStoreSocialHandler(svc *service.StoreSocialService) *StoreSocialHandler {
+	return &StoreSocialHandler{svc: svc}
 }
-
-func (h *StoreSocialHandler) checkAdmin(userID string) bool {
-	var role string
-	err := h.db.QueryRowContext(context.Background(),
-		`SELECT role FROM users WHERE id = $1`, userID).Scan(&role)
-	return err == nil && role == "admin"
-}
-
-// ─── Store Full Info ──────────────────────────────────────────────────────────
 
 // GET /api/store/{siteID}/info
 func (h *StoreSocialHandler) GetStoreFullInfo(w http.ResponseWriter, r *http.Request) {
-	siteID := strings.TrimSpace(r.PathValue("siteID"))
+	siteID := strings.TrimSpace(chi.URLParam(r, "siteID"))
 	if siteID == "" {
 		http.NotFound(w, r)
 		return
@@ -46,18 +36,15 @@ func (h *StoreSocialHandler) GetStoreFullInfo(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	// Record visit asynchronously
 	go func() { _ = h.svc.RecordVisit(siteID) }()
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]any{"success": true, "message": "success", "data": info})
 }
 
-// ─── Visit Stats ─────────────────────────────────────────────────────────────
-
 // GET /api/store/{siteID}/visits?days=30
 func (h *StoreSocialHandler) GetVisitStats(w http.ResponseWriter, r *http.Request) {
-	siteID := strings.TrimSpace(r.PathValue("siteID"))
+	siteID := strings.TrimSpace(chi.URLParam(r, "siteID"))
 	days, _ := strconv.Atoi(r.URL.Query().Get("days"))
 	if days <= 0 {
 		days = 30
@@ -72,8 +59,6 @@ func (h *StoreSocialHandler) GetVisitStats(w http.ResponseWriter, r *http.Reques
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]any{"success": true, "data": stats})
 }
-
-// ─── Comments ────────────────────────────────────────────────────────────────
 
 type CommentData struct {
 	ID              string        `json:"id"`
@@ -102,7 +87,7 @@ func commentToData(c *domain.StoreComment) CommentData {
 
 // GET /api/store/{siteID}/comments
 func (h *StoreSocialHandler) ListComments(w http.ResponseWriter, r *http.Request) {
-	siteID := strings.TrimSpace(r.PathValue("siteID"))
+	siteID := strings.TrimSpace(chi.URLParam(r, "siteID"))
 	comments, err := h.svc.ListComments(siteID)
 	if err != nil {
 		http.Error(w, "erro ao buscar comentários", http.StatusInternalServerError)
@@ -116,9 +101,9 @@ func (h *StoreSocialHandler) ListComments(w http.ResponseWriter, r *http.Request
 	json.NewEncoder(w).Encode(map[string]any{"success": true, "data": data})
 }
 
-// POST /api/store/{siteID}/comments  (auth required)
+// POST /api/store/{siteID}/comments
 func (h *StoreSocialHandler) PostComment(w http.ResponseWriter, r *http.Request) {
-	siteID := strings.TrimSpace(r.PathValue("siteID"))
+	siteID := strings.TrimSpace(chi.URLParam(r, "siteID"))
 	userID, ok := middleware.UserID(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
@@ -146,10 +131,10 @@ func (h *StoreSocialHandler) PostComment(w http.ResponseWriter, r *http.Request)
 	json.NewEncoder(w).Encode(map[string]any{"success": true, "data": commentToData(comment)})
 }
 
-// DELETE /api/store/{siteID}/comments/{commentID}  (auth required)
+// DELETE /api/store/{siteID}/comments/{commentID}
 func (h *StoreSocialHandler) DeleteComment(w http.ResponseWriter, r *http.Request) {
-	siteID := strings.TrimSpace(r.PathValue("siteID"))
-	commentID := strings.TrimSpace(r.PathValue("commentID"))
+	siteID := strings.TrimSpace(chi.URLParam(r, "siteID"))
+	commentID := strings.TrimSpace(chi.URLParam(r, "commentID"))
 	userID, ok := middleware.UserID(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
@@ -165,10 +150,10 @@ func (h *StoreSocialHandler) DeleteComment(w http.ResponseWriter, r *http.Reques
 	json.NewEncoder(w).Encode(map[string]any{"success": true, "message": "comentário removido"})
 }
 
-// POST /api/store/{siteID}/comments/{commentID}/replies  (auth + team role required)
+// POST /api/store/{siteID}/comments/{commentID}/replies
 func (h *StoreSocialHandler) ReplyComment(w http.ResponseWriter, r *http.Request) {
-	siteID := strings.TrimSpace(r.PathValue("siteID"))
-	commentID := strings.TrimSpace(r.PathValue("commentID"))
+	siteID := strings.TrimSpace(chi.URLParam(r, "siteID"))
+	commentID := strings.TrimSpace(chi.URLParam(r, "commentID"))
 	userID, ok := middleware.UserID(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
@@ -199,11 +184,9 @@ func (h *StoreSocialHandler) ReplyComment(w http.ResponseWriter, r *http.Request
 	json.NewEncoder(w).Encode(map[string]any{"success": true, "data": commentToData(reply)})
 }
 
-// ─── Ratings ─────────────────────────────────────────────────────────────────
-
-// POST /api/store/{siteID}/ratings  (auth required)
+// POST /api/store/{siteID}/ratings
 func (h *StoreSocialHandler) RateStore(w http.ResponseWriter, r *http.Request) {
-	siteID := strings.TrimSpace(r.PathValue("siteID"))
+	siteID := strings.TrimSpace(chi.URLParam(r, "siteID"))
 	userID, ok := middleware.UserID(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
@@ -229,9 +212,9 @@ func (h *StoreSocialHandler) RateStore(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]any{"success": true, "data": rating})
 }
 
-// GET /api/store/{siteID}/my-rating  (auth required)
+// GET /api/store/{siteID}/my-rating
 func (h *StoreSocialHandler) GetMyRating(w http.ResponseWriter, r *http.Request) {
-	siteID := strings.TrimSpace(r.PathValue("siteID"))
+	siteID := strings.TrimSpace(chi.URLParam(r, "siteID"))
 	userID, ok := middleware.UserID(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
@@ -248,11 +231,9 @@ func (h *StoreSocialHandler) GetMyRating(w http.ResponseWriter, r *http.Request)
 	json.NewEncoder(w).Encode(map[string]any{"success": true, "data": rating})
 }
 
-// ─── Owner: Update Store Profile ─────────────────────────────────────────────
-
-// PATCH /api/v1/sites/{siteID}/profile  (auth + owner required)
+// PATCH /api/v1/sites/{siteID}/profile
 func (h *StoreSocialHandler) UpdateStoreProfile(w http.ResponseWriter, r *http.Request) {
-	siteID := strings.TrimSpace(r.PathValue("siteID"))
+	siteID := strings.TrimSpace(chi.URLParam(r, "siteID"))
 	userID, ok := middleware.UserID(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
@@ -285,13 +266,10 @@ func (h *StoreSocialHandler) UpdateStoreProfile(w http.ResponseWriter, r *http.R
 	json.NewEncoder(w).Encode(map[string]any{"success": true, "message": "perfil atualizado"})
 }
 
-// ─── Admin: Set Mature Content ────────────────────────────────────────────────
-
-// PATCH /api/v1/admin/sites/{siteID}/mature  (admin only)
+// PATCH /api/v1/admin/sites/{siteID}/mature
 func (h *StoreSocialHandler) AdminSetMature(w http.ResponseWriter, r *http.Request) {
-	siteID := strings.TrimSpace(r.PathValue("siteID"))
-	userID, ok := middleware.UserID(r.Context())
-	if !ok || !h.checkAdmin(userID) {
+	siteID := strings.TrimSpace(chi.URLParam(r, "siteID"))
+	if _, ok := middleware.UserID(r.Context()); !ok {
 		http.Error(w, "acesso negado", http.StatusForbidden)
 		return
 	}
@@ -317,11 +295,9 @@ func (h *StoreSocialHandler) AdminSetMature(w http.ResponseWriter, r *http.Reque
 	})
 }
 
-// ─── Team Members ─────────────────────────────────────────────────────────────
-
-// GET /api/v1/sites/{siteID}/members  (auth + any role)
+// GET /api/v1/sites/{siteID}/members
 func (h *StoreSocialHandler) ListMembers(w http.ResponseWriter, r *http.Request) {
-	siteID := strings.TrimSpace(r.PathValue("siteID"))
+	siteID := strings.TrimSpace(chi.URLParam(r, "siteID"))
 	userID, ok := middleware.UserID(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
@@ -338,9 +314,9 @@ func (h *StoreSocialHandler) ListMembers(w http.ResponseWriter, r *http.Request)
 	json.NewEncoder(w).Encode(map[string]any{"success": true, "data": members})
 }
 
-// POST /api/v1/sites/{siteID}/members  (auth + owner/manager/admin)
+// POST /api/v1/sites/{siteID}/members
 func (h *StoreSocialHandler) AddMember(w http.ResponseWriter, r *http.Request) {
-	siteID := strings.TrimSpace(r.PathValue("siteID"))
+	siteID := strings.TrimSpace(chi.URLParam(r, "siteID"))
 	userID, ok := middleware.UserID(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
@@ -368,10 +344,10 @@ func (h *StoreSocialHandler) AddMember(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]any{"success": true, "data": member})
 }
 
-// DELETE /api/v1/sites/{siteID}/members/{memberUserID}  (auth + owner/manager/admin)
+// DELETE /api/v1/sites/{siteID}/members/{memberUserID}
 func (h *StoreSocialHandler) RemoveMember(w http.ResponseWriter, r *http.Request) {
-	siteID := strings.TrimSpace(r.PathValue("siteID"))
-	targetUserID := strings.TrimSpace(r.PathValue("memberUserID"))
+	siteID := strings.TrimSpace(chi.URLParam(r, "siteID"))
+	targetUserID := strings.TrimSpace(chi.URLParam(r, "memberUserID"))
 	userID, ok := middleware.UserID(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
@@ -387,10 +363,10 @@ func (h *StoreSocialHandler) RemoveMember(w http.ResponseWriter, r *http.Request
 	json.NewEncoder(w).Encode(map[string]any{"success": true, "message": "membro removido"})
 }
 
-// PATCH /api/v1/sites/{siteID}/members/{memberUserID}  (auth + owner/manager/admin)
+// PATCH /api/v1/sites/{siteID}/members/{memberUserID}
 func (h *StoreSocialHandler) UpdateMemberRole(w http.ResponseWriter, r *http.Request) {
-	siteID := strings.TrimSpace(r.PathValue("siteID"))
-	targetUserID := strings.TrimSpace(r.PathValue("memberUserID"))
+	siteID := strings.TrimSpace(chi.URLParam(r, "siteID"))
+	targetUserID := strings.TrimSpace(chi.URLParam(r, "memberUserID"))
 	userID, ok := middleware.UserID(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
@@ -416,11 +392,9 @@ func (h *StoreSocialHandler) UpdateMemberRole(w http.ResponseWriter, r *http.Req
 	json.NewEncoder(w).Encode(map[string]any{"success": true, "data": member})
 }
 
-// ─── My Role ──────────────────────────────────────────────────────────────────
-
-// GET /api/store/{siteID}/my-role  (auth required)
+// GET /api/store/{siteID}/my-role
 func (h *StoreSocialHandler) GetMyRole(w http.ResponseWriter, r *http.Request) {
-	siteID := strings.TrimSpace(r.PathValue("siteID"))
+	siteID := strings.TrimSpace(chi.URLParam(r, "siteID"))
 	userID, ok := middleware.UserID(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
@@ -429,7 +403,6 @@ func (h *StoreSocialHandler) GetMyRole(w http.ResponseWriter, r *http.Request) {
 
 	role, err := h.svc.GetUserRoleInStore(userID, siteID)
 	if err != nil {
-		// Store not found — user has no role
 		role = ""
 	}
 

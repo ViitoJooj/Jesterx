@@ -26,3 +26,5 @@ logs.txt
 
 # Storage — arquivos enviados são criados dinamicamente pelo servidor
 data/
+
+.claude

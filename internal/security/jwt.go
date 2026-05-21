@@ -35,105 +35,134 @@ func AccessCookieName(websiteId string) string {
 	return "access_token_" + websiteId
 }
 
-var jwtAccessTokenKey = []byte(config.Jwt_access_token)
-var jwtRefreshTokenKey = []byte(config.Jwt_refresh_token)
+// accessKey and refreshKey are functions (not vars) so they read the config
+// globals at call time — after config.Load() has populated them.
+func accessKey() []byte  { return []byte(config.Jwt_access_token) }
+func refreshKey() []byte { return []byte(config.Jwt_refresh_token) }
 
 func AccessToken(claims AccessTokenClaims) (string, error) {
-	now := time.Now().Unix()
-
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"iss":  claims.Iss,
-		"sub":  claims.Sub,
-		"aud":  claims.Aud,
-		"exp":  claims.Exp,
-		"iat":  now,
-		"role": claims.Role,
+		"iss":        claims.Iss,
+		"sub":        claims.Sub,
+		"aud":        claims.Aud,
+		"exp":        claims.Exp,
+		"iat":        time.Now().Unix(),
+		"role":       claims.Role,
+		"website_id": claims.WebsiteId,
 	})
-
-	return token.SignedString(jwtAccessTokenKey)
+	return token.SignedString(accessKey())
 }
 
 func RefreshToken(claims RefreshTokenClaims) (string, error) {
-	now := time.Now().Unix()
-
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"iss":        claims.Iss,
 		"sub":        claims.Sub,
 		"website_id": claims.WebsiteId,
 		"exp":        claims.Exp,
-		"iat":        now,
+		"iat":        time.Now().Unix(),
 		"type":       "refresh",
 	})
-
-	return token.SignedString(jwtRefreshTokenKey)
+	return token.SignedString(refreshKey())
 }
 
 func ParseAccessToken(tokenString string) (*AccessTokenClaims, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("Internal error.")
+			return nil, errors.New("unexpected signing method")
 		}
-		return jwtAccessTokenKey, nil
+		return accessKey(), nil
 	})
-
 	if err != nil {
 		return nil, err
 	}
-
 	if !token.Valid {
-		return nil, errors.New("Invalid token.")
+		return nil, errors.New("invalid token")
 	}
 
 	claimsMap, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return nil, errors.New("Invalid claims.")
+		return nil, errors.New("invalid claims")
 	}
 
-	claims := &AccessTokenClaims{
-		Iss:  claimsMap["iss"].(string),
-		Sub:  claimsMap["sub"].(string),
-		Aud:  claimsMap["aud"].(string),
-		Role: claimsMap["role"].(string),
-		Exp:  int64(claimsMap["exp"].(float64)),
-		Iat:  int64(claimsMap["iat"].(float64)),
+	getString := func(key string) (string, bool) {
+		v, ok := claimsMap[key].(string)
+		return v, ok
+	}
+	getFloat := func(key string) (float64, bool) {
+		v, ok := claimsMap[key].(float64)
+		return v, ok
 	}
 
-	return claims, nil
+	iss, ok1 := getString("iss")
+	sub, ok2 := getString("sub")
+	aud, ok3 := getString("aud")
+	role, ok4 := getString("role")
+	exp, ok5 := getFloat("exp")
+	iat, ok6 := getFloat("iat")
+	if !ok1 || !ok2 || !ok3 || !ok4 || !ok5 || !ok6 {
+		return nil, errors.New("malformed token claims")
+	}
+
+	websiteID, _ := getString("website_id")
+
+	return &AccessTokenClaims{
+		Iss:       iss,
+		Sub:       sub,
+		Aud:       aud,
+		Role:      role,
+		WebsiteId: websiteID,
+		Exp:       int64(exp),
+		Iat:       int64(iat),
+	}, nil
 }
 
 func ParseRefreshToken(tokenString string) (*RefreshTokenClaims, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("Internal Error.")
+			return nil, errors.New("unexpected signing method")
 		}
-		return jwtRefreshTokenKey, nil
+		return refreshKey(), nil
 	})
-
 	if err != nil {
 		return nil, err
 	}
-
 	if !token.Valid {
-		return nil, errors.New("Invalid token.")
+		return nil, errors.New("invalid token")
 	}
 
 	claimsMap, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return nil, errors.New("Invalid claims.")
+		return nil, errors.New("invalid claims")
 	}
-
 	if claimsMap["type"] != "refresh" {
-		return nil, errors.New("is not refresh token.")
+		return nil, errors.New("not a refresh token")
 	}
 
-	claims := &RefreshTokenClaims{
-		Iss:       claimsMap["iss"].(string),
-		Sub:       claimsMap["sub"].(string),
-		WebsiteId: claimsMap["website_id"].(string),
-		Exp:       int64(claimsMap["exp"].(float64)),
-		Iat:       int64(claimsMap["iat"].(float64)),
-		Type:      claimsMap["type"].(string),
+	getString := func(key string) (string, bool) {
+		v, ok := claimsMap[key].(string)
+		return v, ok
+	}
+	getFloat := func(key string) (float64, bool) {
+		v, ok := claimsMap[key].(float64)
+		return v, ok
 	}
 
-	return claims, nil
+	iss, ok1 := getString("iss")
+	sub, ok2 := getString("sub")
+	websiteID, ok3 := getString("website_id")
+	typ, ok4 := getString("type")
+	exp, ok5 := getFloat("exp")
+	iat, ok6 := getFloat("iat")
+	if !ok1 || !ok2 || !ok3 || !ok4 || !ok5 || !ok6 {
+		return nil, errors.New("malformed token claims")
+	}
+
+	return &RefreshTokenClaims{
+		Iss:       iss,
+		Sub:       sub,
+		WebsiteId: websiteID,
+		Exp:       int64(exp),
+		Iat:       int64(iat),
+		Type:      typ,
+	}, nil
 }

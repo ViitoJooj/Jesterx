@@ -2,7 +2,6 @@ package domain
 
 import "time"
 
-// Store team member roles
 const (
 	MemberRoleManager        = "manager"
 	MemberRoleCatalogManager = "catalog_manager"
@@ -10,7 +9,6 @@ const (
 	MemberRoleLogistics      = "logistics"
 )
 
-// StoreMember represents a team member of a store.
 type StoreMember struct {
 	ID        string    `json:"id"`
 	WebsiteID string    `json:"website_id"`
@@ -56,7 +54,6 @@ type StoreCreator struct {
 	CompanyName *string `json:"company_name,omitempty"`
 	TradeName   *string `json:"trade_name,omitempty"`
 	AvatarURL   *string `json:"avatar_url,omitempty"`
-	AccountType string  `json:"account_type"`
 }
 
 type StoreFullInfo struct {
@@ -64,7 +61,7 @@ type StoreFullInfo struct {
 	Name             string        `json:"name"`
 	ShortDescription string        `json:"short_description"`
 	Description      string        `json:"description"`
-	Image            []byte        `json:"image,omitempty"`
+	ImageUrl         *string       `json:"image_url,omitempty"`
 	Type             string        `json:"type"`
 	MatureContent    bool          `json:"mature_content"`
 	RatingAvg        float64       `json:"rating_avg"`

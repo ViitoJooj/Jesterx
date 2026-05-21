@@ -11,9 +11,6 @@ import (
 	"strings"
 )
 
-// Run applies all pending migrations from the given directory.
-// It creates a schema_migrations table if it doesn't exist and
-// only applies migrations not yet applied.
 func Run(db *sql.DB, migrationsDir string) error {
 	ctx := context.Background()
 

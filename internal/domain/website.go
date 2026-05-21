@@ -9,11 +9,12 @@ import (
 type WebSite struct {
 	Id                string
 	Type              string
-	Image             []byte
+	ImageUrl          *string
 	Name              string
 	Short_description string
 	Description       string
 	Creator_id        string
+	CompanyId         *string
 	Banned            bool
 	MatureContent     bool
 	RatingAvg         float64
@@ -22,20 +23,20 @@ type WebSite struct {
 	Created_at        time.Time
 }
 
-func NewWebSite(Type string, Image []byte, Name string, Short_description string, Description string, Creator_id string) *WebSite {
+func NewWebSite(siteType string, imageUrl *string, name, shortDesc, description, creatorId string) *WebSite {
 	id, _ := uuid.NewV7()
-
+	now := time.Now()
 	return &WebSite{
 		Id:                id.String(),
-		Type:              Type,
-		Image:             Image,
-		Name:              Name,
-		Short_description: Short_description,
-		Description:       Description,
-		Creator_id:        Creator_id,
+		Type:              siteType,
+		ImageUrl:          imageUrl,
+		Name:              name,
+		Short_description: shortDesc,
+		Description:       description,
+		Creator_id:        creatorId,
 		Banned:            false,
-		Updated_at:        time.Now(),
-		Created_at:        time.Now(),
+		Updated_at:        now,
+		Created_at:        now,
 	}
 }
 
@@ -50,10 +51,9 @@ type WebSiteRoute struct {
 	Created_at   time.Time
 }
 
-func NewWebSiteRoute(websiteID string, path string, title string, requiresAuth bool, position int) *WebSiteRoute {
+func NewWebSiteRoute(websiteID, path, title string, requiresAuth bool, position int) *WebSiteRoute {
 	id, _ := uuid.NewV7()
 	now := time.Now()
-
 	return &WebSiteRoute{
 		Id:           id.String(),
 		WebsiteId:    websiteID,
@@ -83,7 +83,7 @@ type WebSiteVersion struct {
 	Created_at   time.Time
 }
 
-func NewWebSiteVersion(websiteID string, version int, sourceType string, source string, createdBy string) *WebSiteVersion {
+func NewWebSiteVersion(websiteID string, version int, sourceType, source, createdBy string) *WebSiteVersion {
 	id, _ := uuid.NewV7()
 	now := time.Now()
 	return &WebSiteVersion{

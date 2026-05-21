@@ -1,7 +1,6 @@
 -- 0000_Reset.up.sql
--- Drops all application tables and clears migration history so the
--- new clean migrations (0001-0006) are applied from scratch.
--- schema_migrations itself is preserved (the runner recreates it).
+-- Drops everything and clears migration history.
+-- Run this before applying the clean 0001-0008 migrations.
 
 DROP TABLE IF EXISTS store_members    CASCADE;
 DROP TABLE IF EXISTS store_visits     CASCADE;
@@ -17,11 +16,18 @@ DROP TABLE IF EXISTS themes           CASCADE;
 DROP TABLE IF EXISTS payments         CASCADE;
 DROP TABLE IF EXISTS plans            CASCADE;
 DROP TABLE IF EXISTS websites         CASCADE;
+DROP TABLE IF EXISTS companies        CASCADE;
 DROP TABLE IF EXISTS users            CASCADE;
 
--- Drop legacy ENUM types if present
-DROP TYPE IF EXISTS report_status CASCADE;
-DROP TYPE IF EXISTS report_reason CASCADE;
+DROP TYPE IF EXISTS gender_type       CASCADE;
+DROP TYPE IF EXISTS member_role       CASCADE;
+DROP TYPE IF EXISTS order_status      CASCADE;
+DROP TYPE IF EXISTS payment_status    CASCADE;
+DROP TYPE IF EXISTS product_condition CASCADE;
+DROP TYPE IF EXISTS report_status     CASCADE;
+DROP TYPE IF EXISTS report_reason     CASCADE;
+DROP TYPE IF EXISTS scan_status_type  CASCADE;
+DROP TYPE IF EXISTS source_type       CASCADE;
+DROP TYPE IF EXISTS website_type      CASCADE;
 
--- Clear migration history so 0001-0006 are treated as new
 TRUNCATE schema_migrations;

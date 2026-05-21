@@ -1,13 +1,10 @@
 package handlers
 
 import (
-	"context"
 	"database/sql"
 	"encoding/json"
 	"net/http"
 	"time"
-
-	middleware "github.com/ViitoJooj/Jesterx/internal/http/middlewares"
 )
 
 type AdminHandler struct {
@@ -16,13 +13,6 @@ type AdminHandler struct {
 
 func NewAdminHandler(db *sql.DB) *AdminHandler {
 	return &AdminHandler{db: db}
-}
-
-func (h *AdminHandler) checkAdmin(userID string) bool {
-	var role string
-	err := h.db.QueryRowContext(context.Background(),
-		`SELECT role FROM users WHERE id = $1`, userID).Scan(&role)
-	return err == nil && role == "admin"
 }
 
 type AdminStats struct {
@@ -38,14 +28,7 @@ type AdminStats struct {
 }
 
 func (h *AdminHandler) Stats(w http.ResponseWriter, r *http.Request) {
-	userID, ok := middleware.UserID(r.Context())
-	if !ok || !h.checkAdmin(userID) {
-		w.Header().Set("Content-Type", "application/json")
-		http.Error(w, `{"success":false,"message":"acesso negado"}`, http.StatusForbidden)
-		return
-	}
-
-	ctx := context.Background()
+	ctx := r.Context()
 	var stats AdminStats
 	today := time.Now().Format("2006-01-02")
 
@@ -64,14 +47,7 @@ func (h *AdminHandler) Stats(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AdminHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
-	userID, ok := middleware.UserID(r.Context())
-	if !ok || !h.checkAdmin(userID) {
-		w.Header().Set("Content-Type", "application/json")
-		http.Error(w, `{"success":false,"message":"acesso negado"}`, http.StatusForbidden)
-		return
-	}
-
-	ctx := context.Background()
+	ctx := r.Context()
 	rows, err := h.db.QueryContext(ctx, `
 		SELECT u.id, u.first_name, u.last_name, u.email, u.role, u.verified_email,
 		       u.created_at,
@@ -114,14 +90,7 @@ func (h *AdminHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AdminHandler) ListSites(w http.ResponseWriter, r *http.Request) {
-	userID, ok := middleware.UserID(r.Context())
-	if !ok || !h.checkAdmin(userID) {
-		w.Header().Set("Content-Type", "application/json")
-		http.Error(w, `{"success":false,"message":"acesso negado"}`, http.StatusForbidden)
-		return
-	}
-
-	ctx := context.Background()
+	ctx := r.Context()
 	rows, err := h.db.QueryContext(ctx, `
 		SELECT w.id, w.name, w.website_type, w.banned, w.created_at,
 		       u.first_name || ' ' || u.last_name as owner_name, u.email as owner_email,
@@ -165,14 +134,7 @@ func (h *AdminHandler) ListSites(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AdminHandler) ListOrders(w http.ResponseWriter, r *http.Request) {
-	userID, ok := middleware.UserID(r.Context())
-	if !ok || !h.checkAdmin(userID) {
-		w.Header().Set("Content-Type", "application/json")
-		http.Error(w, `{"success":false,"message":"acesso negado"}`, http.StatusForbidden)
-		return
-	}
-
-	ctx := context.Background()
+	ctx := r.Context()
 	rows, err := h.db.QueryContext(ctx, `
 		SELECT o.id, o.website_id, COALESCE(w.name, '') as site_name,
 		       o.buyer_name, o.buyer_email, o.status,
@@ -217,14 +179,7 @@ func (h *AdminHandler) ListOrders(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AdminHandler) Revenue(w http.ResponseWriter, r *http.Request) {
-	userID, ok := middleware.UserID(r.Context())
-	if !ok || !h.checkAdmin(userID) {
-		w.Header().Set("Content-Type", "application/json")
-		http.Error(w, `{"success":false,"message":"acesso negado"}`, http.StatusForbidden)
-		return
-	}
-
-	ctx := context.Background()
+	ctx := r.Context()
 	rows, err := h.db.QueryContext(ctx, `
 		SELECT DATE(created_at) as day,
 		       COUNT(*) as order_count,

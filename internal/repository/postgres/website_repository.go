@@ -16,18 +16,18 @@ func NewWebSiteRepository(db *sql.DB) *connection {
 func (r *connection) SaveWebSite(website domain.WebSite) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	query := `INSERT INTO websites (id, website_type, image, name, short_description, description, creator_id, banned, updated_at, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`
-	_, err := r.db.ExecContext(ctx, query, website.Id, website.Type, website.Image, website.Name, website.Short_description, website.Description, website.Creator_id, website.Banned, website.Updated_at, website.Created_at)
+	query := `INSERT INTO websites (id, website_type, image_url, name, short_description, description, creator_id, banned, updated_at, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`
+	_, err := r.db.ExecContext(ctx, query, website.Id, website.Type, website.ImageUrl, website.Name, website.Short_description, website.Description, website.Creator_id, website.Banned, website.Updated_at, website.Created_at)
 	return err
 }
 
 func (r *connection) FindWebSiteByID(id string) (*domain.WebSite, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	query := `SELECT id, website_type, image, name, short_description, description, creator_id, banned, updated_at, created_at, mature_content, rating_avg, rating_count FROM websites WHERE id = $1`
+	query := `SELECT id, website_type, image_url, name, COALESCE(short_description,''), COALESCE(description,''), creator_id, banned, updated_at, created_at, mature_content, rating_avg, rating_count FROM websites WHERE id = $1`
 	var website domain.WebSite
 	err := r.db.QueryRowContext(ctx, query, id).
-		Scan(&website.Id, &website.Type, &website.Image, &website.Name, &website.Short_description, &website.Description, &website.Creator_id, &website.Banned, &website.Updated_at, &website.Created_at, &website.MatureContent, &website.RatingAvg, &website.RatingCount)
+		Scan(&website.Id, &website.Type, &website.ImageUrl, &website.Name, &website.Short_description, &website.Description, &website.Creator_id, &website.Banned, &website.Updated_at, &website.Created_at, &website.MatureContent, &website.RatingAvg, &website.RatingCount)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
@@ -41,7 +41,7 @@ func (r *connection) ListWebSitesByUserID(id string) ([]domain.WebSite, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	rows, err := r.db.QueryContext(ctx, `
-		SELECT id, website_type, image, name, short_description, description, creator_id, banned, updated_at, created_at
+		SELECT id, website_type, image_url, name, COALESCE(short_description,''), COALESCE(description,''), creator_id, banned, updated_at, created_at
 		FROM websites
 		WHERE creator_id = $1
 		ORDER BY created_at DESC
@@ -57,7 +57,7 @@ func (r *connection) ListWebSitesByUserID(id string) ([]domain.WebSite, error) {
 		if err := rows.Scan(
 			&website.Id,
 			&website.Type,
-			&website.Image,
+			&website.ImageUrl,
 			&website.Name,
 			&website.Short_description,
 			&website.Description,
@@ -81,11 +81,11 @@ func (r *connection) FindWebSiteByName(name string) (*domain.WebSite, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	query := `SELECT id, website_type, image, name, short_description, description, creator_id, banned, updated_at, created_at, mature_content, rating_avg, rating_count FROM websites WHERE name = $1`
+	query := `SELECT id, website_type, image_url, name, COALESCE(short_description,''), COALESCE(description,''), creator_id, banned, updated_at, created_at, mature_content, rating_avg, rating_count FROM websites WHERE name = $1`
 
 	var website domain.WebSite
 	err := r.db.QueryRowContext(ctx, query, name).
-		Scan(&website.Id, &website.Type, &website.Image, &website.Name, &website.Short_description, &website.Description, &website.Creator_id, &website.Banned, &website.Updated_at, &website.Created_at, &website.MatureContent, &website.RatingAvg, &website.RatingCount)
+		Scan(&website.Id, &website.Type, &website.ImageUrl, &website.Name, &website.Short_description, &website.Description, &website.Creator_id, &website.Banned, &website.Updated_at, &website.Created_at, &website.MatureContent, &website.RatingAvg, &website.RatingCount)
 
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
@@ -100,8 +100,8 @@ func (r *connection) FindWebSiteByName(name string) (*domain.WebSite, error) {
 func (r *connection) UpdateWebSiteByID(id string, website domain.WebSite) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	query := `UPDATE websites SET website_type = $1, image = $2, name = $3, short_description = $4, description = $5, creator_id = $6, banned = $7, updated_at = $8 WHERE id = $9`
-	_, err := r.db.ExecContext(ctx, query, website.Type, website.Image, website.Name, website.Short_description, website.Description, website.Creator_id, website.Banned, website.Updated_at, id)
+	query := `UPDATE websites SET website_type = $1, image_url = $2, name = $3, short_description = $4, description = $5, creator_id = $6, banned = $7, updated_at = $8 WHERE id = $9`
+	_, err := r.db.ExecContext(ctx, query, website.Type, website.ImageUrl, website.Name, website.Short_description, website.Description, website.Creator_id, website.Banned, website.Updated_at, id)
 	return err
 }
 
@@ -289,7 +289,7 @@ func (r *connection) FindLatestVersionByWebsiteID(websiteID string) (*domain.Web
 	defer cancel()
 
 	query := `
-		SELECT id, website_id, version, source_type, source, compiled_html, scan_status, scan_score, scan_findings, published, published_at, created_by, updated_at, created_at
+		SELECT id, website_id, version, source_type, source, compiled_html, scan_status, scan_score, COALESCE(scan_findings,''), published, published_at, created_by, updated_at, created_at
 		FROM website_versions
 		WHERE website_id = $1
 		ORDER BY version DESC
@@ -328,7 +328,7 @@ func (r *connection) FindVersionByWebsiteID(websiteID string, versionNumber int)
 	defer cancel()
 
 	query := `
-		SELECT id, website_id, version, source_type, source, compiled_html, scan_status, scan_score, scan_findings, published, published_at, created_by, updated_at, created_at
+		SELECT id, website_id, version, source_type, source, compiled_html, scan_status, scan_score, COALESCE(scan_findings,''), published, published_at, created_by, updated_at, created_at
 		FROM website_versions
 		WHERE website_id = $1 AND version = $2
 		LIMIT 1
@@ -365,7 +365,7 @@ func (r *connection) ListVersionsByWebsiteID(websiteID string) ([]domain.WebSite
 	defer cancel()
 
 	rows, err := r.db.QueryContext(ctx, `
-		SELECT id, website_id, version, source_type, source, compiled_html, scan_status, scan_score, scan_findings, published, published_at, created_by, updated_at, created_at
+		SELECT id, website_id, version, source_type, source, compiled_html, scan_status, scan_score, COALESCE(scan_findings,''), published, published_at, created_by, updated_at, created_at
 		FROM website_versions
 		WHERE website_id = $1
 		ORDER BY version DESC
@@ -410,7 +410,7 @@ func (r *connection) FindPublishedVersionByWebsiteID(websiteID string) (*domain.
 
 	var version domain.WebSiteVersion
 	err := r.db.QueryRowContext(ctx, `
-		SELECT id, website_id, version, source_type, source, compiled_html, scan_status, scan_score, scan_findings, published, published_at, created_by, updated_at, created_at
+		SELECT id, website_id, version, source_type, source, compiled_html, scan_status, scan_score, COALESCE(scan_findings,''), published, published_at, created_by, updated_at, created_at
 		FROM website_versions
 		WHERE website_id = $1 AND published = true
 		ORDER BY version DESC

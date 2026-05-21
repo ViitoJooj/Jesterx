@@ -30,14 +30,14 @@ func NewStorageService() *StorageService {
 }
 
 var allowedMimeTypes = map[string]bool{
-	"image/jpeg":    true,
-	"image/png":     true,
-	"image/gif":     true,
-	"image/webp":    true,
-	"image/svg+xml": true,
-	"video/mp4":     true,
-	"video/webm":    true,
-	"video/ogg":     true,
+	"image/jpeg":         true,
+	"image/png":          true,
+	"image/gif":          true,
+	"image/webp":         true,
+	"image/svg+xml":      true,
+	"video/mp4":          true,
+	"video/webm":         true,
+	"video/ogg":          true,
 	"application/pdf":    true,
 	"application/msword": true,
 	"application/vnd.openxmlformats-officedocument.wordprocessingml.document": true,
@@ -84,7 +84,7 @@ func (s *StorageService) Upload(file io.Reader, filename string, size int64) (*U
 	category := categoryForMime(mimeType)
 	datePart := time.Now().UTC().Format("2006/01")
 	uniqueName := uuid.New().String() + ext
-	// Relative path inside the data folder: e.g. images/2025/01/<uuid>.jpg
+
 	relPath := filepath.Join(category, filepath.FromSlash(datePart), uniqueName)
 	absPath := filepath.Join(config.StoragePath, relPath)
 
@@ -96,7 +96,6 @@ func (s *StorageService) Upload(file io.Reader, filename string, size int64) (*U
 		return nil, fmt.Errorf("salvar arquivo: %w", err)
 	}
 
-	// Public URL served by the backend at /files/...
 	publicURL := "/files/" + filepath.ToSlash(relPath)
 
 	return &UploadResult{
@@ -106,4 +105,3 @@ func (s *StorageService) Upload(file io.Reader, filename string, size int64) (*U
 		Size:     int64(len(data)),
 	}, nil
 }
-

@@ -56,38 +56,69 @@
   gap: 1rem;
 }
 
-.storeCard, .creatorCard, .rateCard {
+.storeCard {
   background: $background-color-primary;
   border-radius: 16px;
+  border: 1px solid $border-color;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+}
+
+.storeCardBanner {
+  height: 72px;
+  background: linear-gradient(135deg, $color-primary-dark-raw 0%, $color-primary-raw 55%, $color-accent-raw 100%);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.storeCardBody {
+  padding: 0 1.25rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.creatorCard, .rateCard {
+  background: $background-color-primary;
+  border-radius: 16px;
+  border: 1px solid $border-color;
   padding: 1.25rem;
   display: flex;
   flex-direction: column;
   gap: .75rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .logoWrap {
   position: relative;
   display: flex;
   justify-content: center;
+  margin-top: -36px;
 }
 
 .logo {
-  width: 80px; height: 80px;
+  width: 72px; height: 72px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid $border-color;
+  object-position: center top;
+  border: 3px solid $background-color-primary;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
 }
 
 .logoPlaceholder {
-  width: 80px; height: 80px;
+  width: 72px; height: 72px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #8b1e3f, #b23a64);
+  background: linear-gradient(135deg, $color-primary-dark-raw, $color-primary-raw);
   color: #fff;
-  font-size: 2rem;
-  font-weight: 700;
+  font-size: 1.8rem;
+  font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 3px solid $background-color-primary;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
 }
 
 .matureBadge {
@@ -180,39 +211,53 @@
 }
 
 .visitBtn {
-  padding: .6rem 1rem;
+  padding: .65rem 1rem;
   border-radius: 10px;
-  background: linear-gradient(90deg, #8b1e3f, #b23a64);
+  background: linear-gradient(135deg, $color-primary-dark-raw, $color-primary-raw);
   color: #fff;
-  font-weight: 600;
+  font-weight: 700;
   font-size: .875rem;
   text-decoration: none;
   text-align: center;
-  &:hover { opacity: .9; }
+  transition: opacity 0.15s, box-shadow 0.15s;
+  box-shadow: 0 2px 8px rgba(230, 0, 0, 0.3);
+
+  &:hover {
+    opacity: .92;
+    box-shadow: 0 4px 14px rgba(230, 0, 0, 0.4);
+  }
 }
 
 .editBtn {
-  padding: .55rem 1rem;
+  padding: .6rem 1rem;
   border-radius: 10px;
   background: $background-color-secondary;
-  border: 1px solid $border-color;
+  border: 1.5px solid $border-color;
   color: $font-color-primary;
   font-size: .875rem;
+  font-weight: 500;
   cursor: pointer;
-  &:hover { background: $background-color-tertiary; }
+  transition: background 0.15s, border-color 0.15s;
+  text-align: center;
+
+  &:hover {
+    background: $background-color-tertiary;
+    border-color: color-mix(in srgb, $color-primary 30%, $border-color);
+  }
 }
 
 .reportBtn {
   padding: .55rem 1rem;
   border-radius: 10px;
-  background: rgba(220,38,38,.08);
-  border: 1px solid rgba(220,38,38,.2);
+  background: rgba(220,38,38,.07);
+  border: 1.5px solid rgba(220,38,38,.18);
   color: #f87171;
   font-size: .875rem;
   text-decoration: none;
   text-align: center;
   font-weight: 500;
-  &:hover { background: rgba(220,38,38,.15); }
+  transition: background 0.15s;
+  &:hover { background: rgba(220,38,38,.14); }
 }
 
 // ── Edit form ─────────────────────────────────────────────────────────────────
@@ -233,7 +278,7 @@
   width: 100%;
   box-sizing: border-box;
   outline: none;
-  &:focus { border-color: #b23a64; }
+  &:focus { border-color: $color-primary-raw; }
 }
 
 .editTextarea { resize: vertical; font-family: inherit; }
@@ -257,7 +302,7 @@
 .saveBtn {
   padding: .45rem .9rem;
   border-radius: 8px;
-  background: linear-gradient(90deg, #8b1e3f, #b23a64);
+  background: linear-gradient(90deg, $color-primary-raw, $color-primary-raw);
   border: none;
   color: #fff;
   font-size: .8rem;
@@ -288,7 +333,7 @@
 .creatorAvatarPlaceholder {
   width: 44px; height: 44px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #8b1e3f, #b23a64);
+  background: linear-gradient(135deg, $color-primary-raw, $color-primary-raw);
   color: #fff;
   font-weight: 700;
   display: flex;
@@ -311,6 +356,133 @@
   color: $font-color-secondary;
 }
 
+// ── Stats grid ────────────────────────────────────────────────────────────────
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+
+  @media (max-width: 600px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.statCard {
+  background: $background-color-primary;
+  border: 1px solid $border-color;
+  border-radius: 14px;
+  padding: 1.1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.statValue {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: $font-color-primary;
+  line-height: 1;
+}
+
+.statLabel {
+  font-size: 0.72rem;
+  color: $font-color-secondary;
+  text-align: center;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.statStar {
+  color: #f59e0b;
+  font-size: 1.1rem;
+}
+
+// ── Admin section ─────────────────────────────────────────────────────────────
+
+.adminSection {
+  h2 {
+    background: color-mix(in srgb, $color-primary 8%, $background-color-secondary);
+    border-bottom-color: color-mix(in srgb, $color-primary 20%, $border-color);
+  }
+}
+
+.adminBadge {
+  display: inline-block;
+  background: color-mix(in srgb, $color-primary 18%, transparent);
+  color: $color-primary-light;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 6px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+// ── Danger zone ───────────────────────────────────────────────────────────────
+
+.dangerSection {
+  h2 {
+    color: #ef4444;
+    background: rgba(220, 38, 38, 0.06);
+    border-bottom-color: rgba(220, 38, 38, 0.18);
+  }
+}
+
+.dangerZoneBody {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.dangerZoneText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+
+  strong {
+    font-size: 0.95rem;
+    color: $font-color-primary;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.82rem;
+    color: $font-color-secondary;
+    max-width: 480px;
+    line-height: 1.5;
+  }
+}
+
+.deleteSiteBtn {
+  flex-shrink: 0;
+  padding: 0.6rem 1.35rem;
+  border-radius: 10px;
+  background: rgba(220, 38, 38, 0.1);
+  border: 1.5px solid rgba(220, 38, 38, 0.28);
+  color: #ef4444;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+  white-space: nowrap;
+
+  &:hover {
+    background: rgba(220, 38, 38, 0.18);
+    border-color: rgba(220, 38, 38, 0.45);
+    box-shadow: 0 2px 12px rgba(220, 38, 38, 0.2);
+  }
+
+  &:active {
+    transform: translateY(1px);
+  }
+}
+
 // ── Content area ──────────────────────────────────────────────────────────────
 
 .content {
@@ -322,12 +494,26 @@
 .section {
   background: $background-color-primary;
   border-radius: 16px;
-  padding: 1.5rem;
+  border: 1px solid $border-color;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 
   h2 {
-    margin: 0 0 1rem;
-    font-size: 1.05rem;
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 0.9rem 1.5rem;
+    background: $background-color-secondary;
+    border-bottom: 1px solid $border-color;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
   }
+}
+
+.sectionInner {
+  padding: 1.5rem;
 }
 
 .descText {
@@ -340,12 +526,55 @@
 
 // ── Preview frame ─────────────────────────────────────────────────────────────
 
-.previewWrap {
-  position: relative;
-  border-radius: 10px;
+.previewDevice {
+  border-radius: 12px;
   overflow: hidden;
   border: 1px solid $border-color;
-  height: 400px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.previewBar {
+  background: $background-color-secondary;
+  border-bottom: 1px solid $border-color;
+  padding: 0.55rem 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.previewDots {
+  display: flex;
+  gap: 5px;
+
+  span {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: $border-color;
+
+    &:nth-child(1) { background: #ff5f57; }
+    &:nth-child(2) { background: #febc2e; }
+    &:nth-child(3) { background: #28c840; }
+  }
+}
+
+.previewUrl {
+  flex: 1;
+  background: $background-color;
+  border: 1px solid $border-color;
+  border-radius: 6px;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.75rem;
+  color: $font-color-muted;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.previewWrap {
+  position: relative;
+  height: 340px;
+  overflow: hidden;
 }
 
 .previewFrame {
@@ -358,8 +587,8 @@
 .previewOverlay {
   position: absolute;
   bottom: 0; left: 0; right: 0;
-  background: linear-gradient(transparent, rgba(0,0,0,.5));
-  padding: 2rem 1rem .75rem;
+  background: linear-gradient(transparent, rgba(0,0,0,.55));
+  padding: 2.5rem 1rem .85rem;
   display: flex;
   justify-content: flex-end;
 }
@@ -367,11 +596,13 @@
 .previewOpenBtn {
   padding: .45rem 1rem;
   border-radius: 8px;
-  background: rgba(255,255,255,.9);
+  background: rgba(255,255,255,.92);
   color: #1a1a1a;
   font-size: .8rem;
   font-weight: 600;
   text-decoration: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  transition: background 0.15s;
   &:hover { background: #fff; }
 }
 
@@ -394,7 +625,7 @@
 }
 
 .chartBar {
-  fill: #b23a64;
+  fill: $color-primary-raw;
   opacity: .75;
   transition: opacity .15s;
   &:hover { opacity: 1; }
@@ -443,7 +674,7 @@
 .commentAvatarPlaceholder {
   width: 36px; height: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #8b1e3f, #b23a64);
+  background: linear-gradient(135deg, $color-primary-raw, $color-primary-raw);
   color: #fff;
   font-weight: 700;
   font-size: .9rem;
@@ -466,7 +697,7 @@
   outline: none;
   font-family: inherit;
   line-height: 1.5;
-  &:focus { border-color: #b23a64; }
+  &:focus { border-color: $color-primary-raw; }
 }
 
 .commentFormFooter {
@@ -485,7 +716,7 @@
 .commentSubmitBtn {
   padding: .45rem 1rem;
   border-radius: 8px;
-  background: linear-gradient(90deg, #8b1e3f, #b23a64);
+  background: linear-gradient(90deg, $color-primary-raw, $color-primary-raw);
   border: none;
   color: #fff;
   font-size: .85rem;
@@ -600,7 +831,7 @@
   font-family: inherit;
   line-height: 1.5;
   outline: none;
-  &:focus { border-color: #b23a64; }
+  &:focus { border-color: $color-primary-raw; }
 }
 
 .replyActions {
@@ -618,7 +849,7 @@
 
 .replyItem {
   background: $background-color;
-  border-left: 3px solid #b23a64;
+  border-left: 3px solid $color-primary-raw;
   border-radius: 0 8px 8px 0;
   padding: .65rem .85rem;
 }
@@ -626,7 +857,7 @@
 .replyBadge {
   display: inline-block;
   background: color-mix(in srgb, $color-primary 15%, transparent);
-  color: #b23a64;
+  color: $color-primary-raw;
   font-size: .7rem;
   font-weight: 700;
   padding: .1rem .4rem;
@@ -693,3 +924,105 @@
 }
 
 
+
+// ── Delete site ───────────────────────────────────────────────────────────────
+
+.deleteBtn {
+  padding: .55rem 1rem;
+  border-radius: 10px;
+  background: rgba(220,38,38,.08);
+  border: 1px solid rgba(220,38,38,.22);
+  color: #ef4444;
+  font-size: .875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .15s;
+  &:hover { background: rgba(220,38,38,.16); }
+}
+
+.deleteOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.deleteModal {
+  background: $background-color-secondary;
+  border: 1px solid rgba(220,38,38,.25);
+  border-radius: 16px;
+  padding: 2rem 2rem 1.75rem;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: 0 24px 64px rgba(0,0,0,.35);
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+}
+
+.deleteModalIcon {
+  font-size: 2.2rem;
+  line-height: 1;
+}
+
+.deleteModalTitle {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #ef4444;
+  margin: 0;
+}
+
+.deleteModalText {
+  font-size: .9rem;
+  color: $font-color-secondary;
+  line-height: 1.55;
+  margin: 0;
+  padding: .65rem .75rem;
+  background: rgba(220,38,38,.07);
+  border-left: 3px solid rgba(220,38,38,.4);
+  border-radius: 0 6px 6px 0;
+}
+
+.deleteModalLabel {
+  font-size: .875rem;
+  color: $font-color-primary;
+  margin: 0;
+}
+
+.deleteInput {
+  background: $background-color;
+  border: 1.5px solid rgba(220,38,38,.35);
+  border-radius: 8px;
+  padding: .6rem .75rem;
+  font-size: .9rem;
+  color: $font-color-primary;
+  width: 100%;
+  box-sizing: border-box;
+  &:focus { outline: none; border-color: #ef4444; }
+  &:disabled { opacity: .6; }
+}
+
+.deleteModalActions {
+  display: flex;
+  gap: .6rem;
+  justify-content: flex-end;
+  margin-top: .25rem;
+}
+
+.deleteConfirmBtn {
+  padding: .55rem 1.1rem;
+  border-radius: 9px;
+  background: #dc2626;
+  border: none;
+  color: #fff;
+  font-size: .875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s, opacity .15s;
+  &:hover:not(:disabled) { background: #b91c1c; }
+  &:disabled { opacity: .45; cursor: not-allowed; }
+}
