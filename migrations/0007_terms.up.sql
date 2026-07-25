@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS terms (
+    uuid UUID PRIMARY KEY NOT NULL DEFAULT uuid_v7(),
+    name VARCHAR(250) NOT NULL,
+    description VARCHAR(3000) NOT NULL,
+    updated_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
