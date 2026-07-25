@@ -1,0 +1,3 @@
+DROP EXTENSION IF EXISTS pgcrypto;
+DROP FUNCTION IF EXISTS uuid_v7();
+DROP FUNCTION IF EXISTS format_datetime();
