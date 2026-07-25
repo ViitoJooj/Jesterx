@@ -1,0 +1,5 @@
+.git
+infra
+www
+*.md
+.env

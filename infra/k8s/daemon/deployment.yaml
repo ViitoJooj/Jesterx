@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jesterx
+  annotations:
+    owner: "joaovitor819oqueres@gmail.com"
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: jesterx
+  template:
+    metadata:
+      labels:
+        app: jesterx
+    spec:
+      containers:
+        - name: jesterx-core
+          image: jesterxdaemon:latest
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: postgres-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: daemon
+spec:
+  selector:
+    app: jesterx
+  ports:
+    - port: 8080
+      targetPort: 8080

@@ -1,0 +1,10 @@
+kubeconfig_path = "~/.kube/config"
+kube_context    = "docker-desktop"
+namespace       = "default"
+
+view_replicas    = 2
+daemon_replicas  = 3
+storage_replicas = 3
+
+enable_redis = false
+enable_mongo = false

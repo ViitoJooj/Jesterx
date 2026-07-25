@@ -1,30 +1,21 @@
-#DOTENV
+# Dotenv
 .env
 */.env
+!.env.example
+secret.yaml
 
-#NPM
-dist
-*/dist
-node_modules
-*/node_modules
-
-#IDE
-.vscode
-*/.vscode
-
-#GO
-tmp
-*/tmp
-main.exe
-*.exe
-*/main.exe
-*/*.exe
-
-#PROJECT
+# Logs
 logs.txt
 */logs.txt
 
-# Storage — arquivos enviados são criados dinamicamente pelo servidor
-data/
+# Frontend
+node_modules
 
-.claude
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+crash.log
+crash.*.log
