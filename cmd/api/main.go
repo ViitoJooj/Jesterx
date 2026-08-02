@@ -1,15 +1,12 @@
 package main
 
 import (
-	"net/http"
 	"os"
 
-	"github.com/ViitoJooj/Jesterx/internal/controllers"
-	"github.com/ViitoJooj/Jesterx/internal/repositories"
-	"github.com/ViitoJooj/Jesterx/internal/usecases"
 	"github.com/ViitoJooj/Jesterx/pkg/dotenv"
 	"github.com/ViitoJooj/Jesterx/pkg/logger"
 	"github.com/ViitoJooj/Jesterx/pkg/postgresql"
+	"github.com/ViitoJooj/Jesterx/pkg/server"
 )
 
 func main() {
@@ -31,14 +28,5 @@ func main() {
 		os.Exit(0)
 	}
 
-	userRepo := repositories.NewUserRepository(db)
-
-	registerUseCase := usecases.NewRegisterUserUseCase(db, userRepo)
-
-	authController := controllers.NewAuthController(registerUseCase)
-
-	mux := http.NewServeMux()
-	mux.HandleFunc("POST /auth/register", authController.Register)
-
-	http.ListenAndServe(":8080", mux)
+	server.Start(config.Application.Port)
 }

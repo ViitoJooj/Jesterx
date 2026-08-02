@@ -5,10 +5,10 @@ CREATE TABLE IF NOT EXISTS users (
     name VARCHAR(250),
     email VARCHAR(250) UNIQUE NOT NULL,
     role UUID NOT NULL,
-    password NOT NULL,
+    password VARCHAR(255) NOT NULL,
     cpf VARCHAR(11) UNIQUE,
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT
+    updated_at TIMESTAMPTZ DEFAULT now(),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE INDEX  IF NOT EXISTS idx_user_website ON users (website_uuid);

@@ -1,7 +1,13 @@
 package dotenv
 
 type Config struct {
-	PostgreSQL PostgreSQL
+	Application Application
+	PostgreSQL  PostgreSQL
+}
+
+type Application struct {
+	Port       string
+	Enviroment string
 }
 
 type PostgreSQL struct {

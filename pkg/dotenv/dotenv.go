@@ -14,6 +14,10 @@ func Conn() (*Config, error) {
 	}
 
 	return &Config{
+		Application: Application{
+			Port:       os.Getenv("PORT"),
+			Enviroment: os.Getenv("ENVIROMENT"),
+		},
 		PostgreSQL: PostgreSQL{
 			URI:      os.Getenv("POSTGRES_URI"),
 			User:     os.Getenv("POSTGRES_USER"),
