@@ -75,7 +75,3 @@ func Warn(erro error) *Log {
 
 	return log
 }
-
-func (l *Log) Print() {
-	fmt.Printf("\n[%s] \n[%s] \n[%s]", l.Time, l.TraceID, l.Function)
-}
