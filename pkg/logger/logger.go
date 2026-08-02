@@ -21,9 +21,15 @@ func Warn(erro error) *Log {
 	pc, _, _, _ := runtime.Caller(1)
 	fn := runtime.FuncForPC(pc)
 
+	funcName := "unknown"
+	if fn != nil {
+		funcName = fn.Name()
+	}
+
 	log := &Log{
+		Erro:     erro,
 		TraceID:  uuid.NewString(),
-		Function: fn.Name(),
+		Function: funcName,
 		Time:     time.Now().Format("02/01/2006 15:04:05"),
 	}
 
@@ -77,5 +83,9 @@ func Warn(erro error) *Log {
 }
 
 func (l *Log) Print() {
-	fmt.Printf("\n[%s] \n[%s] \n[%s]", l.Time, l.TraceID, l.Function)
+	erroTexto := ""
+	if l.Erro != nil {
+		erroTexto = fmt.Sprintf(" [ERROR: %s]", l.Erro.Error())
+	}
+	fmt.Printf("[%s] [%s] [%s]%s\n", l.Time, l.TraceID, l.Function, erroTexto)
 }

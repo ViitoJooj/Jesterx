@@ -10,8 +10,8 @@ CREATE TABLE IF NOT EXISTS phones (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE IF NOT EXISTS idx_phone_website ON phone (website_uuid);
-CREATE IF NOT EXISTS idx_phone_owner ON phone (owner_uuid);
-CREATE IF NOT EXISTS idx_phone_owner_type ON phone (owner_type);
-CREATE IF NOT EXISTS idx_phone_label ON phone (label);
-CREATE IF NOT EXISTS idx_phone_number ON phone (number);
+CREATE INDEX IF NOT EXISTS idx_phone_website ON phones (website_uuid);
+CREATE INDEX IF NOT EXISTS idx_phone_owner ON phones (owner_uuid);
+CREATE INDEX IF NOT EXISTS idx_phone_owner_type ON phones (owner_type);
+CREATE INDEX IF NOT EXISTS idx_phone_label ON phones (label);
+CREATE INDEX IF NOT EXISTS idx_phone_number ON phones (number);

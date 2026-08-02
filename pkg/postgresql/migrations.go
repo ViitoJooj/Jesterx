@@ -9,7 +9,7 @@ import (
 )
 
 func Migrations(db *sql.DB) error {
-	files, err := filepath.Glob("./migrations/*.sql")
+	files, err := filepath.Glob("./migrations/*.up.sql")
 	if err != nil {
 		return err
 	}

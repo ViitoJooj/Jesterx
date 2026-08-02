@@ -2,12 +2,22 @@ package postgresql
 
 import (
 	"database/sql"
+	"strings"
 
 	"github.com/ViitoJooj/Jesterx/pkg/dotenv"
+	_ "github.com/lib/pq"
 )
 
 func Conn(uri dotenv.PostgreSQL) (*sql.DB, error) {
-	db, err := sql.Open("postgres", uri.URI)
+	dsn := uri.URI
+	if !strings.Contains(dsn, "sslmode") {
+		if strings.Contains(dsn, "?") {
+			dsn += "&sslmode=disable"
+		} else {
+			dsn += "?sslmode=disable"
+		}
+	}
+	db, err := sql.Open("postgres", dsn)
 	if err != nil {
 		return nil, err
 	}
