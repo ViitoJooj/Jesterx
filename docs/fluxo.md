@@ -1,0 +1,2 @@
+O usuario terá uma interface front end e executará ações para a api back end, porém antes vai passar por validações como 
+cloudflare, load balancer e circuit breaker, ele também precisarar passar por autenticações e confirmações.
