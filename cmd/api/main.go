@@ -1,8 +1,10 @@
 package main
 
 import (
+	"net/http"
 	"os"
 
+	"github.com/ViitoJooj/Jesterx/internal/port/http/routers"
 	"github.com/ViitoJooj/Jesterx/pkg/dotenv"
 	"github.com/ViitoJooj/Jesterx/pkg/logger"
 	"github.com/ViitoJooj/Jesterx/pkg/postgresql"
@@ -28,5 +30,8 @@ func main() {
 		os.Exit(0)
 	}
 
-	server.Start(config.Application.Port)
+	mux := http.NewServeMux()
+	routers.Register(mux, routers.NewControllers(db))
+
+	server.Start(config.Application.Port, mux)
 }

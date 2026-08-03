@@ -13,7 +13,7 @@ type Conf struct {
 	Handler http.Handler
 }
 
-func Start(port string) {
+func Start(port string, handler http.Handler) {
 	if port == "" {
 		err := fmt.Errorf("Application port cannot be null.")
 		logger.Warn(err).Print()
@@ -21,7 +21,7 @@ func Start(port string) {
 	}
 
 	log.Println("Server started in " + port)
-	err := http.ListenAndServe(":"+port, nil)
+	err := http.ListenAndServe(":"+port, handler)
 	logger.Warn(err).Print()
 	os.Exit(0)
 }
