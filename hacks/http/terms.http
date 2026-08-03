@@ -1,0 +1,19 @@
+### Create Terms
+POST {{BASEPATH}}/terms
+Content-Type: application/json
+X-Website-UUID: {{WEBSITE_UUID}}
+
+{
+  "name": "Termos de Uso",
+  "description": "Termos e condições de uso da plataforma..."
+}
+
+### Get Terms By UUID
+GET {{BASEPATH}}/terms/{{TERMS_UUID}}
+Content-Type: application/json
+X-Website-UUID: {{WEBSITE_UUID}}
+
+### Get All Terms
+GET {{BASEPATH}}/terms
+Content-Type: application/json
+X-Website-UUID: {{WEBSITE_UUID}}

@@ -1,0 +1,23 @@
+### Create Rbac
+POST {{BASEPATH}}/rbac
+Content-Type: application/json
+X-Website-UUID: {{WEBSITE_UUID}}
+
+{
+  "label": "admin",
+  "can_read": true,
+  "can_write": true,
+  "can_update": true,
+  "can_upgrade": true,
+  "can_delete": true
+}
+
+### Get Rbac By UUID
+GET {{BASEPATH}}/rbac/{{RBAC_UUID}}
+Content-Type: application/json
+X-Website-UUID: {{WEBSITE_UUID}}
+
+### Get All Rbac
+GET {{BASEPATH}}/rbac
+Content-Type: application/json
+X-Website-UUID: {{WEBSITE_UUID}}

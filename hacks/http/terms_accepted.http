@@ -1,0 +1,19 @@
+### Create Terms Accepted
+POST {{BASEPATH}}/terms-accepted
+Content-Type: application/json
+X-Website-UUID: {{WEBSITE_UUID}}
+
+{
+  "owner_uuid": "{{OWNER_UUID}}",
+  "owner_type": "User"
+}
+
+### Get Terms Accepted By UUID
+GET {{BASEPATH}}/terms-accepted/{{TERMS_ACCEPTED_UUID}}
+Content-Type: application/json
+X-Website-UUID: {{WEBSITE_UUID}}
+
+### Get All Terms Accepted
+GET {{BASEPATH}}/terms-accepted
+Content-Type: application/json
+X-Website-UUID: {{WEBSITE_UUID}}

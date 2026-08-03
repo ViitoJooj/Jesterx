@@ -1,1 +1,11 @@
-@BASEPATH={{BASEPATH}}
+### Register User
+POST {{BASEPATH}}/auth/register
+Content-Type: application/json
+X-Website-UUID: {{WEBSITE_UUID}}
+
+{
+  "name": "João Silva",
+  "email": "joao@example.com",
+  "password": "Senha@123",
+  "save_login": true
+}

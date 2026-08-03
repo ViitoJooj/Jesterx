@@ -1,0 +1,19 @@
+### Create Cupom
+POST {{BASEPATH}}/cupons
+Content-Type: application/json
+
+{
+  "tag_uuid": "{{TAG_UUID}}",
+  "label": "PROMO10",
+  "description": "10% off on all products",
+  "value": "10",
+  "value_type": "percentage"
+}
+
+### Get Cupom By UUID
+GET {{BASEPATH}}/cupons/{{CUPOM_UUID}}
+Content-Type: application/json
+
+### Get All Cupons
+GET {{BASEPATH}}/cupons
+Content-Type: application/json

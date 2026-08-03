@@ -1,0 +1,22 @@
+### Create Phone
+POST {{BASEPATH}}/phones
+Content-Type: application/json
+X-Website-UUID: {{WEBSITE_UUID}}
+
+{
+  "owner_uuid": "{{OWNER_UUID}}",
+  "owner_type": "User",
+  "label": "Celular",
+  "number": 11987654321,
+  "is_default": true
+}
+
+### Get Phone By UUID
+GET {{BASEPATH}}/phones/{{PHONE_UUID}}
+Content-Type: application/json
+X-Website-UUID: {{WEBSITE_UUID}}
+
+### Get All Phones
+GET {{BASEPATH}}/phones
+Content-Type: application/json
+X-Website-UUID: {{WEBSITE_UUID}}

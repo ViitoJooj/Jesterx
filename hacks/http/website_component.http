@@ -1,0 +1,24 @@
+### Create Website Component
+POST {{BASEPATH}}/website-components
+Content-Type: application/json
+X-Website-UUID: {{WEBSITE_UUID}}
+
+{
+  "website_uuid": "{{WEBSITE_UUID}}",
+  "logo_url": "https://example.com/logo.png",
+  "tittle": "Home Page",
+  "description": "Main landing page",
+  "path": "/",
+  "content": {"hero": {"title": "Welcome", "subtitle": "Best products"}},
+  "visits": 0
+}
+
+### Get Website Component By UUID
+GET {{BASEPATH}}/website-components/{{COMPONENT_UUID}}
+Content-Type: application/json
+X-Website-UUID: {{WEBSITE_UUID}}
+
+### Get All Website Components
+GET {{BASEPATH}}/website-components
+Content-Type: application/json
+X-Website-UUID: {{WEBSITE_UUID}}

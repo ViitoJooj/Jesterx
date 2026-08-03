@@ -1,0 +1,21 @@
+### Create Product
+POST {{BASEPATH}}/products
+Content-Type: application/json
+
+{
+  "name": "Camiseta Básica",
+  "description": "Camiseta 100% algodão",
+  "short_description": "Camiseta confortável",
+  "height": 30,
+  "width": 20,
+  "thickness": 2,
+  "active": true
+}
+
+### Get Product By UUID
+GET {{BASEPATH}}/products/{{PRODUCT_UUID}}
+Content-Type: application/json
+
+### Get All Products
+GET {{BASEPATH}}/products
+Content-Type: application/json
