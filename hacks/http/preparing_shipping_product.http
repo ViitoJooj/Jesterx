@@ -1,0 +1,16 @@
+### Create Preparing Shipping Product
+POST {{BASEPATH}}/preparing-shipping-products
+Content-Type: application/json
+
+{
+  "product_uuid": "{{PRODUCT_UUID}}",
+  "address_uuid": "{{ADDRESS_UUID}}"
+}
+
+### Get Preparing Shipping Product By UUID
+GET {{BASEPATH}}/preparing-shipping-products/{{PREPARING_SHIPPING_UUID}}
+Content-Type: application/json
+
+### Get All Preparing Shipping Products
+GET {{BASEPATH}}/preparing-shipping-products
+Content-Type: application/json

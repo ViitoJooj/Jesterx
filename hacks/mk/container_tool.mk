@@ -1,0 +1,1 @@
+CONTAINER_TOOL ?= $(shell if command -v podman > /dev/null 2>&1; then echo podman; else echo docker; fi)

@@ -1,0 +1,30 @@
+### Create Address
+POST {{BASEPATH}}/addresses
+Content-Type: application/json
+X-Website-UUID: {{WEBSITE_UUID}}
+
+{
+  "owner_uuid": "{{OWNER_UUID}}",
+  "owner_type": "User",
+  "label": "Home",
+  "address_line1": "Rua Example, 123",
+  "address_line2": "Apto 45",
+  "neighborhood": "Centro",
+  "city": "São Paulo",
+  "state": "São Paulo",
+  "state_code": "SP",
+  "postal_code": "01310-100",
+  "reference_point": "Próximo ao metrô",
+  "delivery_notes": "Entregar na portaria",
+  "is_default": true
+}
+
+### Get Address By UUID
+GET {{BASEPATH}}/addresses/{{ADDRESS_UUID}}
+Content-Type: application/json
+X-Website-UUID: {{WEBSITE_UUID}}
+
+### Get All Addresses
+GET {{BASEPATH}}/addresses
+Content-Type: application/json
+X-Website-UUID: {{WEBSITE_UUID}}

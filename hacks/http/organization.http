@@ -1,0 +1,22 @@
+### Create Organization
+POST {{BASEPATH}}/organizations
+Content-Type: application/json
+X-Website-UUID: {{WEBSITE_UUID}}
+
+{
+  "owner_uuid": "{{OWNER_UUID}}",
+  "image_url": "https://example.com/logo.png",
+  "name": "Empresa LTDA",
+  "trade_name": "Empresa",
+  "cnpj": "12.345.678/0001-90"
+}
+
+### Get Organization By UUID
+GET {{BASEPATH}}/organizations/{{ORGANIZATION_UUID}}
+Content-Type: application/json
+X-Website-UUID: {{WEBSITE_UUID}}
+
+### Get All Organizations
+GET {{BASEPATH}}/organizations
+Content-Type: application/json
+X-Website-UUID: {{WEBSITE_UUID}}

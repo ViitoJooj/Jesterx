@@ -5,7 +5,8 @@ import (
 
 	"github.com/ViitoJooj/Jesterx/pkg/dotenv"
 	"github.com/ViitoJooj/Jesterx/pkg/logger"
-	postgresql "github.com/ViitoJooj/Jesterx/pkg/postgreSQL"
+	"github.com/ViitoJooj/Jesterx/pkg/postgresql"
+	"github.com/ViitoJooj/Jesterx/pkg/server"
 )
 
 func main() {
@@ -26,4 +27,6 @@ func main() {
 		logger.Warn(err).Print()
 		os.Exit(0)
 	}
+
+	server.Start(config.Application.Port)
 }

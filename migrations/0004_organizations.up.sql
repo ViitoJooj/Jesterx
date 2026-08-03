@@ -6,9 +6,9 @@ CREATE TABLE IF NOT EXISTS organizations (
     name VARCHAR(250),
     trade_name VARCHAR(250),
     cnpj VARCHAR(14),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT
-)
+    updated_at TIMESTAMPTZ DEFAULT now(),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
 
 CREATE INDEX  IF NOT EXISTS idx_organization_website ON organizations (website_uuid);
 CREATE INDEX  IF NOT EXISTS idx_organization_name ON organizations (name);

@@ -1,0 +1,16 @@
+### Create Product Tag
+POST {{BASEPATH}}/product-tags
+Content-Type: application/json
+
+{
+  "product_uuid": "{{PRODUCT_UUID}}",
+  "label": "camisetas"
+}
+
+### Get Product Tag By UUID
+GET {{BASEPATH}}/product-tags/{{PRODUCT_TAG_UUID}}
+Content-Type: application/json
+
+### Get All Product Tags
+GET {{BASEPATH}}/product-tags
+Content-Type: application/json

@@ -1,0 +1,22 @@
+### Create Plan
+POST {{BASEPATH}}/plans
+Content-Type: application/json
+
+{
+  "name": "Pro",
+  "description": "Professional plan",
+  "max_websites": 5,
+  "max_routers": 20,
+  "max_products": 500,
+  "cost_per_sale_rate": 2,
+  "coin": "BRL",
+  "price": 9990
+}
+
+### Get Plan By UUID
+GET {{BASEPATH}}/plans/{{PLAN_UUID}}
+Content-Type: application/json
+
+### Get All Plans
+GET {{BASEPATH}}/plans
+Content-Type: application/json

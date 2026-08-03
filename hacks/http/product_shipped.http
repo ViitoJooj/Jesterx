@@ -1,0 +1,17 @@
+### Create Product Shipped
+POST {{BASEPATH}}/products-shipped
+Content-Type: application/json
+
+{
+  "product_uuid": "{{PRODUCT_UUID}}",
+  "address_uuid": "{{ADDRESS_UUID}}",
+  "status": "shipped"
+}
+
+### Get Product Shipped By UUID
+GET {{BASEPATH}}/products-shipped/{{PRODUCT_SHIPPED_UUID}}
+Content-Type: application/json
+
+### Get All Products Shipped
+GET {{BASEPATH}}/products-shipped
+Content-Type: application/json

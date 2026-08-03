@@ -1,0 +1,23 @@
+### Create Website
+POST {{BASEPATH}}/websites
+Content-Type: application/json
+X-Website-UUID: {{WEBSITE_UUID}}
+
+{
+  "owner_uuid": "{{OWNER_UUID}}",
+  "owner_type": "User",
+  "label": "Minha Loja",
+  "url": "https://minhaloja.com",
+  "write_in": "React",
+  "description": "Loja de roupas"
+}
+
+### Get Website By UUID
+GET {{BASEPATH}}/websites/{{WEBSITE_UUID}}
+Content-Type: application/json
+X-Website-UUID: {{WEBSITE_UUID}}
+
+### Get All Websites
+GET {{BASEPATH}}/websites
+Content-Type: application/json
+X-Website-UUID: {{WEBSITE_UUID}}

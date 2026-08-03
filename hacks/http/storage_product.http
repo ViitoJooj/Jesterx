@@ -1,0 +1,15 @@
+### Create Storage Product
+POST {{BASEPATH}}/storage-products
+Content-Type: application/json
+
+{
+  "product_uuid": "{{PRODUCT_UUID}}"
+}
+
+### Get Storage Product By UUID
+GET {{BASEPATH}}/storage-products/{{STORAGE_PRODUCT_UUID}}
+Content-Type: application/json
+
+### Get All Storage Products
+GET {{BASEPATH}}/storage-products
+Content-Type: application/json

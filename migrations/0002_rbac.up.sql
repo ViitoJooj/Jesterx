@@ -7,8 +7,8 @@ CREATE TABLE IF NOT EXISTS rbac (
     can_update BOOLEAN NOT NULL,
     can_upgrade BOOLEAN NOT NULL,
     can_delete BOOLEAN NOT NULL,
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT
+    updated_at TIMESTAMPTZ DEFAULT now(),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE INDEX  IF NOT EXISTS idx_website ON rbac (website_uuid);
