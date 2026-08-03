@@ -5,22 +5,10 @@ import (
 	"net/http"
 
 	"github.com/ViitoJooj/Jesterx/internal/domain"
+	"github.com/ViitoJooj/Jesterx/internal/dtos"
 	"github.com/ViitoJooj/Jesterx/internal/usecases"
 	"github.com/google/uuid"
 )
-
-type RegisterRequest struct {
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
-type RegisterResponse struct {
-	UUID      string `json:"uuid"`
-	Name      string `json:"name"`
-	Email     string `json:"email"`
-	CreatedAt string `json:"created_at"`
-}
 
 type AuthController struct {
 	registerUseCase *usecases.RegisterUserUseCase
@@ -45,7 +33,7 @@ func (c *AuthController) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req RegisterRequest
+	var req dtos.RegisterRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
@@ -63,7 +51,7 @@ func (c *AuthController) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := RegisterResponse{
+	resp := dtos.RegisterResponse{
 		UUID:      user.UUID.String(),
 		Name:      user.Name,
 		Email:     user.Email,
