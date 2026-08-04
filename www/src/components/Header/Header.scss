@@ -1,0 +1,197 @@
+@use "../../styles/variables" as *;
+@use "../../styles/mixins" as *;
+
+.jx-header {
+    @include glass-panel(24px);
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    width: calc(100% - 32px);
+    max-width: 1200px;
+    height: 60px;
+    padding: 0 12px 0 20px;
+    border-radius: $radius-pill;
+    box-sizing: border-box;
+
+    &__brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+        color: var(--color-text);
+    }
+
+    &__logo {
+        width: 26px;
+        height: 26px;
+    }
+
+    &__name {
+        font-weight: 700;
+        font-size: 16px;
+        letter-spacing: 0.02em;
+    }
+
+    &__actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    &__guest {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-left: 4px;
+    }
+
+    &__user,
+    &__notifications {
+        position: relative;
+        margin-left: 4px;
+    }
+
+    &__notifications {
+        margin-left: 0;
+    }
+
+    &__avatar-btn {
+        display: inline-flex;
+        padding: 0;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        border-radius: 50%;
+        transition: transform 0.15s ease, box-shadow 0.2s ease;
+
+        &:hover {
+            box-shadow: 0 0 0 3px var(--color-glass-border);
+        }
+
+        &:active {
+            transform: scale(0.94);
+        }
+    }
+
+    &__menu {
+        @include glass(var(--color-glass-strong), 24px);
+        position: absolute;
+        top: calc(100% + 12px);
+        right: 0;
+        min-width: 240px;
+        padding: 8px;
+        border-radius: $radius-lg;
+        box-shadow:
+            inset 0 1px 0 var(--color-glass-highlight),
+            0 16px 48px rgba(0, 0, 0, 0.28);
+        animation: jx-header-menu-in 0.16s ease;
+
+        @keyframes jx-header-menu-in {
+            from {
+                opacity: 0;
+                transform: translateY(-6px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+    }
+
+    &__menu--notifications {
+        min-width: 280px;
+    }
+
+    &__menu-title {
+        display: block;
+        padding: 8px 10px;
+        font-weight: 700;
+        font-size: 14px;
+        color: var(--color-text);
+    }
+
+    &__menu-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        padding: 28px 16px;
+        color: var(--color-text-faint);
+        font-size: 13px;
+    }
+
+    &__menu-user {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 10px;
+    }
+
+    &__menu-user-info {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+
+    &__menu-user-name {
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--color-text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__menu-user-email {
+        font-size: 12px;
+        color: var(--color-text-dim);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__menu-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding: 10px;
+        border: none;
+        background: transparent;
+        border-radius: $radius-sm;
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--color-text);
+        cursor: pointer;
+        text-align: left;
+        transition: background 0.15s ease;
+
+        &:hover {
+            background: var(--color-glass);
+        }
+
+        &--danger {
+            color: var(--color-danger);
+        }
+    }
+}
+
+@media (max-width: 560px) {
+    .jx-header {
+        top: 10px;
+        width: calc(100% - 20px);
+        height: 54px;
+        padding: 0 8px 0 14px;
+
+        &__name {
+            display: none;
+        }
+    }
+}

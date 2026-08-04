@@ -1,6 +1,27 @@
+@use "./styles/variables" as *;
+
 html,
 body,
 #root {
     margin: 0;
     padding: 0;
+    font-family: system-ui, sans-serif;
+    color: var(--color-text);
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+html,
+body {
+    background: var(--color-bg);
+}
+
+// Imagem de fundo por tema. Paginas com fundo proprio (hero, showcase, 404)
+// cobrem a imagem; ela aparece onde nao ha fundo (ex.: ao redor do footer).
+[data-theme="dark"] body,
+:root:not([data-theme="light"]) body {
+    background: var(--color-bg) url("/backgrounds/background-dark.png") center / cover no-repeat fixed;
+}
+
+[data-theme="light"] body {
+    background: var(--color-bg) url("/backgrounds/background-light.png") center / cover no-repeat fixed;
 }

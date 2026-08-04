@@ -1,0 +1,62 @@
+@use "../../styles/variables" as *;
+@use "../../styles/mixins" as *;
+
+.jx-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    animation: jx-modal-fade 0.2s ease;
+}
+
+.jx-modal {
+    @include glass-panel(32px);
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+    padding: 28px;
+    border-radius: $radius-xl;
+    color: var(--color-text);
+    animation: jx-modal-pop 0.25s cubic-bezier(0.34, 1.4, 0.64, 1);
+
+    &__close {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+    }
+
+    &__header {
+        margin-bottom: 20px;
+        padding-right: 40px;
+    }
+
+    &__title {
+        margin: 0;
+        font-size: 22px;
+    }
+
+    &__subtitle {
+        margin: 4px 0 0;
+        font-size: 14px;
+        color: var(--color-text-dim);
+    }
+}
+
+@keyframes jx-modal-fade {
+    from {
+        opacity: 0;
+    }
+}
+
+@keyframes jx-modal-pop {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(8px);
+    }
+}

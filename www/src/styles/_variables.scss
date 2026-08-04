@@ -1,0 +1,68 @@
+// Tema branco e preto. Somente cores e tamanho de bordas.
+// Cores como CSS custom properties p/ suporte dark/light via [data-theme].
+
+// Border radius
+$radius-sm: 8px;
+$radius-md: 12px;
+$radius-lg: 16px;
+$radius-xl: 24px;
+$radius-pill: 999px;
+
+// Border width
+$border-thin: 1px;
+
+:root,
+[data-theme="dark"] {
+    // Backgrounds
+    --color-bg: #050505;
+    --color-bg-elevated: #0d0d0f;
+
+    // Glass surfaces
+    --color-glass: rgba(255, 255, 255, 0.06);
+    --color-glass-strong: rgba(255, 255, 255, 0.1);
+    --color-glass-border: rgba(255, 255, 255, 0.12);
+    --color-glass-highlight: rgba(255, 255, 255, 0.2);
+    --color-glow: rgba(255, 255, 255, 0.08);
+
+    // Texto
+    --color-text: #f5f5f7;
+    --color-text-dim: rgba(255, 255, 255, 0.55);
+    --color-text-faint: rgba(255, 255, 255, 0.35);
+
+    // Acento (branco sobre preto)
+    --color-accent: #ffffff;
+    --color-accent-text: #000000;
+    --color-accent-glow: rgba(255, 255, 255, 0.25);
+
+    // Track desligado (toggle/slider)
+    --color-track: rgba(255, 255, 255, 0.15);
+
+    // Estados
+    --color-danger: #ff453a;
+    --color-success: #30d158;
+}
+
+[data-theme="light"] {
+    --color-bg: #f5f5f7;
+    --color-bg-elevated: #ffffff;
+
+    --color-glass: rgba(255, 255, 255, 0.55);
+    --color-glass-strong: rgba(255, 255, 255, 0.75);
+    --color-glass-border: rgba(0, 0, 0, 0.08);
+    --color-glass-highlight: rgba(255, 255, 255, 0.9);
+    --color-glow: rgba(0, 0, 0, 0.04);
+
+    --color-text: #1d1d1f;
+    --color-text-dim: rgba(0, 0, 0, 0.55);
+    --color-text-faint: rgba(0, 0, 0, 0.35);
+
+    // Acento (preto sobre branco)
+    --color-accent: #1d1d1f;
+    --color-accent-text: #ffffff;
+    --color-accent-glow: rgba(0, 0, 0, 0.2);
+
+    --color-track: rgba(0, 0, 0, 0.12);
+
+    --color-danger: #d70015;
+    --color-success: #248a3d;
+}

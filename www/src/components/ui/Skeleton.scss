@@ -1,0 +1,27 @@
+@use "../../styles/variables" as *;
+
+.jx-skeleton {
+    display: inline-block;
+    border-radius: $radius-sm;
+    background: linear-gradient(
+        90deg,
+        var(--color-glass) 25%,
+        var(--color-glass-strong) 50%,
+        var(--color-glass) 75%
+    );
+    background-size: 200% 100%;
+    animation: jx-skeleton-shimmer 1.4s ease infinite;
+
+    &--circle {
+        border-radius: 50%;
+    }
+}
+
+@keyframes jx-skeleton-shimmer {
+    from {
+        background-position: 200% 0;
+    }
+    to {
+        background-position: -200% 0;
+    }
+}

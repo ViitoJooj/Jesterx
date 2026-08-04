@@ -1,0 +1,36 @@
+{
+    "notFound": {
+        "code": "404",
+        "title": "Oops, page not found",
+        "description": "The page you are looking for does not exist or has been moved. Check the address or head back home.",
+        "backHome": "Back to homepage"
+    },
+    "header": {
+        "notifications": "Notifications",
+        "noNotifications": "No notifications yet",
+        "toggleTheme": "Toggle theme",
+        "toggleLanguage": "Change language",
+        "profile": "Profile",
+        "settings": "Settings",
+        "addAccount": "Add another account",
+        "logout": "Log out",
+        "login": "Log in",
+        "register": "Sign up"
+    },
+    "footer": {
+        "ctaTitle": "Try Jesterx today.",
+        "ctaSubtitle": "Liquid glass interfaces in black and white. Components ready for your next product.",
+        "ctaButton": "Get started",
+        "description": "Design system with glassmorphism, metal UI and light & dark themes.",
+        "mainPages": "Main pages",
+        "utilityPages": "Utility pages",
+        "copyright": "Copyright © {year} Jesterx. All rights reserved."
+    },
+    "home": {
+        "badge": "Jesterx Design System",
+        "title": "Liquid glass interfaces, in black and white",
+        "subtitle": "React components with glassmorphism, metal UI and light & dark themes. Ready to build your next product.",
+        "ctaPrimary": "Get started",
+        "ctaSecondary": "View components"
+    }
+}

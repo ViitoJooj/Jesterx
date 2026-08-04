@@ -1,0 +1,20 @@
+@use "../../styles/variables" as *;
+@use "../../styles/mixins" as *;
+
+.jx-glass-card {
+    @include glass-panel(28px);
+    border-radius: $radius-xl;
+    color: var(--color-text);
+
+    &--sm {
+        padding: 12px;
+    }
+
+    &--md {
+        padding: 24px;
+    }
+
+    &--lg {
+        padding: 32px;
+    }
+}

@@ -1,0 +1,25 @@
+@use "../../styles/variables" as *;
+
+.jx-divider {
+    flex: 1;
+    height: $border-thin;
+    border: none;
+    margin: 0;
+    background: var(--color-glass-border);
+}
+
+.jx-divider-labeled {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+
+    &__text {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--color-text-faint);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        white-space: nowrap;
+    }
+}

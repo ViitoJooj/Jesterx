@@ -1,0 +1,58 @@
+@use "../styles/variables" as *;
+
+.home {
+    position: relative;
+    height: 100vh;
+    overflow: hidden;
+    // Fundo solido no topo, dissolve p/ transparente na base —
+    // revela o background do body (imagem) suavemente abaixo do hero
+    background: linear-gradient(
+        180deg,
+        var(--color-bg) 55%,
+        color-mix(in srgb, var(--color-bg) 60%, transparent) 78%,
+        transparent 100%
+    );
+
+    &__rays {
+        position: absolute;
+        inset: 0;
+    }
+
+    &__hero {
+        position: relative;
+        z-index: 4;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        padding: 48px 16px;
+        text-align: center;
+    }
+
+    &__title {
+        margin: 0;
+        max-width: 720px;
+        font-size: clamp(36px, 6vw, 64px);
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1.05;
+    }
+
+    &__subtitle {
+        margin: 0;
+        max-width: 520px;
+        font-size: clamp(15px, 2vw, 18px);
+        line-height: 1.5;
+        color: var(--color-text-dim);
+    }
+
+    &__actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 8px;
+    }
+}

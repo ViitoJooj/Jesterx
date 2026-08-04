@@ -1,0 +1,71 @@
+@use "../../styles/variables" as *;
+@use "../../styles/mixins" as *;
+
+.jx-checkbox,
+.jx-radio {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+
+    &--disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+
+    &__input {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    &__label {
+        font-size: 14px;
+        color: var(--color-text);
+    }
+}
+
+.jx-checkbox__box {
+    @include glass(var(--color-glass), 8px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 7px;
+    color: var(--color-accent-text);
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+
+    .jx-checkbox__input:checked + & {
+        background: var(--color-accent);
+        box-shadow: 0 0 12px var(--color-accent-glow);
+    }
+
+    .jx-checkbox__input:focus-visible + & {
+        box-shadow: 0 0 0 3px var(--color-glow);
+    }
+}
+
+.jx-radio__circle {
+    @include glass(var(--color-glass), 8px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    transition: box-shadow 0.2s ease;
+
+    .jx-radio__input:checked + & {
+        box-shadow: 0 0 12px var(--color-accent-glow);
+    }
+}
+
+.jx-radio__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--color-accent);
+}

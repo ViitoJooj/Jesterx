@@ -1,0 +1,23 @@
+@use "../../styles/variables" as *;
+
+.jx-progress-dots {
+    display: flex;
+    gap: 8px;
+
+    &__dot {
+        width: 24px;
+        height: 4px;
+        border-radius: $radius-pill;
+        background: var(--color-track);
+        transition: background 0.3s ease, box-shadow 0.3s ease;
+
+        &--done,
+        &--current {
+            background: var(--color-accent);
+        }
+
+        &--current {
+            box-shadow: 0 0 8px var(--color-accent-glow);
+        }
+    }
+}

@@ -1,0 +1,55 @@
+@use "../styles/variables" as *;
+
+.not-found {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 16px;
+    background:
+        radial-gradient(ellipse 50% 35% at 50% 20%, var(--color-glow), transparent),
+        var(--color-bg);
+
+    // Numero gigante metalico (gradiente prata)
+    &__code {
+        font-size: clamp(160px, 32vw, 340px);
+        font-weight: 800;
+        line-height: 0.9;
+        letter-spacing: -0.04em;
+        user-select: none;
+        background: linear-gradient(
+            180deg,
+            var(--color-text) 0%,
+            color-mix(in srgb, var(--color-text) 45%, transparent) 55%,
+            transparent 95%
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+    }
+
+    // Card vidro sobreposto ao numero
+    &__card {
+        margin-top: clamp(-110px, -10vw, -60px);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        max-width: 420px;
+        text-align: center;
+    }
+
+    &__title {
+        margin: 0;
+        font-size: 24px;
+    }
+
+    &__description {
+        margin: 0 0 8px;
+        font-size: 14px;
+        line-height: 1.5;
+        color: var(--color-text-dim);
+    }
+}
