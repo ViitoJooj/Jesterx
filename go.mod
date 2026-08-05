@@ -1,4 +1,4 @@
-module github.com/ViitoJooj/Jesterx
+module github.com/ViitoJooj/verkoupe
 
 go 1.26.4
 

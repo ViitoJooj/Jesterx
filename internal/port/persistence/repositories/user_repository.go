@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ViitoJooj/Jesterx/internal/domain/entities"
-	"github.com/ViitoJooj/Jesterx/internal/port/persistence/helpers"
+	"github.com/ViitoJooj/verkoupe/internal/domain/entities"
+	"github.com/ViitoJooj/verkoupe/internal/port/persistence/helpers"
 )
 
 type UserRepository struct {

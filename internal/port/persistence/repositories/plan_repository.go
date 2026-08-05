@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ViitoJooj/Jesterx/internal/domain/entities"
-	"github.com/ViitoJooj/Jesterx/internal/domain/repositories/contracts"
-	"github.com/ViitoJooj/Jesterx/internal/port/persistence/helpers"
+	"github.com/ViitoJooj/verkoupe/internal/domain/entities"
+	"github.com/ViitoJooj/verkoupe/internal/domain/repositories/contracts"
+	"github.com/ViitoJooj/verkoupe/internal/port/persistence/helpers"
 )
 
 var _ contracts.PlanContract = (*PlanRepository)(nil)
@@ -25,7 +25,7 @@ func NewPlanRepository(db *sql.DB) *PlanRepository {
 	}
 }
 
-func (r *PlanRepository) CreatePlan(plan *domain.JesterxPlans) (*domain.JesterxPlans, error) {
+func (r *PlanRepository) CreatePlan(plan *domain.verkoupePlans) (*domain.verkoupePlans, error) {
 	if plan == nil {
 		return nil, errors.New("invalid plan")
 	}
@@ -61,7 +61,7 @@ func (r *PlanRepository) CreatePlan(plan *domain.JesterxPlans) (*domain.JesterxP
 	return plan, nil
 }
 
-func (r *PlanRepository) FindPlanByUUID(uuid string) (*domain.JesterxPlans, error) {
+func (r *PlanRepository) FindPlanByUUID(uuid string) (*domain.verkoupePlans, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -73,7 +73,7 @@ func (r *PlanRepository) FindPlanByUUID(uuid string) (*domain.JesterxPlans, erro
 	return helpers.ScanPlan(row)
 }
 
-func (r *PlanRepository) FindPlanByName(name string) (*domain.JesterxPlans, error) {
+func (r *PlanRepository) FindPlanByName(name string) (*domain.verkoupePlans, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -85,7 +85,7 @@ func (r *PlanRepository) FindPlanByName(name string) (*domain.JesterxPlans, erro
 	return helpers.ScanPlan(row)
 }
 
-func (r *PlanRepository) GetPlans() ([]*domain.JesterxPlans, error) {
+func (r *PlanRepository) GetPlans() ([]*domain.verkoupePlans, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 

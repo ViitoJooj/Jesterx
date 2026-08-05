@@ -1,8 +1,8 @@
-name: jesterx-prod
+name: verkoupe-prod
 
 services:
   view:
-    image: jesterxview:latest
+    image: verkoupeview:latest
     env_file:
       - ../../.env
     deploy:
@@ -11,7 +11,7 @@ services:
       - daemon
 
   daemon:
-    image: jesterxdaemon:latest
+    image: verkoupedaemon:latest
     env_file:
       - ../../.env
     deploy:

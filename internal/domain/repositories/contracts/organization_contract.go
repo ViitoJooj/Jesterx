@@ -1,7 +1,7 @@
 package contracts
 
 import (
-	"github.com/ViitoJooj/Jesterx/internal/domain/entities"
+	"github.com/ViitoJooj/verkoupe/internal/domain/entities"
 )
 
 type OrganizationContract interface {

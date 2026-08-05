@@ -9,26 +9,26 @@ resource "kubernetes_secret" "daemon" {
 
 resource "kubernetes_deployment" "daemon" {
   metadata {
-    name      = "jesterx"
+    name      = "verkoupe"
     namespace = var.namespace
-    labels    = { app = "jesterx" }
+    labels    = { app = "verkoupe" }
   }
 
   spec {
     replicas = var.replicas
 
     selector {
-      match_labels = { app = "jesterx" }
+      match_labels = { app = "verkoupe" }
     }
 
     template {
       metadata {
-        labels = { app = "jesterx" }
+        labels = { app = "verkoupe" }
       }
 
       spec {
         container {
-          name  = "jesterx-core"
+          name  = "verkoupe-core"
           image = var.image
 
           port {
@@ -53,7 +53,7 @@ resource "kubernetes_service" "daemon" {
   }
 
   spec {
-    selector = { app = "jesterx" }
+    selector = { app = "verkoupe" }
 
     port {
       port        = 8080

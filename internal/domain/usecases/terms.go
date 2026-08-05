@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/ViitoJooj/Jesterx/internal/domain/entities"
-	"github.com/ViitoJooj/Jesterx/internal/domain/repositories/contracts"
+	"github.com/ViitoJooj/verkoupe/internal/domain/entities"
+	"github.com/ViitoJooj/verkoupe/internal/domain/repositories/contracts"
 )
 
 type CreateTermsUseCase struct {

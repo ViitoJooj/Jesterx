@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ViitoJooj/Jesterx/internal/domain/entities"
-	"github.com/ViitoJooj/Jesterx/internal/domain/repositories/contracts"
-	"github.com/ViitoJooj/Jesterx/internal/port/persistence/helpers"
+	"github.com/ViitoJooj/verkoupe/internal/domain/entities"
+	"github.com/ViitoJooj/verkoupe/internal/domain/repositories/contracts"
+	"github.com/ViitoJooj/verkoupe/internal/port/persistence/helpers"
 )
 
 var _ contracts.ProductContract = (*ProductRepository)(nil)

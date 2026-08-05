@@ -54,8 +54,8 @@ export function Header() {
     return (
         <header className="jx-header">
             <Link to="/" className="jx-header__brand">
-                <img src="/favicon.svg" alt="Jesterx" className="jx-header__logo" />
-                <span className="jx-header__name">Jesterx</span>
+                <img src="/favicon.svg" alt="verkoupe" className="jx-header__logo" />
+                <span className="jx-header__name">verkoupe</span>
             </Link>
 
             <div className="jx-header__actions">

@@ -4,14 +4,14 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/ViitoJooj/Jesterx/internal/domain/entities"
+	"github.com/ViitoJooj/verkoupe/internal/domain/entities"
 )
 
-func ScanPlans(rows *sql.Rows) ([]*domain.JesterxPlans, error) {
-	var plans []*domain.JesterxPlans
+func ScanPlans(rows *sql.Rows) ([]*domain.verkoupePlans, error) {
+	var plans []*domain.verkoupePlans
 
 	for rows.Next() {
-		plan := &domain.JesterxPlans{}
+		plan := &domain.verkoupePlans{}
 		err := rows.Scan(
 			&plan.UUID,
 			&plan.Name,
@@ -38,8 +38,8 @@ func ScanPlans(rows *sql.Rows) ([]*domain.JesterxPlans, error) {
 	return plans, nil
 }
 
-func ScanPlan(row *sql.Row) (*domain.JesterxPlans, error) {
-	plan := &domain.JesterxPlans{}
+func ScanPlan(row *sql.Row) (*domain.verkoupePlans, error) {
+	plan := &domain.verkoupePlans{}
 
 	err := row.Scan(
 		&plan.UUID,

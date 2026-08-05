@@ -28,7 +28,7 @@ resource "kubernetes_deployment" "view" {
 
       spec {
         container {
-          name  = "jesterx-view"
+          name  = "verkoupe-view"
           image = var.image
 
           port {

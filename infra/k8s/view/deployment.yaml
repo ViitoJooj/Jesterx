@@ -15,8 +15,8 @@ spec:
         app: view
     spec:
       containers:
-        - name: jesterx-view
-          image: jesterxview:latest
+        - name: verkoupe-view
+          image: verkoupeview:latest
           ports:
             - containerPort: 80
           envFrom:

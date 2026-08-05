@@ -3,9 +3,9 @@ package routers
 import (
 	"database/sql"
 
-	"github.com/ViitoJooj/Jesterx/internal/domain/usecases"
-	"github.com/ViitoJooj/Jesterx/internal/port/http/controllers"
-	"github.com/ViitoJooj/Jesterx/internal/port/persistence/repositories"
+	"github.com/ViitoJooj/verkoupe/internal/domain/usecases"
+	"github.com/ViitoJooj/verkoupe/internal/port/http/controllers"
+	"github.com/ViitoJooj/verkoupe/internal/port/persistence/repositories"
 )
 
 func NewControllers(db *sql.DB) *Controllers {

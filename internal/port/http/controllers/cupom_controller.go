@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/ViitoJooj/Jesterx/internal/port/http/dtos"
-	"github.com/ViitoJooj/Jesterx/internal/domain/usecases"
+	"github.com/ViitoJooj/verkoupe/internal/port/http/dtos"
+	"github.com/ViitoJooj/verkoupe/internal/domain/usecases"
 )
 
 type CupomController struct {

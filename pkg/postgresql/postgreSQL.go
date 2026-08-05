@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"strings"
 
-	"github.com/ViitoJooj/Jesterx/pkg/dotenv"
+	"github.com/ViitoJooj/verkoupe/pkg/dotenv"
 	_ "github.com/lib/pq"
 )
 

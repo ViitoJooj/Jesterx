@@ -3,8 +3,8 @@ package usecases
 import (
 	"database/sql"
 
-	"github.com/ViitoJooj/Jesterx/internal/domain/entities"
-	"github.com/ViitoJooj/Jesterx/internal/domain/repositories/contracts"
+	"github.com/ViitoJooj/verkoupe/internal/domain/entities"
+	"github.com/ViitoJooj/verkoupe/internal/domain/repositories/contracts"
 )
 
 type CreatePlanUseCase struct {
@@ -16,7 +16,7 @@ func NewCreatePlanUseCase(db *sql.DB, repo contracts.PlanContract) *CreatePlanUs
 	return &CreatePlanUseCase{db: db, repo: repo}
 }
 
-func (u *CreatePlanUseCase) Create(name string, description string, maxWebsites int, maxRouters int, maxProducts int, costPerSaleRate int, coin string, price int) (*domain.JesterxPlans, error) {
+func (u *CreatePlanUseCase) Create(name string, description string, maxWebsites int, maxRouters int, maxProducts int, costPerSaleRate int, coin string, price int) (*domain.verkoupePlans, error) {
 	plan, err := domain.NewPlan(name, description, maxWebsites, maxRouters, maxProducts, costPerSaleRate, coin, price)
 	if err != nil {
 		return nil, err

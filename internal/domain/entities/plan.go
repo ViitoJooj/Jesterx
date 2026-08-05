@@ -4,11 +4,11 @@ import (
 	"errors"
 	"time"
 
-	"github.com/ViitoJooj/Jesterx/internal/domain/entities/enums"
+	"github.com/ViitoJooj/verkoupe/internal/domain/entities/enums"
 	"github.com/google/uuid"
 )
 
-type JesterxPlans struct {
+type verkoupePlans struct {
 	UUID            uuid.UUID
 	Name            string
 	Description     string
@@ -22,7 +22,7 @@ type JesterxPlans struct {
 	CreatedAt       time.Time
 }
 
-func NewPlan(name string, description string, maxWebsites int, maxRouters int, maxProducts int, costPerSaleRate int, coin string, price int) (*JesterxPlans, error) {
+func NewPlan(name string, description string, maxWebsites int, maxRouters int, maxProducts int, costPerSaleRate int, coin string, price int) (*verkoupePlans, error) {
 
 	if name == "" {
 		return nil, errors.New("Name cannot be null.")
@@ -37,7 +37,7 @@ func NewPlan(name string, description string, maxWebsites int, maxRouters int, m
 		return nil, errors.New("Price must be greater than 0.")
 	}
 
-	return &JesterxPlans{
+	return &verkoupePlans{
 		UUID:            uuid.Nil,
 		Name:            name,
 		Description:     description,

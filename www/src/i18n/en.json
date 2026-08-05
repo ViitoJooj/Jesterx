@@ -18,16 +18,16 @@
         "register": "Sign up"
     },
     "footer": {
-        "ctaTitle": "Try Jesterx today.",
+        "ctaTitle": "Try verkoupe today.",
         "ctaSubtitle": "Liquid glass interfaces in black and white. Components ready for your next product.",
         "ctaButton": "Get started",
         "description": "Design system with glassmorphism, metal UI and light & dark themes.",
         "mainPages": "Main pages",
         "utilityPages": "Utility pages",
-        "copyright": "Copyright © {year} Jesterx. All rights reserved."
+        "copyright": "Copyright © {year} verkoupe. All rights reserved."
     },
     "home": {
-        "badge": "Jesterx Design System",
+        "badge": "verkoupe Design System",
         "title": "Liquid glass interfaces, in black and white",
         "subtitle": "React components with glassmorphism, metal UI and light & dark themes. Ready to build your next product.",
         "ctaPrimary": "Get started",

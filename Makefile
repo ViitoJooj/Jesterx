@@ -4,20 +4,20 @@ kubernetes = false
 # --- Global(all services) ---
 
 # Build all application
-jesterx-build:
+verkoupe-build:
 
 # Run all tests
-jesterx-test:
+verkoupe-test:
 
 # Make run all services
-jesterx-run:
+verkoupe-run:
 
 # --- Core(Daemon) ---
 
 # Run core tests
 daemon-test:
 
-# Run jesterx core
+# Run verkoupe core
 daemon-run:
 
 # Build core
@@ -25,7 +25,7 @@ daemon-build:
 
 # --- Front end(View) ---
 
-# Run jesterx front end
+# Run verkoupe front end
 view-run:
 
 # Run front end tests

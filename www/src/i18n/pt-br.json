@@ -18,16 +18,16 @@
         "register": "Registrar"
     },
     "footer": {
-        "ctaTitle": "Experimente o Jesterx hoje.",
+        "ctaTitle": "Experimente o verkoupe hoje.",
         "ctaSubtitle": "Interfaces de vidro líquido em preto e branco. Componentes prontos para o seu próximo produto.",
         "ctaButton": "Começar agora",
         "description": "Design system com glassmorphism, metal UI e temas claro e escuro.",
         "mainPages": "Páginas principais",
         "utilityPages": "Páginas utilitárias",
-        "copyright": "Copyright © {year} Jesterx. Todos os direitos reservados."
+        "copyright": "Copyright © {year} verkoupe. Todos os direitos reservados."
     },
     "home": {
-        "badge": "Jesterx Design System",
+        "badge": "verkoupe Design System",
         "title": "Interfaces de vidro líquido, em preto e branco",
         "subtitle": "Componentes React com glassmorphism, metal UI e temas claro e escuro. Prontos para construir seu próximo produto.",
         "ctaPrimary": "Começar agora",

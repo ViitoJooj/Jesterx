@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/ViitoJooj/Jesterx/internal/domain/entities/enums"
+	"github.com/ViitoJooj/verkoupe/internal/domain/entities/enums"
 	"github.com/ViitoJooj/go-sdk/validate"
 	"github.com/google/uuid"
 )

@@ -67,8 +67,8 @@ export function Footer() {
             <div className="jx-footer__grid">
                 <div className="jx-footer__brand">
                     <Link to="/" className="jx-footer__brand-link">
-                        <img src="/favicon.svg" alt="Jesterx" className="jx-footer__logo" />
-                        <span className="jx-footer__name">Jesterx</span>
+                        <img src="/favicon.svg" alt="verkoupe" className="jx-footer__logo" />
+                        <span className="jx-footer__name">verkoupe</span>
                     </Link>
                     <p className="jx-footer__description">{t("footer.description")}</p>
                 </div>

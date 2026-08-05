@@ -24,12 +24,12 @@ variable "env_file_path" {
 
 variable "view_image" {
   type    = string
-  default = "jesterxview:latest"
+  default = "verkoupeview:latest"
 }
 
 variable "daemon_image" {
   type    = string
-  default = "jesterxdaemon:latest"
+  default = "verkoupedaemon:latest"
 }
 
 variable "postgres_image" {

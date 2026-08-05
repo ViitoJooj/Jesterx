@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/ViitoJooj/Jesterx/internal/domain/entities"
+	"github.com/ViitoJooj/verkoupe/internal/domain/entities"
 )
 
 func ScanPhones(rows *sql.Rows) ([]*domain.Phone, error) {

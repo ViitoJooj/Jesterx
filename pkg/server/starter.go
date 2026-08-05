@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/ViitoJooj/Jesterx/pkg/logger"
+	"github.com/ViitoJooj/verkoupe/pkg/logger"
 )
 
 type Conf struct {

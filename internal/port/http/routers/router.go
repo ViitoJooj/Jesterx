@@ -3,7 +3,7 @@ package routers
 import (
 	"net/http"
 
-	"github.com/ViitoJooj/Jesterx/internal/port/http/controllers"
+	"github.com/ViitoJooj/verkoupe/internal/port/http/controllers"
 )
 
 type Controllers struct {

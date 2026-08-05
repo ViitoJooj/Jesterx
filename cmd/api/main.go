@@ -4,11 +4,11 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/ViitoJooj/Jesterx/internal/port/http/routers"
-	"github.com/ViitoJooj/Jesterx/pkg/dotenv"
-	"github.com/ViitoJooj/Jesterx/pkg/logger"
-	"github.com/ViitoJooj/Jesterx/pkg/postgresql"
-	"github.com/ViitoJooj/Jesterx/pkg/server"
+	"github.com/ViitoJooj/verkoupe/internal/port/http/routers"
+	"github.com/ViitoJooj/verkoupe/pkg/dotenv"
+	"github.com/ViitoJooj/verkoupe/pkg/logger"
+	"github.com/ViitoJooj/verkoupe/pkg/postgresql"
+	"github.com/ViitoJooj/verkoupe/pkg/server"
 )
 
 func main() {
