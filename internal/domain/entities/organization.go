@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"database/sql"
 	"errors"
 	"time"
 
@@ -21,16 +20,7 @@ type OrganizationBR struct {
 	CreatedAt   time.Time
 }
 
-func NewOrganization(websiteUUID string, ownerUUID string, imageURL string, name string, tradeName string, cnpj string, db *sql.DB) (*OrganizationBR, error) {
-
-	if err := validate.UUIDv7(websiteUUID, "organizations", db); err != nil {
-		return nil, err
-	}
-
-	if err := validate.UUIDv7(ownerUUID, "users", db); err != nil {
-		return nil, err
-	}
-
+func NewOrganization(websiteUUID string, ownerUUID string, imageURL string, name string, tradeName string, cnpj string) (*OrganizationBR, error) {
 	if err := validate.FullName(name); err != nil {
 		return nil, err
 	}

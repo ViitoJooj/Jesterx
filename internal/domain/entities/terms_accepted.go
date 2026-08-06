@@ -1,12 +1,10 @@
 package domain
 
 import (
-	"database/sql"
 	"errors"
 	"time"
 
 	"github.com/ViitoJooj/verkoupe/internal/domain/entities/enums"
-	"github.com/ViitoJooj/go-sdk/validate"
 	"github.com/google/uuid"
 )
 
@@ -18,16 +16,7 @@ type TermsAcceptedBy struct {
 	AcceptedWhen time.Time
 }
 
-func NewTermsAcceptedBy(websiteUUID string, ownerUUID string, ownerType string, db *sql.DB) (*TermsAcceptedBy, error) {
-
-	if err := validate.UUIDv7(websiteUUID, "terms_accepted", db); err != nil {
-		return nil, err
-	}
-
-	if err := validate.UUIDv7(ownerUUID, "users", db); err != nil {
-		return nil, err
-	}
-
+func NewTermsAcceptedBy(websiteUUID string, ownerUUID string, ownerType string) (*TermsAcceptedBy, error) {
 	otype := enums.OwnerType(ownerType)
 	if otype != enums.UserOwner && otype != enums.OrganizationOwner {
 		return nil, errors.New("OwnerType must be 'User' or 'Organization'.")

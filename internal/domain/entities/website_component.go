@@ -1,12 +1,10 @@
 package domain
 
 import (
-	"database/sql"
 	"encoding/json"
 	"errors"
 	"time"
 
-	"github.com/ViitoJooj/go-sdk/validate"
 	"github.com/google/uuid"
 )
 
@@ -24,12 +22,7 @@ type ComponentWebsites struct {
 	CreatedAt   time.Time
 }
 
-func NewComponentWebsite(websiteUUID string, logoURL string, tittle string, description string, path string, content json.RawMessage, visits int, db *sql.DB) (*ComponentWebsites, error) {
-
-	if err := validate.UUIDv7(websiteUUID, "websites", db); err != nil {
-		return nil, err
-	}
-
+func NewComponentWebsite(websiteUUID string, logoURL string, tittle string, description string, path string, content json.RawMessage, visits int) (*ComponentWebsites, error) {
 	if tittle == "" {
 		return nil, errors.New("Tittle cannot be null.")
 	}

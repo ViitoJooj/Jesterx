@@ -1,12 +1,10 @@
 package domain
 
 import (
-	"database/sql"
 	"errors"
 	"time"
 
 	"github.com/ViitoJooj/verkoupe/internal/domain/entities/enums"
-	"github.com/ViitoJooj/go-sdk/validate"
 	"github.com/google/uuid"
 )
 
@@ -22,22 +20,10 @@ type Website struct {
 	CreatedAt   time.Time
 }
 
-func NewWebsite(ownerUUID string, ownerType string, label string, url string, writeIn string, description string, db *sql.DB) (*Website, error) {
-
+func NewWebsite(ownerUUID string, ownerType string, label string, url string, writeIn string, description string) (*Website, error) {
 	otype := enums.OwnerType(ownerType)
 	if otype != enums.UserOwner && otype != enums.OrganizationOwner {
 		return nil, errors.New("OwnerType must be 'User' or 'Organization'.")
-	}
-
-	var ownerTable string
-	if otype == enums.UserOwner {
-		ownerTable = "users"
-	} else {
-		ownerTable = "organizations"
-	}
-
-	if err := validate.UUIDv7(ownerUUID, ownerTable, db); err != nil {
-		return nil, err
 	}
 
 	if label == "" {

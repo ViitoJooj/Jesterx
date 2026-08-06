@@ -1,11 +1,9 @@
 package domain
 
 import (
-	"database/sql"
 	"errors"
 	"time"
 
-	"github.com/ViitoJooj/go-sdk/validate"
 	"github.com/google/uuid"
 )
 
@@ -17,12 +15,7 @@ type ProductsTags struct {
 	CreatedAt   time.Time
 }
 
-func NewProductTag(productUUID string, label string, db *sql.DB) (*ProductsTags, error) {
-
-	if err := validate.UUIDv7(productUUID, "products", db); err != nil {
-		return nil, err
-	}
-
+func NewProductTag(productUUID string, label string) (*ProductsTags, error) {
 	if label == "" {
 		return nil, errors.New("Label cannot be null.")
 	}

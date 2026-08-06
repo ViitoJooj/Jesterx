@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"database/sql"
 	"time"
 
 	"github.com/ViitoJooj/go-sdk/validate"
@@ -24,12 +23,7 @@ type User struct {
 	CreatedAt   time.Time
 }
 
-func NewUser(websiteUUID string, imageURL string, name string, email string, role string, password string, cpf string, github bool, google bool, apple bool, db *sql.DB) (*User, error) {
-
-	if err := validate.UUIDv7(websiteUUID, "users", db); err != nil {
-		return nil, err
-	}
-
+func NewUser(websiteUUID string, imageURL string, name string, email string, role string, password string, cpf string, github bool, google bool, apple bool) (*User, error) {
 	if err := validate.FullName(name); err != nil {
 		return nil, err
 	}

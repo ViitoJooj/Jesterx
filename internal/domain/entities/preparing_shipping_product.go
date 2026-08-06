@@ -1,9 +1,6 @@
 package domain
 
 import (
-	"database/sql"
-
-	"github.com/ViitoJooj/go-sdk/validate"
 	"github.com/google/uuid"
 )
 
@@ -13,16 +10,7 @@ type PreparingShippingProducts struct {
 	AddressUUID uuid.UUID
 }
 
-func NewPreparingShippingProduct(productUUID string, addressUUID string, db *sql.DB) (*PreparingShippingProducts, error) {
-
-	if err := validate.UUIDv7(productUUID, "products", db); err != nil {
-		return nil, err
-	}
-
-	if err := validate.UUIDv7(addressUUID, "addresses", db); err != nil {
-		return nil, err
-	}
-
+func NewPreparingShippingProduct(productUUID string, addressUUID string) (*PreparingShippingProducts, error) {
 	productUUIDParsed, err := uuid.Parse(productUUID)
 	if err != nil {
 		return nil, err
