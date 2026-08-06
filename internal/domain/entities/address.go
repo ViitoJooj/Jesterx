@@ -1,12 +1,10 @@
 package domain
 
 import (
-	"database/sql"
 	"errors"
 	"time"
 
 	"github.com/ViitoJooj/verkoupe/internal/domain/entities/enums"
-	"github.com/ViitoJooj/go-sdk/validate"
 	"github.com/google/uuid"
 )
 
@@ -45,16 +43,7 @@ func NewAddress(
 	referencePoint string,
 	deliveryNotes string,
 	isDefault bool,
-	db *sql.DB,
 ) (*AddressBR, error) {
-
-	if err := validate.UUIDv7(websiteUUID, "addresses", db); err != nil {
-		return nil, err
-	}
-
-	if err := validate.UUIDv7(ownerUUID, "users", db); err != nil {
-		return nil, err
-	}
 
 	otype := enums.OwnerType(ownerType)
 	if otype != enums.UserOwner && otype != enums.OrganizationOwner {
