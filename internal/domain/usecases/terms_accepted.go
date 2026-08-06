@@ -1,7 +1,6 @@
 package usecases
 
 import (
-	"database/sql"
 	"errors"
 
 	"github.com/ViitoJooj/verkoupe/internal/domain/entities"
@@ -10,13 +9,11 @@ import (
 )
 
 type CreateTermsAcceptedUseCase struct {
-	db                *sql.DB
 	termsAcceptedRepo contracts.TermsAcceptedContract
 }
 
-func NewCreateTermsAcceptedUseCase(db *sql.DB, termsAcceptedRepo contracts.TermsAcceptedContract) *CreateTermsAcceptedUseCase {
+func NewCreateTermsAcceptedUseCase(termsAcceptedRepo contracts.TermsAcceptedContract) *CreateTermsAcceptedUseCase {
 	return &CreateTermsAcceptedUseCase{
-		db:                db,
 		termsAcceptedRepo: termsAcceptedRepo,
 	}
 }
@@ -27,7 +24,6 @@ func (u *CreateTermsAcceptedUseCase) Create(input *domain.TermsAcceptedBy, websi
 		website.String(),
 		input.OwnerUUID.String(),
 		string(input.OwnerType),
-		u.db,
 	)
 	if err != nil {
 		return nil, err
@@ -47,4 +43,12 @@ func (u *CreateTermsAcceptedUseCase) Create(input *domain.TermsAcceptedBy, websi
 	}
 
 	return createdTermsAccepted, nil
+}
+
+func (u *CreateTermsAcceptedUseCase) GetByUUID(uuidStr string) (*domain.TermsAcceptedBy, error) {
+	return u.termsAcceptedRepo.FindTermsAcceptedByUUID(uuidStr)
+}
+
+func (u *CreateTermsAcceptedUseCase) GetAll(websiteUUIDStr string) ([]*domain.TermsAcceptedBy, error) {
+	return u.termsAcceptedRepo.GetTermsAcceptedFromWebsite(websiteUUIDStr)
 }

@@ -1,19 +1,17 @@
 package usecases
 
 import (
-	"database/sql"
 
-	"github.com/ViitoJooj/verkoupe/internal/domain/entities"
+	domain "github.com/ViitoJooj/verkoupe/internal/domain/entities"
 	"github.com/ViitoJooj/verkoupe/internal/domain/repositories/contracts"
 )
 
 type CreateProductUseCase struct {
-	db   *sql.DB
-	repo contracts.ProductContract
+	repository contracts.ProductContract
 }
 
-func NewCreateProductUseCase(db *sql.DB, repo contracts.ProductContract) *CreateProductUseCase {
-	return &CreateProductUseCase{db: db, repo: repo}
+func NewCreateProductUseCase(repository contracts.ProductContract) *CreateProductUseCase {
+	return &CreateProductUseCase{repository: repository}
 }
 
 func (u *CreateProductUseCase) Create(name string, description string, shortDescription string, height int, width int, thickness int, active bool) (*domain.Products, error) {
@@ -22,7 +20,7 @@ func (u *CreateProductUseCase) Create(name string, description string, shortDesc
 		return nil, err
 	}
 
-	createdProduct, err := u.repo.CreateProduct(product)
+	createdProduct, err := u.repository.CreateProduct(product)
 	if err != nil {
 		return nil, err
 	}

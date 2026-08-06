@@ -1,7 +1,6 @@
 package usecases
 
 import (
-	"database/sql"
 	"errors"
 
 	"github.com/ViitoJooj/verkoupe/internal/domain/entities"
@@ -9,13 +8,11 @@ import (
 )
 
 type CreateTermsUseCase struct {
-	db        *sql.DB
 	termsRepo contracts.TermsContract
 }
 
-func NewCreateTermsUseCase(db *sql.DB, termsRepo contracts.TermsContract) *CreateTermsUseCase {
+func NewCreateTermsUseCase(termsRepo contracts.TermsContract) *CreateTermsUseCase {
 	return &CreateTermsUseCase{
-		db:        db,
 		termsRepo: termsRepo,
 	}
 }
@@ -41,4 +38,12 @@ func (u *CreateTermsUseCase) Create(input *domain.Terms) (*domain.Terms, error) 
 	}
 
 	return createdTerms, nil
+}
+
+func (u *CreateTermsUseCase) GetByUUID(uuidStr string) (*domain.Terms, error) {
+	return u.termsRepo.FindTermsByUUID(uuidStr)
+}
+
+func (u *CreateTermsUseCase) GetAll() ([]*domain.Terms, error) {
+	return u.termsRepo.GetTerms()
 }

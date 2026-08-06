@@ -1,7 +1,6 @@
 package usecases
 
 import (
-	"database/sql"
 
 	"github.com/ViitoJooj/verkoupe/internal/domain/entities"
 	"github.com/ViitoJooj/verkoupe/internal/domain/repositories/contracts"
@@ -9,13 +8,11 @@ import (
 )
 
 type CreatePhoneUseCase struct {
-	db        *sql.DB
 	phoneRepo contracts.PhoneContract
 }
 
-func NewCreatePhoneUseCase(db *sql.DB, phoneRepo contracts.PhoneContract) *CreatePhoneUseCase {
+func NewCreatePhoneUseCase(phoneRepo contracts.PhoneContract) *CreatePhoneUseCase {
 	return &CreatePhoneUseCase{
-		db:        db,
 		phoneRepo: phoneRepo,
 	}
 }
@@ -29,7 +26,6 @@ func (u *CreatePhoneUseCase) Create(input *domain.Phone, website uuid.UUID) (*do
 		input.Label,
 		input.Number,
 		input.IsDefault,
-		u.db,
 	)
 	if err != nil {
 		return nil, err
@@ -41,4 +37,12 @@ func (u *CreatePhoneUseCase) Create(input *domain.Phone, website uuid.UUID) (*do
 	}
 
 	return createdPhone, nil
+}
+
+func (u *CreatePhoneUseCase) GetByUUID(uuidStr string) (*domain.Phone, error) {
+	return u.phoneRepo.FindPhoneByUUID(uuidStr)
+}
+
+func (u *CreatePhoneUseCase) GetAll(websiteUUIDStr string) ([]*domain.Phone, error) {
+	return u.phoneRepo.GetPhonesFromWebsite(websiteUUIDStr)
 }

@@ -1,21 +1,17 @@
 package usecases
 
 import (
-	"database/sql"
-
-	"github.com/ViitoJooj/verkoupe/internal/domain/entities"
+	domain "github.com/ViitoJooj/verkoupe/internal/domain/entities"
 	"github.com/ViitoJooj/verkoupe/internal/domain/repositories/contracts"
 	"github.com/google/uuid"
 )
 
 type CreateAddressUseCase struct {
-	db          *sql.DB
 	addressRepo contracts.AddressContract
 }
 
-func NewCreateAddressUseCase(db *sql.DB, addressRepo contracts.AddressContract) *CreateAddressUseCase {
+func NewCreateAddressUseCase(addressRepo contracts.AddressContract) *CreateAddressUseCase {
 	return &CreateAddressUseCase{
-		db:          db,
 		addressRepo: addressRepo,
 	}
 }
@@ -37,7 +33,6 @@ func (u *CreateAddressUseCase) Create(input *domain.AddressBR, website uuid.UUID
 		input.ReferencePoint,
 		input.DeliveryNotes,
 		input.IsDefault,
-		u.db,
 	)
 	if err != nil {
 		return nil, err
@@ -49,4 +44,12 @@ func (u *CreateAddressUseCase) Create(input *domain.AddressBR, website uuid.UUID
 	}
 
 	return createdAddress, nil
+}
+
+func (u *CreateAddressUseCase) GetByUUID(uuidStr string) (*domain.AddressBR, error) {
+	return u.addressRepo.FindAddressByUUID(uuidStr)
+}
+
+func (u *CreateAddressUseCase) GetAll(websiteUUIDStr string) ([]*domain.AddressBR, error) {
+	return u.addressRepo.GetAddressesFromWebsite(websiteUUIDStr)
 }

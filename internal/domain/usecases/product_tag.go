@@ -1,28 +1,26 @@
 package usecases
 
 import (
-	"database/sql"
 
-	"github.com/ViitoJooj/verkoupe/internal/domain/entities"
+	domain "github.com/ViitoJooj/verkoupe/internal/domain/entities"
 	"github.com/ViitoJooj/verkoupe/internal/domain/repositories/contracts"
 )
 
 type CreateProductTagUseCase struct {
-	db   *sql.DB
-	repo contracts.ProductTagContract
+	repository contracts.ProductTagContract
 }
 
-func NewCreateProductTagUseCase(db *sql.DB, repo contracts.ProductTagContract) *CreateProductTagUseCase {
-	return &CreateProductTagUseCase{db: db, repo: repo}
+func NewCreateProductTagUseCase(repository contracts.ProductTagContract) *CreateProductTagUseCase {
+	return &CreateProductTagUseCase{repository: repository}
 }
 
 func (u *CreateProductTagUseCase) Create(productUUID string, label string) (*domain.ProductsTags, error) {
-	tag, err := domain.NewProductTag(productUUID, label, u.db)
+	tag, err := domain.NewProductTag(productUUID, label)
 	if err != nil {
 		return nil, err
 	}
 
-	createdTag, err := u.repo.CreateProductTag(tag)
+	createdTag, err := u.repository.CreateProductTag(tag)
 	if err != nil {
 		return nil, err
 	}

@@ -1,28 +1,26 @@
 package usecases
 
 import (
-	"database/sql"
 
-	"github.com/ViitoJooj/verkoupe/internal/domain/entities"
+	domain "github.com/ViitoJooj/verkoupe/internal/domain/entities"
 	"github.com/ViitoJooj/verkoupe/internal/domain/repositories/contracts"
 )
 
 type CreateCupomUseCase struct {
-	db   *sql.DB
-	repo contracts.CupomContract
+	repository contracts.CupomContract
 }
 
-func NewCreateCupomUseCase(db *sql.DB, repo contracts.CupomContract) *CreateCupomUseCase {
-	return &CreateCupomUseCase{db: db, repo: repo}
+func NewCreateCupomUseCase(repository contracts.CupomContract) *CreateCupomUseCase {
+	return &CreateCupomUseCase{repository: repository}
 }
 
 func (u *CreateCupomUseCase) Create(tagUUID string, label string, description string, value string, valueType string) (*domain.Cupons, error) {
-	cupom, err := domain.NewCupom(tagUUID, label, description, value, valueType, u.db)
+	cupom, err := domain.NewCupom(tagUUID, label, description, value, valueType)
 	if err != nil {
 		return nil, err
 	}
 
-	createdCupom, err := u.repo.CreateCupom(cupom)
+	createdCupom, err := u.repository.CreateCupom(cupom)
 	if err != nil {
 		return nil, err
 	}

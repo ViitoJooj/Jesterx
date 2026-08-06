@@ -1,28 +1,26 @@
 package usecases
 
 import (
-	"database/sql"
 
-	"github.com/ViitoJooj/verkoupe/internal/domain/entities"
+	domain "github.com/ViitoJooj/verkoupe/internal/domain/entities"
 	"github.com/ViitoJooj/verkoupe/internal/domain/repositories/contracts"
 )
 
 type CreateStorageProductUseCase struct {
-	db   *sql.DB
-	repo contracts.StorageProductContract
+	repository contracts.StorageProductContract
 }
 
-func NewCreateStorageProductUseCase(db *sql.DB, repo contracts.StorageProductContract) *CreateStorageProductUseCase {
-	return &CreateStorageProductUseCase{db: db, repo: repo}
+func NewCreateStorageProductUseCase(repository contracts.StorageProductContract) *CreateStorageProductUseCase {
+	return &CreateStorageProductUseCase{repository: repository}
 }
 
 func (u *CreateStorageProductUseCase) Create(productUUID string) (*domain.StorageProducts, error) {
-	sp, err := domain.NewStorageProduct(productUUID, u.db)
+	sp, err := domain.NewStorageProduct(productUUID)
 	if err != nil {
 		return nil, err
 	}
 
-	createdSP, err := u.repo.CreateStorageProduct(sp)
+	createdSP, err := u.repository.CreateStorageProduct(sp)
 	if err != nil {
 		return nil, err
 	}

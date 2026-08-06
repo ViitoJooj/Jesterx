@@ -1,7 +1,6 @@
 package usecases
 
 import (
-	"database/sql"
 	"errors"
 
 	"github.com/ViitoJooj/verkoupe/internal/domain/entities"
@@ -10,20 +9,18 @@ import (
 )
 
 type CreateRbacUseCase struct {
-	db       *sql.DB
 	rbacRepo contracts.RbacContract
 }
 
-func NewCreateRbacUseCase(db *sql.DB, rbacRepo contracts.RbacContract) *CreateRbacUseCase {
+func NewCreateRbacUseCase(rbacRepo contracts.RbacContract) *CreateRbacUseCase {
 	return &CreateRbacUseCase{
-		db:       db,
 		rbacRepo: rbacRepo,
 	}
 }
 
 func (u *CreateRbacUseCase) Create(input *domain.Rbac, website uuid.UUID) (*domain.Rbac, error) {
 
-	rbac, err := domain.NewRbac(website.String(), input.Label, input.CanRead, input.CanWrite, input.CanUpdate, input.CanUpgrade, input.CanDelete, u.db)
+	rbac, err := domain.NewRbac(website.String(), input.Label, input.CanRead, input.CanWrite, input.CanUpdate, input.CanUpgrade, input.CanDelete)
 	if err != nil {
 		return nil, err
 	}
@@ -42,4 +39,12 @@ func (u *CreateRbacUseCase) Create(input *domain.Rbac, website uuid.UUID) (*doma
 	}
 
 	return createdRbac, nil
+}
+
+func (u *CreateRbacUseCase) GetByUUID(uuidStr string) (*domain.Rbac, error) {
+	return u.rbacRepo.FindRbacByUUID(uuidStr)
+}
+
+func (u *CreateRbacUseCase) GetAll(websiteUUIDStr string) ([]*domain.Rbac, error) {
+	return u.rbacRepo.GetRbacFromWebsite(websiteUUIDStr)
 }
