@@ -7,11 +7,11 @@ import (
 	"github.com/ViitoJooj/verkoupe/internal/domain/entities"
 )
 
-func ScanPlans(rows *sql.Rows) ([]*domain.verkoupePlans, error) {
-	var plans []*domain.verkoupePlans
+func ScanPlans(rows *sql.Rows) ([]*domain.VerkoupePlan, error) {
+	var plans []*domain.VerkoupePlan
 
 	for rows.Next() {
-		plan := &domain.verkoupePlans{}
+		plan := &domain.VerkoupePlan{}
 		err := rows.Scan(
 			&plan.UUID,
 			&plan.Name,
@@ -38,8 +38,8 @@ func ScanPlans(rows *sql.Rows) ([]*domain.verkoupePlans, error) {
 	return plans, nil
 }
 
-func ScanPlan(row *sql.Row) (*domain.verkoupePlans, error) {
-	plan := &domain.verkoupePlans{}
+func ScanPlan(row *sql.Row) (*domain.VerkoupePlan, error) {
+	plan := &domain.VerkoupePlan{}
 
 	err := row.Scan(
 		&plan.UUID,

@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type verkoupePlans struct {
+type VerkoupePlan struct {
 	UUID            uuid.UUID
 	Name            string
 	Description     string
@@ -22,7 +22,7 @@ type verkoupePlans struct {
 	CreatedAt       time.Time
 }
 
-func NewPlan(name string, description string, maxWebsites int, maxRouters int, maxProducts int, costPerSaleRate int, coin string, price int) (*verkoupePlans, error) {
+func NewPlan(name string, description string, maxWebsites int, maxRouters int, maxProducts int, costPerSaleRate int, coin string, price int) (*VerkoupePlan, error) {
 
 	if name == "" {
 		return nil, errors.New("Name cannot be null.")
@@ -37,7 +37,7 @@ func NewPlan(name string, description string, maxWebsites int, maxRouters int, m
 		return nil, errors.New("Price must be greater than 0.")
 	}
 
-	return &verkoupePlans{
+	return &VerkoupePlan{
 		UUID:            uuid.Nil,
 		Name:            name,
 		Description:     description,

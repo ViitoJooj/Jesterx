@@ -25,7 +25,7 @@ func NewPlanRepository(db *sql.DB) *PlanRepository {
 	}
 }
 
-func (r *PlanRepository) CreatePlan(plan *domain.verkoupePlans) (*domain.verkoupePlans, error) {
+func (r *PlanRepository) CreatePlan(plan *domain.VerkoupePlan) (*domain.VerkoupePlan, error) {
 	if plan == nil {
 		return nil, errors.New("invalid plan")
 	}
@@ -61,7 +61,7 @@ func (r *PlanRepository) CreatePlan(plan *domain.verkoupePlans) (*domain.verkoup
 	return plan, nil
 }
 
-func (r *PlanRepository) FindPlanByUUID(uuid string) (*domain.verkoupePlans, error) {
+func (r *PlanRepository) FindPlanByUUID(uuid string) (*domain.VerkoupePlan, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -73,7 +73,7 @@ func (r *PlanRepository) FindPlanByUUID(uuid string) (*domain.verkoupePlans, err
 	return helpers.ScanPlan(row)
 }
 
-func (r *PlanRepository) FindPlanByName(name string) (*domain.verkoupePlans, error) {
+func (r *PlanRepository) FindPlanByName(name string) (*domain.VerkoupePlan, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -85,7 +85,7 @@ func (r *PlanRepository) FindPlanByName(name string) (*domain.verkoupePlans, err
 	return helpers.ScanPlan(row)
 }
 
-func (r *PlanRepository) GetPlans() ([]*domain.verkoupePlans, error) {
+func (r *PlanRepository) GetPlans() ([]*domain.VerkoupePlan, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
