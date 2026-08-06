@@ -1,7 +1,6 @@
 package dotenv
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -10,13 +9,15 @@ import (
 func Conn() (*Config, error) {
 	err := godotenv.Load()
 	if err != nil {
-		return nil, fmt.Errorf("%v", err)
+		return nil, err
 	}
 
 	return &Config{
 		Application: Application{
 			Port:       os.Getenv("PORT"),
 			Enviroment: os.Getenv("ENVIROMENT"),
+			ViewUrl:    os.Getenv("VIEW_URL"),
+			DaemonUrl:  os.Getenv("DAEMON_URL"),
 		},
 		PostgreSQL: PostgreSQL{
 			URI:      os.Getenv("POSTGRES_URI"),
@@ -25,6 +26,9 @@ func Conn() (*Config, error) {
 			Host:     os.Getenv("POSTGRES_HOST"),
 			Port:     os.Getenv("POSTGRES_PORT"),
 			SSLMode:  os.Getenv("POSTGRES_SSLMODE"),
+		},
+		Security: Security{
+			PasetoSecretKey: os.Getenv("PASETO_SECRET_KEY"),
 		},
 	}, nil
 }

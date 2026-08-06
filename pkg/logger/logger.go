@@ -89,3 +89,10 @@ func (l *Log) Print() {
 	}
 	fmt.Printf("[%s] [%s] [%s]%s\n", l.Time, l.TraceID, l.Function, erroTexto)
 }
+
+func Fatal(erro error) *Log {
+	log := Warn(erro)
+	log.Print()
+	os.Exit(1)
+	return log
+}

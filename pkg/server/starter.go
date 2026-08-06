@@ -13,6 +13,10 @@ type Conf struct {
 	Handler http.Handler
 }
 
+func RegisterHandler(handler http.Handler) {
+
+}
+
 func Start(port string, handler http.Handler) {
 	if port == "" {
 		err := fmt.Errorf("Application port cannot be null.")
