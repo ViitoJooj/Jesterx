@@ -1,9 +1,13 @@
-{$CADDY_DOMAIN::80} {
-	handle_path /api/* {
-		reverse_proxy daemon:8080
-	}
+# Caddy reverse proxy for Verkoupe development
 
-	handle {
-		reverse_proxy view:80
-	}
+:80 {
+    # API (daemon)
+    handle /api/* {
+        reverse_proxy daemon:8080
+    }
+
+    # Frontend (view - Vite dev server)
+    handle {
+        reverse_proxy view:5173
+    }
 }

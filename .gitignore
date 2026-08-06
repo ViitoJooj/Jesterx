@@ -10,6 +10,8 @@ logs.txt
 
 # Frontend
 node_modules
+dist
+build
 
 # Terraform
 **/.terraform/*
@@ -19,3 +21,7 @@ node_modules
 !*.tfvars.example
 crash.log
 crash.*.log
+
+# app
+bin
+api.exe
