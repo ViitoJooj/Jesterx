@@ -6,8 +6,8 @@ import (
 	"github.com/ViitoJooj/verkoupe/internal/port/http/controllers"
 )
 
-func RegisterTermsRoutes(mux *http.ServeMux, c *controllers.TermsController) {
-	mux.HandleFunc("POST /terms", c.Create)
-	mux.HandleFunc("GET /terms", c.GetAll)
-	mux.HandleFunc("GET /terms/uuid", c.GetByUUID)
+func RegisterTermsRoutes(mux *http.ServeMux, controller *controllers.TermsController, middlewares ...func(http.Handler) http.Handler) {
+	mux.Handle("POST /terms", wrapHandler(controller.Create, middlewares...))
+	mux.Handle("GET /terms", wrapHandler(controller.GetAll, middlewares...))
+	mux.Handle("GET /terms/uuid", wrapHandler(controller.GetByUUID, middlewares...))
 }

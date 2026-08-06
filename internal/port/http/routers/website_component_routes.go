@@ -6,6 +6,6 @@ import (
 	"github.com/ViitoJooj/verkoupe/internal/port/http/controllers"
 )
 
-func RegisterWebsiteComponentRoutes(mux *http.ServeMux, c *controllers.WebsiteComponentController) {
-	mux.HandleFunc("POST /website-components", c.Create)
+func RegisterWebsiteComponentRoutes(mux *http.ServeMux, controller *controllers.WebsiteComponentController, middlewares ...func(http.Handler) http.Handler) {
+	mux.Handle("POST /website-components", wrapHandler(controller.Create, middlewares...))
 }

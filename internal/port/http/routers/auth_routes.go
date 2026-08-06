@@ -6,6 +6,7 @@ import (
 	"github.com/ViitoJooj/verkoupe/internal/port/http/controllers"
 )
 
-func RegisterAuthRoutes(mux *http.ServeMux, c *controllers.AuthController) {
-	mux.HandleFunc("POST /auth/register", c.Register)
+func RegisterAuthRoutes(mux *http.ServeMux, controller *controllers.AuthController, middlewares ...func(http.Handler) http.Handler) {
+	mux.Handle("POST /auth/register", wrapHandler(controller.Register, middlewares...))
+	mux.Handle("POST /auth/login", wrapHandler(controller.Login, middlewares...))
 }

@@ -6,8 +6,8 @@ import (
 	"github.com/ViitoJooj/verkoupe/internal/port/http/controllers"
 )
 
-func RegisterTermsAcceptedRoutes(mux *http.ServeMux, c *controllers.TermsAcceptedController) {
-	mux.HandleFunc("POST /terms-accepted", c.Create)
-	mux.HandleFunc("GET /terms-accepted", c.GetAll)
-	mux.HandleFunc("GET /terms-accepted/uuid", c.GetByUUID)
+func RegisterTermsAcceptedRoutes(mux *http.ServeMux, controller *controllers.TermsAcceptedController, middlewares ...func(http.Handler) http.Handler) {
+	mux.Handle("POST /terms-accepted", wrapHandler(controller.Create, middlewares...))
+	mux.Handle("GET /terms-accepted", wrapHandler(controller.GetAll, middlewares...))
+	mux.Handle("GET /terms-accepted/uuid", wrapHandler(controller.GetByUUID, middlewares...))
 }

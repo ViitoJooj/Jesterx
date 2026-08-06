@@ -6,6 +6,6 @@ import (
 	"github.com/ViitoJooj/verkoupe/internal/port/http/controllers"
 )
 
-func RegisterPlanRoutes(mux *http.ServeMux, c *controllers.PlanController) {
-	mux.HandleFunc("POST /plans", c.Create)
+func RegisterPlanRoutes(mux *http.ServeMux, controller *controllers.PlanController, middlewares ...func(http.Handler) http.Handler) {
+	mux.Handle("POST /plans", wrapHandler(controller.Create, middlewares...))
 }

@@ -6,8 +6,8 @@ import (
 	"github.com/ViitoJooj/verkoupe/internal/port/http/controllers"
 )
 
-func RegisterPhoneRoutes(mux *http.ServeMux, c *controllers.PhoneController) {
-	mux.HandleFunc("POST /phones", c.Create)
-	mux.HandleFunc("GET /phones", c.GetAll)
-	mux.HandleFunc("GET /phones/uuid", c.GetByUUID)
+func RegisterPhoneRoutes(mux *http.ServeMux, controller *controllers.PhoneController, middlewares ...func(http.Handler) http.Handler) {
+	mux.Handle("POST /phones", wrapHandler(controller.Create, middlewares...))
+	mux.Handle("GET /phones", wrapHandler(controller.GetAll, middlewares...))
+	mux.Handle("GET /phones/uuid", wrapHandler(controller.GetByUUID, middlewares...))
 }

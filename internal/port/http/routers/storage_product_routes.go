@@ -6,6 +6,6 @@ import (
 	"github.com/ViitoJooj/verkoupe/internal/port/http/controllers"
 )
 
-func RegisterStorageProductRoutes(mux *http.ServeMux, c *controllers.StorageProductController) {
-	mux.HandleFunc("POST /storage-products", c.Create)
+func RegisterStorageProductRoutes(mux *http.ServeMux, controller *controllers.StorageProductController, middlewares ...func(http.Handler) http.Handler) {
+	mux.Handle("POST /storage-products", wrapHandler(controller.Create, middlewares...))
 }

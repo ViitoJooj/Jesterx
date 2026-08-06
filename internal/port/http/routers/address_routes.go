@@ -6,8 +6,8 @@ import (
 	"github.com/ViitoJooj/verkoupe/internal/port/http/controllers"
 )
 
-func RegisterAddressRoutes(mux *http.ServeMux, c *controllers.AddressController) {
-	mux.HandleFunc("POST /addresses", c.Create)
-	mux.HandleFunc("GET /addresses", c.GetAll)
-	mux.HandleFunc("GET /addresses/uuid", c.GetByUUID)
+func RegisterAddressRoutes(mux *http.ServeMux, controller *controllers.AddressController, middlewares ...func(http.Handler) http.Handler) {
+	mux.Handle("POST /addresses", wrapHandler(controller.Create, middlewares...))
+	mux.Handle("GET /addresses", wrapHandler(controller.GetAll, middlewares...))
+	mux.Handle("GET /addresses/uuid", wrapHandler(controller.GetByUUID, middlewares...))
 }

@@ -6,8 +6,8 @@ import (
 	"github.com/ViitoJooj/verkoupe/internal/port/http/controllers"
 )
 
-func RegisterOrganizationRoutes(mux *http.ServeMux, c *controllers.OrganizationController) {
-	mux.HandleFunc("POST /organizations", c.Create)
-	mux.HandleFunc("GET /organizations", c.GetAll)
-	mux.HandleFunc("GET /organizations/uuid", c.GetByUUID)
+func RegisterOrganizationRoutes(mux *http.ServeMux, controller *controllers.OrganizationController, middlewares ...func(http.Handler) http.Handler) {
+	mux.Handle("POST /organizations", wrapHandler(controller.Create, middlewares...))
+	mux.Handle("GET /organizations", wrapHandler(controller.GetAll, middlewares...))
+	mux.Handle("GET /organizations/uuid", wrapHandler(controller.GetByUUID, middlewares...))
 }
