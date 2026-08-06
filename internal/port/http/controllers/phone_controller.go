@@ -7,20 +7,17 @@ import (
 	"github.com/ViitoJooj/verkoupe/internal/domain/entities"
 	"github.com/ViitoJooj/verkoupe/internal/domain/entities/enums"
 	"github.com/ViitoJooj/verkoupe/internal/port/http/dtos"
-	"github.com/ViitoJooj/verkoupe/internal/domain/repositories/contracts"
 	"github.com/ViitoJooj/verkoupe/internal/domain/usecases"
 	"github.com/google/uuid"
 )
 
 type PhoneController struct {
 	createUseCase *usecases.CreatePhoneUseCase
-	phoneRepo     contracts.PhoneContract
 }
 
-func NewPhoneController(createUseCase *usecases.CreatePhoneUseCase, phoneRepo contracts.PhoneContract) *PhoneController {
+func NewPhoneController(createUseCase *usecases.CreatePhoneUseCase) *PhoneController {
 	return &PhoneController{
 		createUseCase: createUseCase,
-		phoneRepo:     phoneRepo,
 	}
 }
 
@@ -71,7 +68,7 @@ func (c *PhoneController) GetByUUID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	phone, err := c.phoneRepo.FindPhoneByUUID(uuidStr)
+	phone, err := c.createUseCase.GetByUUID(uuidStr)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
@@ -90,7 +87,7 @@ func (c *PhoneController) GetAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	phones, err := c.phoneRepo.GetPhonesFromWebsite(websiteUUIDStr)
+	phones, err := c.createUseCase.GetAll(websiteUUIDStr)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

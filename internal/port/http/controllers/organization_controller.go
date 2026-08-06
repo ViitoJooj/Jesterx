@@ -6,20 +6,17 @@ import (
 
 	"github.com/ViitoJooj/verkoupe/internal/domain/entities"
 	"github.com/ViitoJooj/verkoupe/internal/port/http/dtos"
-	"github.com/ViitoJooj/verkoupe/internal/domain/repositories/contracts"
 	"github.com/ViitoJooj/verkoupe/internal/domain/usecases"
 	"github.com/google/uuid"
 )
 
 type OrganizationController struct {
 	createUseCase *usecases.CreateOrganizationUseCase
-	orgRepo       contracts.OrganizationContract
 }
 
-func NewOrganizationController(createUseCase *usecases.CreateOrganizationUseCase, orgRepo contracts.OrganizationContract) *OrganizationController {
+func NewOrganizationController(createUseCase *usecases.CreateOrganizationUseCase) *OrganizationController {
 	return &OrganizationController{
 		createUseCase: createUseCase,
-		orgRepo:       orgRepo,
 	}
 }
 
@@ -70,7 +67,7 @@ func (c *OrganizationController) GetByUUID(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	org, err := c.orgRepo.FindOrganizationByUUID(uuidStr)
+	org, err := c.createUseCase.GetByUUID(uuidStr)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
@@ -89,7 +86,7 @@ func (c *OrganizationController) GetAll(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	orgs, err := c.orgRepo.GetOrganizationsFromWebsite(websiteUUIDStr)
+	orgs, err := c.createUseCase.GetAll(websiteUUIDStr)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

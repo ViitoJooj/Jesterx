@@ -6,19 +6,16 @@ import (
 
 	"github.com/ViitoJooj/verkoupe/internal/domain/entities"
 	"github.com/ViitoJooj/verkoupe/internal/port/http/dtos"
-	"github.com/ViitoJooj/verkoupe/internal/domain/repositories/contracts"
 	"github.com/ViitoJooj/verkoupe/internal/domain/usecases"
 )
 
 type TermsController struct {
 	createUseCase *usecases.CreateTermsUseCase
-	termsRepo     contracts.TermsContract
 }
 
-func NewTermsController(createUseCase *usecases.CreateTermsUseCase, termsRepo contracts.TermsContract) *TermsController {
+func NewTermsController(createUseCase *usecases.CreateTermsUseCase) *TermsController {
 	return &TermsController{
 		createUseCase: createUseCase,
-		termsRepo:     termsRepo,
 	}
 }
 
@@ -62,7 +59,7 @@ func (c *TermsController) GetByUUID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	terms, err := c.termsRepo.FindTermsByUUID(uuidStr)
+	terms, err := c.createUseCase.GetByUUID(uuidStr)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
@@ -75,7 +72,7 @@ func (c *TermsController) GetByUUID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *TermsController) GetAll(w http.ResponseWriter, r *http.Request) {
-	terms, err := c.termsRepo.GetTerms()
+	terms, err := c.createUseCase.GetAll()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

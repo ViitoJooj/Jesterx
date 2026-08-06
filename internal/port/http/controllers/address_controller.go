@@ -4,23 +4,20 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/ViitoJooj/verkoupe/internal/domain/entities"
+	domain "github.com/ViitoJooj/verkoupe/internal/domain/entities"
 	"github.com/ViitoJooj/verkoupe/internal/domain/entities/enums"
-	"github.com/ViitoJooj/verkoupe/internal/port/http/dtos"
-	"github.com/ViitoJooj/verkoupe/internal/domain/repositories/contracts"
 	"github.com/ViitoJooj/verkoupe/internal/domain/usecases"
+	"github.com/ViitoJooj/verkoupe/internal/port/http/dtos"
 	"github.com/google/uuid"
 )
 
 type AddressController struct {
 	createUseCase *usecases.CreateAddressUseCase
-	addressRepo   contracts.AddressContract
 }
 
-func NewAddressController(createUseCase *usecases.CreateAddressUseCase, addressRepo contracts.AddressContract) *AddressController {
+func NewAddressController(createUseCase *usecases.CreateAddressUseCase) *AddressController {
 	return &AddressController{
 		createUseCase: createUseCase,
-		addressRepo:   addressRepo,
 	}
 }
 
@@ -79,7 +76,7 @@ func (c *AddressController) GetByUUID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	address, err := c.addressRepo.FindAddressByUUID(uuidStr)
+	address, err := c.createUseCase.GetByUUID(uuidStr)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
@@ -98,7 +95,7 @@ func (c *AddressController) GetAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	addresses, err := c.addressRepo.GetAddressesFromWebsite(websiteUUIDStr)
+	addresses, err := c.createUseCase.GetAll(websiteUUIDStr)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

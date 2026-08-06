@@ -6,20 +6,17 @@ import (
 
 	"github.com/ViitoJooj/verkoupe/internal/domain/entities"
 	"github.com/ViitoJooj/verkoupe/internal/port/http/dtos"
-	"github.com/ViitoJooj/verkoupe/internal/domain/repositories/contracts"
 	"github.com/ViitoJooj/verkoupe/internal/domain/usecases"
 	"github.com/google/uuid"
 )
 
 type RbacController struct {
 	createUseCase *usecases.CreateRbacUseCase
-	rbacRepo      contracts.RbacContract
 }
 
-func NewRbacController(createUseCase *usecases.CreateRbacUseCase, rbacRepo contracts.RbacContract) *RbacController {
+func NewRbacController(createUseCase *usecases.CreateRbacUseCase) *RbacController {
 	return &RbacController{
 		createUseCase: createUseCase,
-		rbacRepo:      rbacRepo,
 	}
 }
 
@@ -71,7 +68,7 @@ func (c *RbacController) GetByUUID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rbac, err := c.rbacRepo.FindRbacByUUID(uuidStr)
+	rbac, err := c.createUseCase.GetByUUID(uuidStr)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
@@ -90,7 +87,7 @@ func (c *RbacController) GetAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rbacs, err := c.rbacRepo.GetRbacFromWebsite(websiteUUIDStr)
+	rbacs, err := c.createUseCase.GetAll(websiteUUIDStr)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

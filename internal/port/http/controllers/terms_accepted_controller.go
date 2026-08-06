@@ -7,20 +7,17 @@ import (
 	"github.com/ViitoJooj/verkoupe/internal/domain/entities"
 	"github.com/ViitoJooj/verkoupe/internal/domain/entities/enums"
 	"github.com/ViitoJooj/verkoupe/internal/port/http/dtos"
-	"github.com/ViitoJooj/verkoupe/internal/domain/repositories/contracts"
 	"github.com/ViitoJooj/verkoupe/internal/domain/usecases"
 	"github.com/google/uuid"
 )
 
 type TermsAcceptedController struct {
 	createUseCase *usecases.CreateTermsAcceptedUseCase
-	termsAccRepo  contracts.TermsAcceptedContract
 }
 
-func NewTermsAcceptedController(createUseCase *usecases.CreateTermsAcceptedUseCase, termsAccRepo contracts.TermsAcceptedContract) *TermsAcceptedController {
+func NewTermsAcceptedController(createUseCase *usecases.CreateTermsAcceptedUseCase) *TermsAcceptedController {
 	return &TermsAcceptedController{
 		createUseCase: createUseCase,
-		termsAccRepo:  termsAccRepo,
 	}
 }
 
@@ -68,7 +65,7 @@ func (c *TermsAcceptedController) GetByUUID(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	termsAccepted, err := c.termsAccRepo.FindTermsAcceptedByUUID(uuidStr)
+	termsAccepted, err := c.createUseCase.GetByUUID(uuidStr)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
@@ -87,7 +84,7 @@ func (c *TermsAcceptedController) GetAll(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	termsAccepteds, err := c.termsAccRepo.GetTermsAcceptedFromWebsite(websiteUUIDStr)
+	termsAccepteds, err := c.createUseCase.GetAll(websiteUUIDStr)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
